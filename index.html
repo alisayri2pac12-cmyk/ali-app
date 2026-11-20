@@ -203,6 +203,12 @@ label.f{display:block;font-size:12px;color:var(--tx2);margin-bottom:4px}
 .pomo .ex-clock{font-size:20px;background:var(--bg)}
 .tips{margin-top:10px;font-size:13.5px}.tips summary{cursor:pointer;color:var(--tx2)}.tips li{margin:5px 0}
 a{color:#9ab8ff}
+.subs{display:flex;flex-direction:column;gap:2px}
+label.sub{font-size:13.5px;align-items:flex-start;padding:4px 0}
+label.sub input{width:18px;height:18px;margin-top:1px;flex:0 0 auto}
+label.sub input:checked+span{text-decoration:line-through;opacity:.6}
+.tl details{margin-top:4px}.tl summary{font-size:12px;color:var(--tx2);cursor:pointer}
+#updBar{position:fixed;left:10px;right:10px;top:calc(52px + env(safe-area-inset-top));z-index:25;background:#172443;border:1px solid #7aa2ff;color:#dbe4ff;border-radius:12px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;box-shadow:0 6px 20px #0008}
 #toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);background:#e6e8ee;color:#111;padding:9px 14px;border-radius:10px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%)}
 @media (min-width:900px){
@@ -377,7 +383,7 @@ function normalize(d){
     id:String(n.id), week: Number.isFinite(+n.week)&&n.week!==null&&n.week!=='' ? +n.week : null,
     dates:String(n.dates||''), phase: PHASES[n.phase]?n.phase:'F1', title:String(n.title||n.id),
     target: Math.max(0, +n.target||0), goal:String(n.goal||''), reqs: Array.isArray(n.reqs)?n.reqs.map(String):[],
-    desc:String(n.desc||''), dashed:!!n.dashed, grade20:!!n.grade20, links:Array.isArray(n.links)?n.links.filter(l=>Array.isArray(l)&&/^https?:\/\//i.test(String(l[1]))).map(l=>[String(l[0]||l[1]),String(l[1])]):[], row: Number.isFinite(+n.row)&&n.row!==null&&n.row!==''?+n.row:undefined
+    desc:String(n.desc||''), dashed:!!n.dashed, grade20:!!n.grade20, links:Array.isArray(n.links)?n.links.filter(l=>Array.isArray(l)&&/^https?:\/\//i.test(String(l[1]))).map(l=>[String(l[0]||l[1]),String(l[1])]):[], row: Number.isFinite(+n.row)&&n.row!==null&&n.row!==''?+n.row:undefined, subs: Array.isArray(n.subs)&&n.subs.length?n.subs.map(String):undefined
   }));
   const evals = Array.isArray(d.evals) && d.evals.some(e=>e&&e.id) ? d.evals.filter(e=>e&&e.id).map(e=>({id:String(e.id),name:String(e.name||''),date:String(e.date||''),topic:String(e.topic||''),max:+e.max||10,nodes:Array.isArray(e.nodes)?e.nodes.map(String):(EVAL_NODES[e.id]||[]),score:(e.score===null||e.score===undefined||e.score==='')?null:+e.score})) : defaultEvals();
   const progress = (d.progress && typeof d.progress==='object') ? d.progress : {};
@@ -671,6 +677,7 @@ function openPanel(id){
   h += `<div class="sec"><h3>Qué necesita</h3>${chipsFor(n.reqs)}</div>`;
   h += `<div class="sec"><h3>Qué abre</h3>${chipsFor(C[id]||[])}</div>`;
   h += `<div class="sec"><h3>Meta verificable</h3><div class="goal">${esc(n.goal||'—')}</div></div>`;
+  if(subsOf(id).length) h += `<details class="sec" ${subsDone(id).length<subsOf(id).length?'open':''}><summary style="cursor:pointer"><h3 style="display:inline">Subtemas · <span id="pSubN">${subsDone(id).length}/${subsOf(id).length}</span></h3></summary><div style="margin-top:6px">${subsHtml(id)}</div></details>`;
   if(n.grade20){
     h += `<div class="sec"><h3>Nota final del curso (sobre 20)</h3><input type="number" id="pGrade" min="0" max="20" step="0.5" inputmode="decimal" placeholder="Ej. 16" value="${p.grade??''}"><div class="muted" id="pGradeMsg" style="margin-top:5px"></div></div>`;
   } else {
@@ -688,7 +695,7 @@ function openPanel(id){
     if(ri) h += `<div class="sec"><h3>Repaso espaciado</h3><div class="goal" style="font-size:13.5px">${ri.complete?'✅ Completaste los 3 repasos (7, 21 y 60 días).':`Repaso ${ri.i+1} de 3 · ${ri.days<=0?'<b style="color:#fde68a">toca '+(ri.days===0?'hoy':'desde hace '+(-ri.days)+' d')+'</b>':'en '+ri.days+' días ('+esc(fmt(ri.due,{day:'numeric',month:'short'}))+')'}`}</div>${ri.complete?'':`<button class="btn sm" id="pRev" style="margin-top:6px">Marcar repaso hecho</button>`}</div>`;
     if(p.minutes) h += `<div class="muted" style="margin-top:8px">⏱ ${p.minutes} min registrados en este tema.</div>`;
     if(n.links && n.links.length) h += `<div class="sec"><h3>Recursos</h3><div class="chips">${n.links.map(([l,u])=>`<a class="nchip" style="color:var(--tx);text-decoration:none" href="${esc(u)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div></div>`;
-    else if(n.phase!=='U' && n.phase!=='P' && n.phase!=='R') h += `<div class="sec"><h3>Practicar</h3><div class="chips">${GEN[id]?`<button class="nchip" id="pPrac" style="--c:${c}"><b>🧮 Generar ejercicios</b></button>`:''}${topicLinks(n).slice(0,3).map(([l,u])=>`<a class="nchip" style="color:var(--tx);text-decoration:none" href="${esc(u)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div></div>`;
+    else if(n.phase!=='U' && n.phase!=='P' && n.phase!=='R') h += `<div class="sec"><h3>Practicar</h3><div class="chips">${GEN[id]?`<button class="nchip" id="pPrac" style="--c:${c}"><b>🧮 Generar ejercicios</b></button>`:''}${THEORY[id]?`<button class="nchip" id="pTheo" style="--c:${c}"><b>🧠 Teoría</b></button>`:''}${topicLinks(n).slice(0,3).map(([l,u])=>`<a class="nchip" style="color:var(--tx);text-decoration:none" href="${esc(u)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div></div>`;
   }
   h += `<button class="stbtn" id="pStBtn"></button>
     <div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" id="pEdit">✎ Editar nodo</button></div>`;
@@ -711,6 +718,8 @@ function openPanel(id){
   $('#pEdit').onclick = ()=>openEditor(id);
   if($('#pRev')) $('#pRev').onclick = ()=>markReview(id);
   if($('#pPrac')) $('#pPrac').onclick = ()=>{ closePanel(); goPractice(id); };
+  if($('#pTheo')) $('#pTheo').onclick = ()=>{ closePanel(); goTheory(id); };
+  bindSubs(panel, ()=>{ const e=$('#pSubN'); if(e) e.textContent=subsDone(id).length+'/'+subsOf(id).length; });
   refreshPanel();
 }
 function refreshPanel(){
@@ -742,6 +751,7 @@ function renderProgress(){
     <div class="ph-row" style="margin-top:14px"><div class="t"><b>Progreso general</b><span>${Math.round(dom/Math.max(1,nodes.length)*100)} %</span></div><div class="pbar"><i style="width:${dom/Math.max(1,nodes.length)*100}%"></i></div></div>
     <div class="ph-row"><div class="t"><b>Ejercicios del plan</b><span>${done} / ${tot}</span></div><div class="pbar"><i style="width:${Math.min(100,done/Math.max(1,tot)*100)}%;background:#4ade80"></i></div></div>
   </div>`;
+  h += weeklyChart();
   h += `<div class="card"><h2>Por fase</h2>`;
   Object.entries(PHASES).forEach(([k,ph])=>{ const ns=nodes.filter(n=>n.phase===k); if(!ns.length) return; const dd=ns.filter(n=>isDom(n.id)).length;
     h += `<div class="ph-row"><div class="t"><b style="color:${ph.color}">${esc(ph.name)}</b><span>${dd} / ${ns.length}</span></div><div class="pbar" style="--c:${ph.color}"><i style="width:${dd/ns.length*100}%"></i></div></div>`; });
@@ -753,12 +763,13 @@ function renderProgress(){
   for(let k=1;k<=19;k++){
     const ns = S.nodes.filter(n=>n.week===k);
     const evs = (evByWeek[k]||[]).map(e=>`📝 ${esc(e.name)}${evalPct(e)!==null?' · '+evalPct(e)+' %':''}`).join('<br>');
-    let body = [REVIEW_WEEKS[k]?`<span class="rv">🔁 ${esc(REVIEW_WEEKS[k])}</span>`:'', ...ns.map(n=>`<b style="color:${col(n)}">${esc(n.id)}</b> ${esc(n.title)}`)].filter(Boolean).join('<br>') || '<span class="rv">Sin tema</span>';
+    let body = [REVIEW_WEEKS[k]?`<span class="rv">🔁 ${esc(REVIEW_WEEKS[k])}</span>`:'', ...ns.map(n=>`<b style="color:${col(n)}">${esc(n.id)}</b> ${esc(n.title)}${subsOf(n.id).length?`<details><summary>Subtemas (${subsDone(n.id).length}/${subsOf(n.id).length})</summary>${subsHtml(n.id)}</details>`:''}`)].filter(Boolean).join('<br>') || '<span class="rv">Sin tema</span>';
     const ic = ns.length ? (ns.every(n=>isDom(n.id))?'✅':ns.some(n=>(S.progress[n.id]||{}).status==='progreso')?'⏳':(k<w?'⚠️':'')) : (k<w?'✔︎':'');
     h += `<li class="${k===w?'cur':''}"><div class="wk">S${k}</div><div>${body}<div class="d">${weekRange(k)}${k===w?' · <b style="color:#bfd0ff">esta semana</b>':''}</div>${evs?`<div class="d" style="color:var(--tx2)">${evs}</div>`:''}</div><div>${ic}</div></li>`;
   }
   h += `</ul><div class="muted" style="margin-top:8px">Después: 29 mar 2027 empieza la universidad (U1 y P2 en ciclos 1 y 2). P1 (CS50P) va los domingos hasta marzo.</div>${(()=>{const ex=S.nodes.filter(n=>!n.week&&!['U','P'].includes(n.phase)); return ex.length?`<div class="muted" style="margin-top:6px">Temas extra sin semana fija: ${ex.map(n=>esc(n.id+' '+n.title)).join(', ')}. Mételos en semanas con tiempo libre o en los repasos.</div>`:'';})()}</div>`;
-  document.getElementById('progWrap').innerHTML = h;
+  const pw=document.getElementById('progWrap'); pw.innerHTML = h;
+  bindSubs(pw, id=>{ pw.querySelectorAll(`[data-sub^="${id}:"]`).forEach(c=>{ const sm=c.closest('details').querySelector('summary'); sm.textContent='Subtemas ('+subsDone(id).length+'/'+subsOf(id).length+')'; }); });
 }
 
 /* ===================== Evaluaciones ===================== */
@@ -853,6 +864,7 @@ function openEditor(id){
    <div class="fld"><label class="f">Descripción</label><textarea id="fDe" style="min-height:60px">${esc(n.desc)}</textarea></div>
    <div class="fld"><label class="f">Requisitos (flechas que llegan a este nodo)</label><div class="reqbox" id="fRq">${reqs||'<span class="muted">No hay otros nodos</span>'}</div>${id?'<div class="muted" style="margin-top:4px">Los grises dependen de este nodo (crearían un ciclo).</div>':''}</div>
    <div class="fld"><label class="chk"><input type="checkbox" id="fG20" ${n.grade20?'checked':''}> Curso universitario (nota final sobre 20 en vez de contador)</label></div>
+   <div class="fld"><label class="f">Subtemas (uno por línea)</label><textarea id="fSb" style="min-height:70px">${esc((id?subsOf(id):[]).join('\n'))}</textarea></div>
    <div class="fld"><label class="f">Enlaces (uno por línea: Nombre | https://…)</label><textarea id="fLk" style="min-height:60px" placeholder="Khan Academy | https://es.khanacademy.org">${esc((n.links||[]).map(l=>l[0]+' | '+l[1]).join('\n'))}</textarea></div>
    <div class="fld"><label class="chk"><input type="checkbox" id="fDa" ${n.dashed?'checked':''}> Dibujar con línea punteada (por confirmar)</label></div>
    <div class="err" id="fErr"></div>
@@ -868,6 +880,7 @@ function openEditor(id){
     const data={ id:nid, title, phase:$('#fPh').value, week: wk===''?null:Math.max(1,Math.min(19,+wk)), dates:$('#fDt').value.trim(), goal:$('#fGo').value.trim(),
       target:Math.max(0,parseInt($('#fTg').value)||0), desc:$('#fDe').value.trim(), reqs:[...mbox.querySelectorAll('#fRq input:checked')].map(i=>i.value),
       grade20:$('#fG20').checked, dashed:$('#fDa').checked,
+      subs:(()=>{ const L=$('#fSb').value.split('\n').map(x=>x.trim()).filter(Boolean); return (L.length && L.join('\n')!==(SUBT[nid]||[]).join('\n')) ? L : undefined; })(),
       links:$('#fLk').value.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{ const i=x.lastIndexOf('|'); const u=(i>=0?x.slice(i+1):x).trim(), l=(i>=0?x.slice(0,i):x).trim(); return [l||u,u]; }).filter(l=>/^https?:\/\//i.test(l[1])) };
     if(id){
       const node=B[id]; Object.assign(node,data);
@@ -1059,24 +1072,27 @@ function renderStudy(){
     <h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:10px 0 6px">Registrar minutos de hoy</h3>
     <select id="sTopic" style="margin-bottom:8px"><option value="">Sin tema</option>${opts}</select>
     <div class="counter"><button data-min="10">+10</button><button data-min="15">+15</button><button data-min="30">+30</button><button data-min="45">+45</button><input type="number" id="sMin" min="1" max="600" placeholder="min" inputmode="numeric"><button id="sAdd" style="padding:0 12px">Guardar</button></div>
-    <div class="muted" style="margin-top:6px">La racha cuenta los días seguidos con al menos 1 minuto registrado.</div></div>`;
+    <div class="muted" style="margin-top:6px">La racha cuenta los días seguidos con al menos 1 minuto registrado.</div></div>` + reminderCard();
   // repasos
   const due=S.nodes.filter(n=>reviewDue(n.id)), up=S.nodes.map(n=>[n,reviewInfo(n.id)]).filter(([n,r])=>r&&!r.complete&&r.days>0).sort((a,b)=>a[1].days-b[1].days).slice(0,6);
   h += `<div class="card"><h2>🔁 Repaso espaciado</h2><p class="muted" style="margin-top:0">Cada tema dominado se repasa a los 7, 21 y 60 días de la fecha en que lo dominaste: resuelve unos 5 ejercicios sin apuntes.</p>`;
   h += due.length ? due.map(n=>{ const r=reviewInfo(n.id); return `<div class="nitem" style="margin-bottom:6px"><span class="dot" style="background:${col(n)}"></span><div class="tx"><b>${esc(n.id)}</b> ${esc(n.title)}<small>Repaso ${r.i+1} de 3 (día ${REVIEW_DAYS[r.i]}) · ${r.days===0?'toca hoy':'atrasado '+(-r.days)+' d'}</small></div><button class="btn sm" data-prac="${esc(n.id)}">Practicar</button><button class="btn pri sm" data-rev="${esc(n.id)}">Hecho</button></div>`; }).join('') : '<div class="muted">No tienes repasos pendientes hoy. ✅</div>';
   if(up.length) h += `<div class="muted" style="margin-top:8px">Próximos: ${up.map(([n,r])=>esc(n.id)+' en '+r.days+' d').join(' · ')}</div>`;
   h += `</div>`;
-  h += examCard() + errorCard();
+  h += theoryCard() + examCard() + errorCard();
   // práctica
   if(!practice.topic || !B[practice.topic] || !GEN[practice.topic]) practice={topic:defaultTopic(), items:[]};
   const pt = B[practice.topic];
   h += `<div class="card" id="practiceCard"><h2>🧮 Practicar</h2>
     <select id="pTopic">${practiceTopics().map(n=>`<option value="${esc(n.id)}" ${n.id===practice.topic?'selected':''}>${esc(n.id+' · '+n.title)}</option>`).join('')}</select>
-    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="pGen">Generar 5 ejercicios</button></div>`;
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="pGen">Generar 5 ejercicios</button><button class="btn" id="pOne">Una por una ›</button></div>`;
   if(practice.items.length){
-    h += `<ol style="padding-left:20px;margin:12px 0 0">` + practice.items.map((it,i)=>`<li style="margin-bottom:10px"><div style="font-size:15px">${esc(it.q)}</div>
+    const okN=practice.items.filter(x=>x.ok).length, badN=practice.items.filter(x=>x.bad).length;
+    if(practice.single) h += `<div class="muted" style="margin-top:10px">Ejercicio ${practice.items.length} · ✓ ${okN} · ✗ ${badN}</div>`;
+    h += `<ol style="padding-left:20px;margin:12px 0 0" ${practice.single?`start="${practice.items.length}"`:''}>` + practice.items.map((it,i)=>(practice.single&&i<practice.items.length-1)?'':`<li style="margin-bottom:10px"><div style="font-size:15px">${esc(it.q)}</div>
       <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn sm" data-ans="${i}">Ver respuesta</button><button class="btn sm" data-ok="${i}" ${it.ok||it.bad?'disabled':''}>${it.ok?'✓ Sumado':'✓ Lo hice bien (+1)'}</button><button class="btn sm" data-bad="${i}" ${it.ok||it.bad?'disabled':''}>${it.bad?'📒 Anotado':'✗ Me equivoqué'}</button></div>
       <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${esc(it.a)}</div></li>`).join('') + `</ol>`;
+    if(practice.single) h += `<button class="btn pri" id="pNext" style="width:100%">Siguiente ejercicio ›</button>`;
     h += `<div class="muted">"Lo hice bien" suma 1 al contador de ejercicios de ${esc(practice.topic)}.</div>`;
   }
   if(pt){ h += `<h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:14px 0 6px">Más ejercicios de ${esc(pt.id)}</h3><div class="chips">${topicLinks(pt).map(([l,u])=>`<a class="nchip" style="color:var(--tx);text-decoration:none" href="${esc(u)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div>`; }
@@ -1087,12 +1103,14 @@ function renderStudy(){
   w.querySelector('#sAdd').onclick=()=>{ logMinutes(w.querySelector('#sMin').value, topicSel()); renderStudy(); };
   w.querySelectorAll('[data-rev]').forEach(b=>b.onclick=()=>{ markReview(b.dataset.rev); });
   w.querySelectorAll('[data-prac]').forEach(b=>b.onclick=()=>{ practice={topic:b.dataset.prac, items:genFor(b.dataset.prac,5)}; renderStudy(); w.querySelector('#practiceCard').scrollIntoView({behavior:'smooth'}); });
-  w.querySelector('#pTopic').onchange=e=>{ practice={topic:e.target.value, items:[]}; renderStudy(); };
-  w.querySelector('#pGen').onclick=()=>{ practice.items=genFor(practice.topic,5); renderStudy(); };
+  w.querySelector('#pTopic').onchange=e=>{ practice={topic:e.target.value, items:[], single:practice.single}; if(practice.single) practice.items=genFor(practice.topic,1); renderStudy(); };
+  w.querySelector('#pGen').onclick=()=>{ practice.items=genFor(practice.topic,5); practice.single=false; renderStudy(); };
+  const oneMore=()=>{ if(!practice.single){ practice.single=true; practice.items=[]; } practice.items.push(...genFor(practice.topic,1)); renderStudy(); const c=w.querySelector('#practiceCard'); if(c) c.scrollIntoView({block:'start'}); };
+  w.querySelector('#pOne').onclick=oneMore; if(w.querySelector('#pNext')) w.querySelector('#pNext').onclick=oneMore;
   w.querySelectorAll('[data-ans]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ans]; it.show=!it.show; w.querySelector('#ans'+b.dataset.ans).style.display=it.show?'block':'none'; });
   w.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ok]; if(it.ok||it.bad) return; it.ok=true; const p=P(practice.topic); p.count=(+p.count||0)+1; save(); renderTree(); b.disabled=true; b.textContent='✓ Sumado'; b.nextElementSibling.disabled=true; });
   w.querySelectorAll('[data-bad]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.bad]; if(it.ok||it.bad) return; it.bad=true; addError(practice.topic, it.q, it.a); renderHeader(); b.disabled=true; b.textContent='📒 Anotado'; b.previousElementSibling.disabled=true; toast('Guardado en tu cuaderno de errores'); });
-  bindPlan(w); bindErrors(w);
+  bindPlan(w); bindErrors(w); bindTheory(w); remindLinks(w);
 }
 
 /* ===================== Gráfico de mini evaluaciones ===================== */
@@ -1312,6 +1330,307 @@ function bindErrors(w){
   w.querySelectorAll('[data-ebad]').forEach(b=>b.onclick=()=>errorRetry(b.dataset.ebad,false));
   const add=w.querySelector('#eAdd'); if(add) add.onclick=()=>{ const q=w.querySelector('#eQ').value.trim(); if(!q){ toast('Escribe el ejercicio'); return; } addError(w.querySelector('#eTopic').value, q, w.querySelector('#eA').value.trim()); toast('Guardado en el cuaderno'); renderStudy(); };
   const go=w.querySelector('#exGo'); if(go) go.onclick=()=>startExam(w.querySelector('#exTopic').value);
+}
+
+/* ===================== Subtemas de cada tema ===================== */
+const SUBT = {
+  T1:['Ley de signos (suma y multiplicación)','Jerarquía de operaciones y signos de agrupación','Simplificar y amplificar fracciones','Suma y resta de fracciones con MCM','Multiplicación y división de fracciones','Fracciones mixtas e impropias','Operaciones combinadas'],
+  T2:['Decimales y su paso a fracción (incluye periódicos)','Porcentajes: aumentos y descuentos','Leyes de exponentes (producto, cociente, potencia)','Exponente cero y negativo','Exponente fraccionario','Notación científica'],
+  T3:['Raíz n-ésima y sus propiedades','Simplificar radicales','Suma y resta de radicales semejantes','Multiplicación y división de radicales','Racionalización (monomio y conjugado)','Radicales como exponentes fraccionarios'],
+  T4:['Términos semejantes y grado','Suma, resta y multiplicación de polinomios','Binomio al cuadrado','Suma por diferencia','Binomio al cubo','Producto de binomios con término común','Valor numérico'],
+  T5:['Factor común y agrupación','Diferencia de cuadrados','Trinomio cuadrado perfecto','Trinomio x² + bx + c','Trinomio ax² + bx + c (aspa simple)','Suma y diferencia de cubos','Combinar varios casos'],
+  X1:['División larga de polinomios','Regla de Ruffini','Teorema del resto','Teorema del factor y raíces racionales','Factorizar polinomios cúbicos'],
+  T7:['Propiedades de la igualdad','Ecuaciones con paréntesis','Ecuaciones con fracciones (MCM)','Ecuaciones sin solución o con infinitas','Problemas de planteo'],
+  T8:['Simplificar fracciones algebraicas','Suma y resta (MCM de polinomios)','Multiplicación y división','Fracciones complejas','Ecuaciones racionales y soluciones extrañas'],
+  T9:['Forma general ax² + bx + c = 0','Resolver por factorización','Completar el cuadrado','Fórmula general','Discriminante y tipo de raíces','Suma y producto de raíces','Ecuaciones bicuadradas y problemas'],
+  T10:['Método de sustitución','Método de igualación','Método de reducción','Interpretación gráfica (una, ninguna o infinitas soluciones)','Sistemas 3×3','Problemas de planteo'],
+  T11:['Desigualdades e intervalos','Inecuaciones lineales (cambio de sentido)','Inecuaciones cuadráticas (puntos críticos)','Inecuaciones racionales','Valor absoluto: definición','Ecuaciones con valor absoluto','Inecuaciones con valor absoluto'],
+  T12:['Plano cartesiano','Distancia entre dos puntos','Punto medio','Pendiente','Ecuaciones de la recta (punto-pendiente, explícita, general)','Rectas paralelas y perpendiculares','Distancia de un punto a una recta'],
+  T13:['Qué es una función','Dominio','Rango','Funciones básicas: lineal, cuadrática, raíz, valor absoluto, racional','Graficar a mano (cortes con los ejes y vértice)','Funciones pares e impares','Crecimiento y decrecimiento'],
+  X10:['Funciones a trozos: evaluar y graficar','Traslaciones','Reflexiones','Estiramientos y compresiones','Valor absoluto como función a trozos'],
+  T14:['Circunferencia: forma canónica y general','Completar cuadrados','Parábola: vértice, foco y directriz','Parábola vertical y horizontal','Problemas con cónicas'],
+  T15:['Tipos de matrices','Suma y producto por un número','Producto de matrices','Transpuesta','Sistemas en forma matricial','Método de Gauss y Gauss-Jordan','Sistema 3×3'],
+  X9:['Determinante 2×2','Regla de Sarrus (3×3)','Cofactores','Propiedades del determinante','Matriz inversa 2×2','Regla de Cramer'],
+  T16:['Función exponencial y su gráfica','El número e','Logaritmo: definición','Propiedades de los logaritmos','Cambio de base','Ecuaciones exponenciales','Ecuaciones logarítmicas (verificar el dominio)','Crecimiento y decaimiento'],
+  T17:['Idea intuitiva de límite','Límites laterales','Propiedades de los límites','Indeterminación 0/0: factorizar','Indeterminación 0/0: racionalizar','Límites al infinito y asíntotas','Continuidad y tipos de discontinuidad'],
+  T18:['Derivada como pendiente y razón de cambio','Definición por límite','Reglas: potencia, constante y suma','Regla del producto y del cociente','Regla de la cadena','Derivadas de eˣ, ln x, sen x y cos x','Recta tangente','Máximos y mínimos (idea)'],
+  X2:['Grados y radianes','Razones en el triángulo rectángulo','Ángulos notables','Círculo unitario y signos por cuadrante','Ley de senos y de cosenos','Gráficas de seno y coseno','Ecuaciones trigonométricas'],
+  X3:['Elipse: centro, vértices y focos','Relación c² = a² − b² y excentricidad','Hipérbola: vértices, focos y c² = a² + b²','Asíntotas de la hipérbola','Reconocer la cónica por su ecuación'],
+  X4:['Componentes, módulo y dirección','Suma, resta y producto por un número','Producto escalar','Ángulo entre vectores','Vectores paralelos y perpendiculares','Vectores unitarios'],
+  X5:['Proposiciones y conectores','Tablas de verdad','Leyes de De Morgan','Conjuntos: pertenencia e inclusión','Unión, intersección, diferencia y complemento','Diagramas de Venn','Cardinal de la unión'],
+  X6:['Composición de funciones','Dominio de una composición','Funciones inyectivas','Cómo hallar la inversa','Gráfica de la inversa (simetría con y = x)'],
+  X7:['Notación Σ y sus propiedades','Sumas notables (1 + 2 + … + n)','Sucesiones','Progresión aritmética','Progresión geométrica','Serie geométrica infinita'],
+  X8:['Principio de multiplicación','Permutaciones','Combinaciones','Probabilidad clásica','Evento complementario','Eventos independientes','Probabilidad condicional (idea)'],
+  X11:['Identidades fundamentales','Identidades pitagóricas','Ángulo doble','Suma y resta de ángulos','Verificar identidades','Simplificar expresiones'],
+  P1:['Semana 0: funciones y variables','Semana 1: condicionales','Semana 2: bucles','Semana 3: excepciones']
+};
+function subsOf(id){ const n=byId()[id]; return (n&&Array.isArray(n.subs)&&n.subs.length)?n.subs:(SUBT[id]||[]); }
+function subsDone(id){ const p=S.progress[id]; return (p&&Array.isArray(p.subs))?p.subs:[]; }
+function toggleSub(id,i,on){ const p=P(id); const s=new Set(Array.isArray(p.subs)?p.subs:[]); on?s.add(i):s.delete(i); p.subs=[...s].sort((a,b)=>a-b); save(); }
+function subsHtml(id, compact){
+  const L=subsOf(id); if(!L.length) return ''; const d=subsDone(id);
+  return `<div class="subs">${L.map((t,i)=>`<label class="chk sub"><input type="checkbox" data-sub="${esc(id)}:${i}" ${d.includes(i)?'checked':''}><span>${esc(t)}</span></label>`).join('')}</div>`;
+}
+function bindSubs(root, after){ root.querySelectorAll('[data-sub]').forEach(c=>c.onchange=()=>{ const [id,i]=c.dataset.sub.split(':'); toggleSub(id,+i,c.checked); if(after) after(id); }); }
+
+/* ===================== Banco de teoría ===================== */
+const VF=(q,v,e)=>[q,['Verdadero','Falso'],v?0:1,e,true];
+const THEORY = {
+  T1:[VF('(−3)·(−4) = −12',false,'Menos por menos da más: (−3)·(−4) = 12.'),
+    ['En 8 − 2 × 3, ¿qué se hace primero?',['La resta','La multiplicación','Da igual el orden'],1,'Primero multiplicaciones y divisiones, luego sumas y restas: 8 − 6 = 2.'],
+    ['Para sumar 1/4 + 1/6, el denominador común más pequeño es…',['10','12','24'],1,'El MCM de 4 y 6 es 12: 3/12 + 2/12 = 5/12.'],
+    ['Dividir entre una fracción es lo mismo que…',['Multiplicar por su inversa','Restar sus términos','Dividir numeradores y sumar denominadores'],0,'a/b ÷ c/d = a/b · d/c.'],
+    VF('−2² = 4',false,'El exponente afecta solo al 2: −2² = −4. En cambio (−2)² = 4.'),
+    ['2 1/3 como fracción impropia es…',['7/3','5/3','6/3'],0,'2 · 3 + 1 = 7, así que 7/3.']],
+  T2:[['a³ · a⁵ =',['a⁸','a¹⁵','2a⁸'],0,'Misma base que se multiplica: se suman los exponentes.'],
+    ['a⁰ (con a ≠ 0) vale…',['0','1','a'],1,'Todo número distinto de 0 elevado a 0 da 1.'],
+    ['2⁻³ =',['−8','−6','1/8'],2,'Exponente negativo = inverso: 2⁻³ = 1/2³ = 1/8.'],
+    ['Un precio sube 10 % y luego baja 10 %. El precio final es…',['Igual al inicial','1 % menor que el inicial','1 % mayor que el inicial'],1,'1,1 × 0,9 = 0,99: queda 1 % menos.'],
+    VF('(a + b)² = a² + b²',false,'Falta el doble producto: (a + b)² = a² + 2ab + b². Los exponentes no se reparten en una suma.'),
+    ['8^(1/3) =',['2','8/3','24'],0,'Exponente 1/3 = raíz cúbica: ∛8 = 2.']],
+  T3:[['√50 se simplifica a…',['5√2','25√2','2√5'],0,'50 = 25 · 2 y √25 = 5.'],
+    VF('√(a + b) = √a + √b',false,'La raíz no se reparte en una suma: √(9 + 16) = 5, pero √9 + √16 = 7.'),
+    ['Para racionalizar 1/(√3 − 1) se multiplica arriba y abajo por…',['√3','√3 + 1','√3 − 1'],1,'Por el conjugado: (√3 − 1)(√3 + 1) = 3 − 1 = 2.'],
+    ['∛(x²) escrito como potencia es…',['x^(3/2)','x^(2/3)','x⁶'],1,'ⁿ√(xᵐ) = x^(m/n).'],
+    ['¿Cuáles son radicales semejantes?',['√2 y √8','√2 y √3','√2 y ∛2'],0,'√8 = 2√2, así que los dos llevan √2.'],
+    VF('√(a·b) = √a · √b (con a, b ≥ 0)',true,'La raíz sí se reparte en productos y cocientes.')],
+  T4:[['(x + 3)² =',['x² + 9','x² + 6x + 9','x² + 3x + 9'],1,'Cuadrado del primero + doble producto + cuadrado del segundo.'],
+    ['(x + 5)(x − 5) =',['x² − 25','x² + 25','x² − 10x − 25'],0,'Suma por diferencia = diferencia de cuadrados.'],
+    ['El grado de 3x²y³ − x⁴ es…',['4','5','6'],1,'3x²y³ tiene grado 2 + 3 = 5, el mayor.'],
+    ['(a − b)³ =',['a³ − b³','a³ − 3a²b + 3ab² − b³','a³ − 3ab − b³'],1,'Binomio al cubo con signos alternados.'],
+    VF('3x² y 3x³ son términos semejantes',false,'Semejantes = misma parte literal con los mismos exponentes.'),
+    ['(x + 2)(x + 5) =',['x² + 7x + 10','x² + 10x + 7','x² + 10'],0,'Término común: x² + (2 + 5)x + 2·5.']],
+  T5:[['x² − 9 es un caso de…',['Trinomio cuadrado perfecto','Diferencia de cuadrados','Factor común'],1,'x² − 3² = (x + 3)(x − 3).'],
+    ['x² + 5x + 6 =',['(x + 2)(x + 3)','(x + 1)(x + 6)','(x − 2)(x − 3)'],0,'Dos números que multiplicados den 6 y sumados 5: 2 y 3.'],
+    VF('x² + 6x + 9 es un trinomio cuadrado perfecto',true,'x² y 9 son cuadrados y 6x = 2 · x · 3: es (x + 3)².'),
+    ['a³ − b³ =',['(a − b)(a² + ab + b²)','(a − b)³','(a − b)(a² − ab + b²)'],0,'Diferencia de cubos.'],
+    VF('x² + 4 se puede factorizar con números reales',false,'Una suma de cuadrados no se factoriza en los reales.'),
+    ['Lo primero que conviene buscar al factorizar es…',['Factor común','Aspa simple','Ruffini'],0,'Sacar el factor común simplifica todo lo demás.']],
+  X1:[['Por el teorema del resto, el residuo de P(x) ÷ (x − 2) es…',['P(−2)','P(2)','P(0)'],1,'El residuo de dividir entre x − a es P(a).'],
+    ['Si P(3) = 0, entonces…',['x + 3 es factor de P','x − 3 es factor de P','3 es el término independiente'],1,'Teorema del factor.'],
+    ['Las posibles raíces enteras de x³ − 2x² − 5x + 6 son divisores de…',['1','6','−2'],1,'Divisores del término independiente: ±1, ±2, ±3, ±6.'],
+    VF('Ruffini sirve para dividir entre cualquier polinomio',false,'Solo entre divisores de la forma x − a.'),
+    ['Al dividir un polinomio de grado 4 entre x − 1, el cociente tiene grado…',['4','3','1'],1,'El grado baja en 1.']],
+  T7:[['En 2x + 3 = 11, x =',['4','7','5'],0,'2x = 8, x = 4.'],
+    ['Para quitar denominadores en x/3 + x/4 = 7 se multiplica todo por…',['7','12','3'],1,'MCM(3, 4) = 12.'],
+    ['La ecuación 2x + 1 = 2x + 5…',['Tiene solución x = 2','No tiene solución','Tiene infinitas soluciones'],1,'Queda 1 = 5, que es falso siempre.'],
+    VF('Si multiplico los dos lados por un mismo número distinto de 0, las soluciones no cambian',true,'Es una propiedad de la igualdad.'),
+    ['3(x − 2) = 3x − 6 es…',['Una identidad (vale para todo x)','Una ecuación sin solución','Una ecuación con x = 2'],0,'Los dos lados son iguales para cualquier x.']],
+  T8:[['(x² − 1)/(x − 1) se simplifica a…',['x','x + 1','x − 1'],1,'x² − 1 = (x + 1)(x − 1), con x ≠ 1.'],
+    VF('(x + 2)/x se simplifica a 2',false,'Solo se cancelan factores, no términos de una suma.'),
+    ['En 1/(x − 3) = 2/(x − 3) + 1, ¿qué valor está prohibido?',['x = 0','x = 3','x = −3'],1,'Un denominador no puede valer 0.'],
+    ['Una solución extraña es…',['Un valor que anula un denominador y se descarta','Una solución negativa','Una solución fraccionaria'],0,'Siempre verifica que la solución no anule ningún denominador.'],
+    ['1/x + 1/(x + 1) =',['2/(2x + 1)','(2x + 1)/(x(x + 1))','1/(x² + x)'],1,'Común denominador x(x + 1).']],
+  T9:[['La fórmula general de ax² + bx + c = 0 es…',['x = (−b ± √(b² − 4ac)) / 2a','x = (b ± √(b² − 4ac)) / 2a','x = −b ± √(b² − 4ac) / 2'],0,'Fórmula general.'],
+    ['Si el discriminante b² − 4ac es negativo, la ecuación…',['Tiene dos raíces reales','Tiene una raíz doble','No tiene raíces reales'],2,'La raíz de un número negativo no es real.'],
+    ['En x² − 5x + 6 = 0, la suma de las raíces es…',['−5','5','6'],1,'Suma = −b/a = 5; producto = c/a = 6.'],
+    VF('Si x² = 9, entonces x = 3',false,'También x = −3.'),
+    ['Para completar el cuadrado en x² + 6x se suma…',['6','9','36'],1,'(6/2)² = 9.']],
+  T10:[['Un sistema 2×2 cuyas rectas son paralelas y distintas…',['Tiene una solución','No tiene solución','Tiene infinitas soluciones'],1,'Las rectas no se cortan.'],
+    ['Si las dos ecuaciones son la misma recta, el sistema…',['No tiene solución','Tiene infinitas soluciones','Tiene una solución'],1,'Todos los puntos de la recta sirven.'],
+    ['En el método de reducción, el objetivo es…',['Eliminar una variable sumando o restando ecuaciones','Despejar y reemplazar','Igualar dos despejes'],0,'Por eso también se llama eliminación.'],
+    VF('Un sistema 3×3 se puede resolver reduciéndolo a uno 2×2',true,'Se elimina una variable usando pares de ecuaciones.'),
+    ['La solución de x + y = 5 y x − y = 1 es…',['(3, 2)','(2, 3)','(4, 1)'],0,'Sumando: 2x = 6, x = 3, y = 2.']],
+  T11:[['Al multiplicar una inecuación por un número negativo…',['Se invierte el sentido','No cambia nada','Se vuelve ecuación'],0,'Ej.: −x > 2 → x < −2.'],
+    ['|x| < 3 equivale a…',['x < 3','−3 < x < 3','x < −3 o x > 3'],1,'La distancia al 0 es menor que 3.'],
+    ['|x − 1| ≥ 2 tiene solución…',['[−1, 3]','(−∞, −1] ∪ [3, +∞)','[3, +∞)'],1,'x − 1 ≥ 2 o x − 1 ≤ −2.'],
+    ['El intervalo [2, 5) incluye…',['El 2 y el 5','El 2 pero no el 5','El 5 pero no el 2'],1,'Corchete incluye; paréntesis excluye.'],
+    VF('|x| = −4 tiene solución',false,'El valor absoluto nunca es negativo.'),
+    ['x² − 4 < 0 tiene solución…',['(−2, 2)','(−∞, −2) ∪ (2, +∞)','(2, +∞)'],0,'La parábola es negativa entre sus raíces.']],
+  T12:[['La pendiente entre (1, 2) y (3, 6) es…',['2','1/2','4'],0,'(6 − 2)/(3 − 1) = 2.'],
+    ['Dos rectas son perpendiculares si sus pendientes cumplen…',['m₁ = m₂','m₁ · m₂ = −1','m₁ + m₂ = 0'],1,'Ej.: 2 y −1/2.'],
+    ['En y = 3x − 4, el corte con el eje y es…',['3','−4','4/3'],1,'En y = mx + b, b es el corte con el eje y.'],
+    ['El punto medio de (2, 4) y (6, 8) es…',['(4, 6)','(8, 12)','(2, 2)'],0,'Se promedian las coordenadas.'],
+    VF('Una recta vertical tiene pendiente 0',false,'La horizontal tiene pendiente 0; la vertical no tiene pendiente definida.')],
+  T13:[['El dominio de f(x) = 1/(x − 2) es…',['ℝ','ℝ − {2}','x > 2'],1,'El denominador no puede ser 0.'],
+    ['El dominio de f(x) = √x es…',['ℝ','[0, +∞)','(0, +∞)'],1,'Solo hay raíz cuadrada real de números ≥ 0.'],
+    ['El rango de f(x) = x² es…',['ℝ','[0, +∞)','(−∞, 0]'],1,'Un cuadrado nunca es negativo.'],
+    ['¿Qué prueba dice si una gráfica es una función?',['Toda recta vertical la corta a lo más una vez','Toda recta horizontal la corta una vez','Pasa por el origen'],0,'Cada x debe tener un solo valor de y.'],
+    ['f(x) = x² es una función…',['Par','Impar','Ni par ni impar'],0,'f(−x) = f(x).'],
+    ['El vértice de f(x) = x² − 4x + 1 está en x =',['2','−2','4'],0,'x = −b/2a = 4/2 = 2.']],
+  X10:[['La gráfica de f(x − 3) es la de f movida…',['3 a la derecha','3 a la izquierda','3 hacia arriba'],0,'Restar dentro del argumento mueve a la derecha.'],
+    ['f(x) + 2 mueve la gráfica…',['2 hacia arriba','2 hacia abajo','2 a la derecha'],0,'Sumar afuera mueve en vertical.'],
+    ['−f(x) refleja la gráfica respecto…',['Al eje x','Al eje y','A la recta y = x'],0,'Cambia el signo de y.'],
+    ['Si f(x) = x + 1 para x < 0 y f(x) = x² para x ≥ 0, f(0) =',['1','0','No existe'],1,'x = 0 cae en el trozo x ≥ 0.'],
+    VF('|x| = x para todo x',false,'Si x < 0, |x| = −x.')],
+  T14:[['El centro y el radio de (x − 2)² + (y + 1)² = 9 son…',['(2, −1) y 3','(−2, 1) y 9','(2, 1) y 3'],0,'(x − h)² + (y − k)² = r².'],
+    ['Para pasar x² + y² − 4x = 0 a forma canónica se…',['Completan cuadrados','Factoriza','Deriva'],0,'x² − 4x = (x − 2)² − 4.'],
+    ['La parábola x² = 4py con p > 0 abre…',['Hacia arriba','Hacia abajo','A la derecha'],0,'Eje vertical y p positivo.'],
+    ['En una parábola, cada punto está a igual distancia de…',['El foco y la directriz','El vértice y el foco','Los dos focos'],0,'Es la definición de parábola.'],
+    VF('x² + y² = −4 es una circunferencia',false,'Un radio al cuadrado no puede ser negativo.')],
+  T15:[['Si A es 2×3 y B es 3×4, el producto AB es…',['3×3','2×4','4×2'],1,'Filas de A × columnas de B.'],
+    VF('El producto de matrices es conmutativo (AB = BA siempre)',false,'En general AB ≠ BA.'),
+    ['La transpuesta de una matriz…',['Cambia filas por columnas','Cambia los signos','Es su inversa'],0,'El elemento (i, j) pasa a (j, i).'],
+    ['En Gauss-Jordan se busca llevar la matriz a…',['Forma escalonada reducida','Matriz cero','Su transpuesta'],0,'Así las soluciones se leen directamente.'],
+    ['La matriz identidad I cumple…',['AI = A','AI = 0','AI = Aᵀ'],0,'Es el neutro del producto.']],
+  X9:[['det [a b; c d] =',['ad − bc','ab − cd','ad + bc'],0,'Diagonal principal menos diagonal secundaria.'],
+    ['Una matriz cuadrada tiene inversa si y solo si…',['Su determinante es distinto de 0','Es de 2×2','Todos sus elementos son positivos'],0,'det ≠ 0.'],
+    ['Si se intercambian dos filas, el determinante…',['Cambia de signo','No cambia','Se duplica'],0,'Propiedad de los determinantes.'],
+    VF('La regla de Sarrus sirve para matrices 4×4',false,'Solo para 3×3. Para tamaños mayores se usan cofactores.'),
+    ['La inversa de [a b; c d] es…',['(1/det)·[d −b; −c a]','(1/det)·[a b; c d]','[d c; b a]'],0,'Se intercambian a y d, y b y c cambian de signo.']],
+  T16:[['log₂ 8 =',['3','4','1/3'],0,'2³ = 8.'],
+    ['log(a·b) =',['log a · log b','log a + log b','log a − log b'],1,'Logaritmo de un producto = suma de logaritmos.'],
+    ['El dominio de log(x) es…',['ℝ','x > 0','x ≥ 0'],1,'Solo los números positivos tienen logaritmo.'],
+    VF('log(a + b) = log a + log b',false,'No hay propiedad para el logaritmo de una suma.'),
+    ['eˣ = 5 se resuelve así…',['x = ln 5','x = 5/e','x = log 5'],0,'ln es la inversa de eˣ.'],
+    ['Si 0 < b < 1, la función bˣ es…',['Creciente','Decreciente','Constante'],1,'Ej.: (1/2)ˣ decrece.']],
+  T17:[['lím x→2 de (x² − 4)/(x − 2) =',['0','4','No existe'],1,'Se factoriza: queda x + 2 → 4.'],
+    ['Obtener 0/0 al evaluar un límite significa…',['Que el límite es 0','Una indeterminación: hay que simplificar','Que el límite no existe'],1,'Hay que factorizar o racionalizar.'],
+    ['Un límite existe en a si…',['Los límites laterales existen y son iguales','f(a) existe','f es positiva'],0,'Izquierda = derecha.'],
+    ['f es continua en a si…',['f(a) existe, el límite existe y son iguales','Solo f(a) existe','El límite es 0'],0,'Son tres condiciones.'],
+    ['lím x→∞ de (3x² + 1)/(x² − 5) =',['3','0','∞'],0,'Mismo grado: cociente de los coeficientes principales.'],
+    ['Para (√x − 2)/(x − 4) cuando x → 4 conviene…',['Racionalizar','Usar la fórmula general','Derivar'],0,'Multiplicando por √x + 2 queda 1/(√x + 2) → 1/4.']],
+  T18:[['La derivada de xⁿ es…',['nxⁿ⁻¹','xⁿ⁺¹/(n + 1)','nxⁿ'],0,'Regla de la potencia.'],
+    ['f′(a) representa…',['La pendiente de la recta tangente en a','El área bajo la curva','El valor de f en a'],0,'Es la razón de cambio instantánea.'],
+    ['(f·g)′ =',['f′·g′','f′g + fg′','f′g − fg′'],1,'Regla del producto.'],
+    ['La derivada de (3x + 1)⁵ es…',['5(3x + 1)⁴','15(3x + 1)⁴','(3x + 1)⁴'],1,'Regla de la cadena: 5(3x + 1)⁴ · 3.'],
+    ['La derivada de sen x es…',['cos x','−cos x','−sen x'],0,'(sen x)′ = cos x; (cos x)′ = −sen x.'],
+    VF('La derivada de una constante es 0',true,'Una constante no cambia.'),
+    ['La derivada de ln x es…',['1/x','ln x','eˣ'],0,'Para x > 0.']],
+  X2:[['π radianes equivalen a…',['90°','180°','360°'],1,'π rad = 180°.'],
+    ['En un triángulo rectángulo, sen θ =',['Opuesto / hipotenusa','Adyacente / hipotenusa','Opuesto / adyacente'],0,'Coseno = adyacente/hipotenusa; tangente = opuesto/adyacente.'],
+    ['En el segundo cuadrante es positivo el…',['Seno','Coseno','Tangente'],0,'Ahí x < 0 e y > 0.'],
+    ['sen 30° =',['1/2','√3/2','√2/2'],0,'Ángulo notable.'],
+    VF('sen²x + cos²x = 1 para todo x',true,'Identidad pitagórica.'),
+    ['El período de sen x es…',['π','2π','π/2'],1,'Se repite cada 2π.']],
+  X3:[['En una elipse con a > b, se cumple…',['c² = a² − b²','c² = a² + b²','c = a + b'],0,'En la hipérbola es c² = a² + b².'],
+    ['La excentricidad de una elipse está entre…',['0 y 1','1 e ∞','−1 y 1'],0,'e = c/a < 1.'],
+    ['x²/9 − y²/4 = 1 es…',['Una elipse','Una hipérbola','Una parábola'],1,'Hay un signo menos entre los cuadrados.'],
+    ['Las asíntotas de x²/9 − y²/4 = 1 son…',['y = ±(2/3)x','y = ±(3/2)x','y = ±4x'],0,'y = ±(b/a)x, con a = 3 y b = 2.'],
+    VF('Una circunferencia es una elipse con a = b',true,'Su excentricidad es 0.')],
+  X4:[['|(3, 4)| =',['5','7','1'],0,'√(9 + 16) = 5.'],
+    ['(1, 2)·(3, −1) =',['1','5','(3, −2)'],0,'1·3 + 2·(−1) = 1.'],
+    ['Si u·v = 0 y ninguno es el vector cero, los vectores son…',['Perpendiculares','Paralelos','Iguales'],0,'cos θ = 0, θ = 90°.'],
+    VF('El producto escalar de dos vectores es otro vector',false,'Es un número.'),
+    ['El vector unitario en la dirección de v es…',['v/|v|','v·|v|','v − |v|'],0,'Se divide entre su módulo.']],
+  X5:[['p → q es falsa solo cuando…',['p es V y q es F','p es F y q es V','Ambas son F'],0,'Es la única fila falsa del condicional.'],
+    ['¬(p ∧ q) equivale a…',['¬p ∨ ¬q','¬p ∧ ¬q','p ∨ q'],0,'Ley de De Morgan.'],
+    ['n(A ∪ B) =',['n(A) + n(B) − n(A ∩ B)','n(A) + n(B)','n(A) · n(B)'],0,'Se resta la intersección para no contarla dos veces.'],
+    VF('El conjunto vacío es subconjunto de cualquier conjunto',true,'∅ ⊂ A siempre.'),
+    ['A − B contiene…',['Los elementos de A que no están en B','Los de B que no están en A','Los comunes'],0,'Es la diferencia de conjuntos.']],
+  X6:[['(f ∘ g)(x) significa…',['f(g(x))','g(f(x))','f(x) · g(x)'],0,'Primero se aplica g y luego f.'],
+    ['Para que f tenga inversa debe ser…',['Inyectiva (uno a uno)','Par','Positiva'],0,'Cada y debe venir de un solo x.'],
+    ['La gráfica de f⁻¹ es simétrica a la de f respecto a…',['La recta y = x','El eje x','El origen'],0,'Se intercambian x e y.'],
+    VF('f⁻¹(x) = 1/f(x)',false,'La inversa deshace lo que hace f; 1/f es el recíproco, otra cosa.'),
+    ['La inversa de f(x) = 2x + 3 es…',['(x − 3)/2','2x − 3','1/(2x + 3)'],0,'Se despeja x de y = 2x + 3 y se cambian los nombres.']],
+  X7:[['1 + 2 + … + n =',['n(n + 1)/2','n²','n(n − 1)'],0,'Fórmula de Gauss.'],
+    ['En una progresión aritmética, aₙ =',['a₁ + (n − 1)d','a₁ · rⁿ⁻¹','a₁ + nd'],0,'Se suma la diferencia n − 1 veces.'],
+    ['En una progresión geométrica, aₙ =',['a₁ · rⁿ⁻¹','a₁ + (n − 1)r','a₁ · rⁿ'],0,'Se multiplica por la razón n − 1 veces.'],
+    ['1 + 1/2 + 1/4 + … (infinita) suma…',['2','∞','1'],0,'a₁/(1 − r) = 1/(1/2) = 2.'],
+    VF('Σ (de i = 1 a n) de c = c·n',true,'Se suma c, n veces.')],
+  X8:[['Si el orden importa, se usan…',['Permutaciones','Combinaciones','Ninguna de las dos'],0,'Cuando el orden no importa, combinaciones.'],
+    ['C(5, 2) =',['10','20','5'],0,'5·4/2 = 10.'],
+    ['P(no A) =',['1 − P(A)','P(A) − 1','1/P(A)'],0,'Evento complementario.'],
+    ['Si A y B son independientes, P(A y B) =',['P(A) · P(B)','P(A) + P(B)','0'],0,'Es la definición de independencia.'],
+    VF('Una probabilidad puede valer 1,2',false,'Siempre está entre 0 y 1.')],
+  X11:[['sen 2x =',['2 sen x cos x','2 sen x','sen²x − cos²x'],0,'Ángulo doble.'],
+    ['cos 2x =',['cos²x − sen²x','2 cos x','1 − cos²x'],0,'También 2cos²x − 1 o 1 − 2sen²x.'],
+    ['1 + tan²x =',['sec²x','csc²x','1'],0,'Se divide sen²x + cos²x = 1 entre cos²x.'],
+    ['sen(a + b) =',['sen a cos b + cos a sen b','sen a + sen b','sen a sen b − cos a cos b'],0,'Seno de una suma.'],
+    VF('Para verificar una identidad se pasan términos de un lado al otro como en una ecuación',false,'Se transforma un solo lado hasta llegar al otro.')]
+};
+let TH=null;
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function prepQ(item, topic){ const [q,opts,c,e,vf]=item; if(vf) return {q,opts:opts.slice(),c,e,topic}; const o=shuffle(opts.map((t,i)=>({t,ok:i===c}))); return {q,opts:o.map(x=>x.t),c:o.findIndex(x=>x.ok),e,topic}; }
+function theoryTopics(){ return S.nodes.filter(n=>THEORY[n.id]); }
+function startTheory(topic){
+  let qs;
+  if(topic==='MIX'){ const w=curWeek(); let ts=theoryTopics().filter(n=>n.week && n.week<=Math.max(1,w)); ts=ts.concat(theoryTopics().filter(n=>isDom(n.id)&&!ts.includes(n))); if(!ts.length) ts=theoryTopics().slice(0,1);
+    qs=shuffle(ts.flatMap(n=>THEORY[n.id].map(x=>prepQ(x,n.id)))).slice(0,10); }
+  else qs=shuffle(THEORY[topic].map(x=>prepQ(x,topic)));
+  TH={topic, qs, i:0, ans:null, ok:0};
+}
+function theoryCard(){
+  const tps=theoryTopics(), cw=curWeek();
+  let h=`<div class="card" id="theoryCard"><h2>🧠 Teoría</h2>`;
+  if(!TH){
+    h+=`<p class="muted" style="margin-top:0">Preguntas de concepto con explicación: comprueba que entiendes el porqué, no solo el procedimiento.</p>
+      <select id="thTopic"><option value="MIX">Mezcla de lo visto hasta esta semana (10)</option>${tps.map(n=>{ const t=(S.progress[n.id]||{}).theory; return `<option value="${esc(n.id)}" ${n.week===cw?'selected':''}>${esc(n.id+' · '+n.title)}${t?' · mejor '+t.best+'/'+t.n:''}</option>`; }).join('')}</select>
+      <button class="btn pri" id="thGo" style="margin-top:8px;width:100%">Empezar</button>`;
+  } else if(TH.i>=TH.qs.length){
+    const n=TH.qs.length, pct=Math.round(TH.ok/n*100);
+    h+=`<div class="big">${TH.ok}/${n} · ${pct} %</div><div style="margin-top:6px">${pct>=80?'✅ Dominas la teoría de este tema.':pct>=60?'Bien, pero repasa las explicaciones de las que fallaste.':'Repasa la teoría (subtemas y videos) y vuelve a intentarlo.'}</div>
+      <div class="muted" style="margin-top:6px">Las que fallaste se guardaron en tu cuaderno de errores.</div>
+      <div class="mact"><button class="btn" id="thExit">Salir</button><button class="btn pri" id="thAgain">Otra vez</button></div>`;
+  } else {
+    const q=TH.qs[TH.i], a=TH.ans;
+    h+=`<div class="muted" style="margin-top:-4px">${esc(q.topic)} · pregunta ${TH.i+1} de ${TH.qs.length} · ${TH.ok} bien</div>
+      <div style="font-size:16px;margin:8px 0 10px">${esc(q.q)}</div><div class="nlist">`;
+    q.opts.forEach((o,i)=>{ const st = a===null ? '' : i===q.c ? 'background:#14361f;border-color:#4ade80' : i===a ? 'background:#3a1518;border-color:#f87171' : 'opacity:.55';
+      h+=`<button class="btn" data-tha="${i}" style="text-align:left;${st}" ${a!==null?'disabled':''}>${a!==null&&i===q.c?'✓ ':a===i?'✗ ':''}${esc(o)}</button>`; });
+    h+=`</div>`;
+    if(a!==null) h+=`<div class="goal" style="margin-top:10px">${a===q.c?'✅ Correcto. ':'❌ La respuesta es: <b>'+esc(q.opts[q.c])+'</b>. '}${esc(q.e)}</div>
+      <div class="mact"><button class="btn" id="thExit">Salir</button><button class="btn pri" id="thNext">${TH.i+1<TH.qs.length?'Siguiente ›':'Ver resultado'}</button></div>`;
+    else h+=`<div class="mact"><button class="btn" id="thExit">Salir</button></div>`;
+  }
+  return h+`</div>`;
+}
+function renderTheoryCard(){ const el=document.getElementById('theoryCard'); if(!el) return; el.outerHTML=theoryCard(); bindTheory(document.getElementById('studyWrap')); }
+function bindTheory(w){
+  const $=s=>w.querySelector(s);
+  if($('#thGo')) $('#thGo').onclick=()=>{ startTheory($('#thTopic').value); renderTheoryCard(); };
+  if($('#thExit')) $('#thExit').onclick=()=>{ TH=null; renderTheoryCard(); };
+  if($('#thAgain')) $('#thAgain').onclick=()=>{ startTheory(TH.topic); renderTheoryCard(); };
+  w.querySelectorAll('[data-tha]').forEach(b=>b.onclick=()=>{ if(TH.ans!==null) return; const q=TH.qs[TH.i]; TH.ans=+b.dataset.tha;
+    if(TH.ans===q.c) TH.ok++; else { addError(q.topic, '🧠 '+q.q, q.opts[q.c]+' · '+q.e); renderHeader(); }
+    renderTheoryCard(); });
+  if($('#thNext')) $('#thNext').onclick=()=>{ TH.i++; TH.ans=null;
+    if(TH.i>=TH.qs.length && TH.topic!=='MIX'){ const p=P(TH.topic), n=TH.qs.length; const prev=p.theory; p.theory={n, last:TH.ok, best:Math.max(TH.ok, prev&&prev.n===n?prev.best:0), date:iso(today())}; save(); }
+    renderTheoryCard(); document.getElementById('theoryCard').scrollIntoView({block:'nearest'}); };
+}
+function goTheory(id){ TH=null; document.querySelector('nav button[data-v="vStudy"]').click(); startTheory(id); renderTheoryCard(); setTimeout(()=>{ const el=document.getElementById('theoryCard'); if(el) el.scrollIntoView({behavior:'smooth'}); },60); }
+
+/* ===================== Más tipos de ejercicio ===================== */
+(function(){
+  const more = {
+    T3:()=>{ const m=pick([2,3,5,6,7]), k=rnd(1,6); const f=Fr(k,m); return {q:`Racionaliza: ${k}/√${m}`, a: f.d===1 ? (f.n===1?'':f.n)+'√'+m : `${f.n===1?'':f.n}√${m}/${f.d}`}; },
+    T9:()=>{ const b=nz(-8,8), c=rnd(-9,12); const D=b*b-4*c; return {q:`¿Cuántas raíces reales tiene ${poly([1,b,c])} = 0? (usa el discriminante)`, a:`Δ = ${num(D)} → ${D>0?'dos raíces reales distintas':D===0?'una raíz doble':'ninguna raíz real'}`}; },
+    T13:()=>{ const h=nz(-5,5), k=rnd(-6,6); return {q:`Vértice de f(x) = ${poly([1,-2*h,h*h+k])}`, a:`V(${num(h)}, ${num(k)})`}; },
+    T16:()=>{ const b=pick([2,3]), m=rnd(1,3), n=rnd(1,3); return {q:`Calcula: log${sub(b)}(${b**m}) + log${sub(b)}(${b**n})`, a:`${m+n}  (= log${sub(b)}(${b**(m+n)}))`}; },
+    T17:()=>{ const a=rnd(1,5); return {q:`lím x→${a*a} (√x − ${a}) / (x − ${a*a})  (racionaliza)`, a:`1/${2*a}`}; },
+    T18:()=>pick([()=>{ const a=nz(-4,5), b=nz(-6,6), n=rnd(2,5); return {q:`Deriva con la regla de la cadena: f(x) = (${terms([[a,'x'],[b,'']])})${sup(n)}`, a:`f′(x) = ${num(n*a)}(${terms([[a,'x'],[b,'']])})${n-1>1?sup(n-1):''}`}; },
+      ()=>{ const k=nz(-5,5), c=nz(-4,4); const kx=k===1?'x':k===-1?'−x':num(k)+'x', cs=v=>v===1?'':v===-1?'−':num(v)+'·'; return {q:`Deriva: f(x) = ${cs(c)}e^(${kx})`, a:`f′(x) = ${cs(c*k)}e^(${kx})`}; }])()
+  };
+  Object.keys(more).forEach(id=>{ const old=GEN[id]; GEN[id]=()=>Math.random()<0.3?more[id]():old(); });
+})();
+
+/* ===================== Minutos por semana ===================== */
+function weeklyChart(){
+  const W0=Math.min(19,Math.max(1,curWeek())), vals=[];
+  for(let k=1;k<=W0;k++){ let m=0; for(let i=0;i<7;i++) m+=minutesOn(addDays(START,(k-1)*7+i)); vals.push(m); }
+  const mx=Math.max(60,...vals), bw=Math.min(28, 300/W0-4);
+  let s=`<svg viewBox="0 0 320 120" style="width:100%" role="img" aria-label="Minutos por semana">`;
+  vals.forEach((m,i)=>{ const h=Math.round(m/mx*80), x=10+i*(300/W0); s+=`<rect x="${x}" y="${95-h}" width="${bw}" height="${Math.max(h,2)}" rx="3" fill="${m?(i===W0-1?'#7aa2ff':'#f4a261'):'#2a3242'}"/><text x="${x+bw/2}" y="110" text-anchor="middle" font-size="9" fill="#6b7383">S${i+1}</text>${m?`<text x="${x+bw/2}" y="${91-h}" text-anchor="middle" font-size="9" fill="#e6e8ee">${m>=60?(Math.round(m/6)/10)+'h':m}</text>`:''}`; });
+  s+=`</svg>`;
+  const tot=vals.reduce((a,b)=>a+b,0), avg=Math.round(tot/W0);
+  return `<div class="card"><h2>⏱ Minutos por semana</h2>${s}<div class="muted">Promedio: <b style="color:var(--tx)">${Math.floor(avg/60)} h ${avg%60} min</b> por semana. La barra azul es la semana actual.</div></div>`;
+}
+
+/* ===================== Recordatorio diario ===================== */
+function reminderCard(){
+  const t=meta().remindAt||'20:00';
+  return `<div class="card"><h2>⏰ Recordatorio diario</h2><p class="muted" style="margin-top:0">Una app web no puede mandarte avisos con la app cerrada, así que el recordatorio se agrega a tu calendario, que sí suena todos los días hasta el 28 de marzo.</p>
+    <div class="row" style="align-items:center"><label class="f" style="margin:0;flex:0 0 auto">Hora</label><input type="time" id="rmT" value="${esc(t)}" style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:40px;color-scheme:dark"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn pri" id="rmG" target="_blank" rel="noopener" style="text-decoration:none">Google Calendar ↗</a><button class="btn" id="rmI">Descargar .ics (otros calendarios)</button></div></div>`;
+}
+function remindLinks(w){
+  const $=s=>w.querySelector(s); if(!$('#rmT')) return;
+  const upd=()=>{ const [hh,mm]=($('#rmT').value||'20:00').split(':'); meta().remindAt=hh+':'+mm; save();
+    const d=iso(addDays(today(),1)).replace(/-/g,''), st=d+'T'+hh+mm+'00', en=new Date(2000,0,1,+hh,+mm+30), et=d+'T'+String(en.getHours()).padStart(2,'0')+String(en.getMinutes()).padStart(2,'0')+'00';
+    let tz=''; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||''; }catch(e){}
+    $('#rmG').href='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Estudiar matemática 📘')+'&details='+encodeURIComponent('Abre tu Árbol de Matemática: plan de hoy y racha.\n'+location.href.split('?')[0])+'&dates='+st+'/'+et+'&recur='+encodeURIComponent('RRULE:FREQ=DAILY;UNTIL=20270328T235900Z')+(tz?'&ctz='+encodeURIComponent(tz):'');
+    return {st,et}; };
+  $('#rmT').onchange=upd; const r=upd();
+  $('#rmI').onclick=()=>{ const {st,et}=upd(); const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//arbol-ali//ES','BEGIN:VEVENT','UID:arbol-ali-recordatorio@local','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z','DTSTART:'+st,'DTEND:'+et,'RRULE:FREQ=DAILY;UNTIL=20270328T235900Z','SUMMARY:Estudiar matemática','DESCRIPTION:Abre tu Árbol de Matemática: plan de hoy y racha.','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Hora de estudiar','TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); a.download='recordatorio-estudio.ics'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500); toast('Ábrelo para agregarlo a tu calendario'); };
+}
+
+/* ===================== Aviso de versión nueva ===================== */
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  const hadSW=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(!hadSW || document.getElementById('updBar')) return;
+    const b=document.createElement('div'); b.id='updBar'; b.innerHTML='✨ Hay una versión nueva de la app. <button class="btn pri sm">Actualizar</button>'; b.querySelector('button').onclick=()=>location.reload(); document.body.appendChild(b); });
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{}); });
 }
 
 /* ===================== General ===================== */
