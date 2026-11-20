@@ -307,10 +307,12 @@ function defaultNodes(){ return [
   T('T11',11,'25–31 ene 2027','F2','Inecuaciones y valor absoluto',70,'8/10 con la solución como intervalo',['T9']),
   T('T12',12,'1–7 feb 2027','F3','Recta y distancia',70,'8/10 ecuaciones de la recta',['T7']),
   T('T13',13,'8–14 feb 2027','F3','Funciones: dominio, rango y gráfica',70,'8/10 funciones graficadas a mano',['T9','T11','T12']),
+  {...T('X10',13,'8–14 feb 2027 (con T13)','F3','Funciones a trozos y transformaciones',40,'8/10 evaluar funciones a trozos y graficar traslaciones y reflexiones',['T13']), desc:'Tema agregado (nov 2026). Se estudia en la semana 13, junto a T13. Las funciones a trozos aparecen en continuidad.'},
   T('T14',14,'15–21 feb 2027','F3','Circunferencia y parábola',60,'8/10 ecuaciones (centro y radio, vértice y foco)',['T9','T12']),
   T('T15',15,'22–28 feb 2027','F3','Matrices',70,'8/10 operaciones y un sistema 3×3',['T10']),
+  {...T('X9',15,'22–28 feb 2027 (con T15)','F3','Determinantes y matriz inversa',40,'8/10 determinantes 2×2 y 3×3 e inversas 2×2',['T15']), desc:'Tema agregado (nov 2026). Se estudia en la semana 15, junto a T15. Matemática para Ingenieros I suele incluirlo.'},
   T('T16',16,'1–7 mar 2027','F3','Exponenciales y logaritmos',60,'8/10 ecuaciones',['T2','T13','X6']),
-  T('T17',17,'8–14 mar 2027','F4','Límites y continuidad',50,'8/10 límites algebraicos',['T5','T8','T13','X1']),
+  T('T17',17,'8–14 mar 2027','F4','Límites y continuidad',50,'8/10 límites algebraicos',['T5','T8','T13','X1','X10']),
   {...T('X2',null,'Extra (sin semana fija)','F3','Trigonometría',80,'8/10 problemas de razones, identidades y ecuaciones trigonométricas',['T3','T13']), desc:'Tema agregado en la auditoría: hace falta para derivar seno y coseno.'},
   {...T('X3',null,'Extra (sin semana fija)','F3','Elipse e hipérbola',50,'8/10 ecuaciones de elipse e hipérbola (centro, ejes y focos)',['T14']), desc:'Tema agregado en la auditoría: completa las cónicas de geometría analítica.'},
   {...T('X4',null,'Extra (sin semana fija)','F3','Vectores',50,'8/10 operaciones con vectores (suma, producto escalar, norma y ángulo)',['T12']), desc:'Tema agregado en la auditoría.'},
@@ -318,8 +320,9 @@ function defaultNodes(){ return [
   {...T('X6',null,'Extra (sin semana fija)','F3','Funciones inversa y compuesta',50,'8/10 composiciones e inversas',['T13']), desc:'El logaritmo es la inversa de la exponencial, y la regla de la cadena deriva funciones compuestas.'},
   {...T('X7',null,'Extra (sin semana fija)','F3','Sumatorias y sucesiones',40,'8/10 sumas con Σ y progresiones',['T2','T7']), desc:'Las integrales (MI II) se definen como sumas. También aparecen en algoritmos.'},
   {...T('X8',null,'Extra (sin semana fija)','F3','Probabilidad básica y conteo',50,'8/10 problemas de conteo y probabilidad',['T1','X5']), desc:'Prepara el curso de Estadística (ciclo 3) y Machine Learning.'},
-  T('T18',18,'15–21 mar 2027','F4','Derivadas',60,'8/10 funciones derivadas',['T16','T17','X2','X6']),
-  {id:'U1',week:null,dates:'Ciclo 1',phase:'U',title:'Matemática para Ingenieros I',target:0,goal:'Aprobar el curso con 16 o más',reqs:['T13','T14','T15','T17','T18','X3','X4'],desc:'Contenido probable: matrices, geometría analítica, funciones, límites y continuidad, derivadas.',dashed:false,grade20:true},
+  {...T('X11',null,'Extra (sin semana fija)','F3','Identidades trigonométricas',40,'8/10 identidades verificadas y valores con ángulo doble',['X2']), desc:'Tema agregado (nov 2026). Hace falta para derivar funciones trigonométricas.'},
+  T('T18',18,'15–21 mar 2027','F4','Derivadas',60,'8/10 funciones derivadas',['T16','T17','X2','X6','X11']),
+  {id:'U1',week:null,dates:'Ciclo 1',phase:'U',title:'Matemática para Ingenieros I',target:0,goal:'Aprobar el curso con 16 o más',reqs:['T13','T14','T15','T17','T18','X3','X4','X9'],desc:'Contenido probable: matrices, geometría analítica, funciones, límites y continuidad, derivadas.',dashed:false,grade20:true},
   {id:'U2',week:null,dates:'Ciclo 2',phase:'U',title:'Matemática para Ingenieros II',target:0,goal:'Aprobar el curso con 16 o más',reqs:['U1','X7'],desc:'Contenido por confirmar (probablemente integrales).',dashed:false,grade20:true},
   {id:'U3',week:null,dates:'Ciclo 3 o después',phase:'U',title:'Matemática III (por confirmar)',target:0,goal:'Por confirmar con la malla oficial',reqs:['U2'],desc:'Curso por confirmar.',dashed:true,grade20:true},
   {id:'P1',week:null,dates:'Domingos hasta marzo',phase:'P',title:'Python con CS50P (Harvard)',target:0,goal:'Terminar las primeras 4 semanas de CS50P',reqs:[],desc:'Se estudia los domingos, en paralelo a la matemática.',dashed:false,grade20:false,links:P1_LINKS},
@@ -339,7 +342,7 @@ function defaultEvals(){ return withNodes([
   {id:'final',name:'Simulacro final',date:'2027-03-27',topic:'Simulacro de todo (15 ejercicios)',max:15,score:null}
 ]);}
 function withNodes(a){ a.forEach(e=>e.nodes=(EVAL_NODES[e.id]||[]).slice()); return a; }
-const EVAL_NODES = {e1:['T1','T2'], e2:['T3','T4'], e3:['T1','T2','T3','T4','T5'], e4:['T7','T8'], e5:['T4','T5','T7','T8','T9','T10'], e6:['T11','T12'], e7:['T13','T14'], e8:['T15','T16'], e9:['T17','T18'], final:['T1','T2','T3','T4','T5','T7','T8','T9','T10','T11','T12','T13','T14','T15','T16','T17','T18']};
+const EVAL_NODES = {e1:['T1','T2'], e2:['T3','T4'], e3:['T1','T2','T3','T4','T5'], e4:['T7','T8'], e5:['T4','T5','T7','T8','T9','T10'], e6:['T11','T12'], e7:['T13','T14','X10'], e8:['T15','T16','X9'], e9:['T17','T18','X11'], final:['T1','T2','T3','T4','T5','T7','T8','T9','T10','T11','T12','T13','T14','T15','T16','T17','T18']};
 const REVIEW_WEEKS = {6:'Repaso de las semanas 1 a 5, división de polinomios y Ruffini', 19:'Repaso general y simulacro final'};
 
 /* ===================== Fechas ===================== */
@@ -359,7 +362,7 @@ function weekRange(w){ const a=new Date(START); a.setDate(a.getDate()+(w-1)*7); 
 
 /* ===================== Estado ===================== */
 let S = load();
-function fresh(){ return {version:3, errors:[], dayDone:{}, nodes:defaultNodes(), progress:{}, evals:defaultEvals(), study:{log:{}}, meta:{firstUse:iso(today())}}; }
+function fresh(){ return {version:4, errors:[], dayDone:{}, nodes:defaultNodes(), progress:{}, evals:defaultEvals(), study:{log:{}}, meta:{firstUse:iso(today())}}; }
 function load(){
   try{ const raw = localStorage.getItem(KEY); if(raw){ const d = normalize(JSON.parse(raw)); if(d) return d; } }catch(e){}
   return fresh();
@@ -374,9 +377,10 @@ function normalize(d){
   }));
   const evals = Array.isArray(d.evals) && d.evals.length ? d.evals.map(e=>({id:String(e.id),name:String(e.name||''),date:String(e.date||''),topic:String(e.topic||''),max:+e.max||10,nodes:Array.isArray(e.nodes)?e.nodes.map(String):(EVAL_NODES[e.id]||[]),score:(e.score===null||e.score===undefined||e.score==='')?null:+e.score})) : defaultEvals();
   const progress = (d.progress && typeof d.progress==='object') ? d.progress : {};
-  const out = {version:3, errors:Array.isArray(d.errors)?d.errors.filter(e=>e&&e.q).map(e=>({id:String(e.id||Math.random().toString(36).slice(2)),topic:String(e.topic||''),q:String(e.q),a:String(e.a||''),added:String(e.added||iso(today())),due:/^\d{4}-\d{2}-\d{2}$/.test(e.due)?e.due:iso(today()),tries:+e.tries||0,fixed:e.fixed||''})):[], dayDone:(d.dayDone&&typeof d.dayDone==='object')?d.dayDone:{}, nodes, progress, evals, study:(d.study&&typeof d.study==='object'&&d.study.log&&typeof d.study.log==='object')?{log:d.study.log}:{log:{}}, meta:(d.meta&&typeof d.meta==='object')?d.meta:{}};
+  const out = {version:4, errors:Array.isArray(d.errors)?d.errors.filter(e=>e&&e.q).map(e=>({id:String(e.id||Math.random().toString(36).slice(2)),topic:String(e.topic||''),q:String(e.q),a:String(e.a||''),added:String(e.added||iso(today())),due:/^\d{4}-\d{2}-\d{2}$/.test(e.due)?e.due:iso(today()),tries:+e.tries||0,fixed:e.fixed||''})):[], dayDone:(d.dayDone&&typeof d.dayDone==='object')?d.dayDone:{}, nodes, progress, evals, study:(d.study&&typeof d.study==='object'&&d.study.log&&typeof d.study.log==='object')?{log:d.study.log}:{log:{}}, meta:(d.meta&&typeof d.meta==='object')?d.meta:{}};
   if(!(d.version>=2)) migrateV2(out);
   if(!(d.version>=3)) migrateV3(out);
+  if(!(d.version>=4)) migrateV4(out);
   return out;
 }
 function migrateV2(st){
@@ -391,6 +395,15 @@ function migrateV3(st){
   const add = (id, reqs) => { const n=get(id); if(n) reqs.forEach(r=>{ if(has(r) && !n.reqs.includes(r)) n.reqs.push(r); }); };
   add('T16',['X6']); add('T18',['X6']); add('U2',['X7']);
   const p1=get('P1'); if(p1 && !(p1.links&&p1.links.length)) p1.links=P1_LINKS.map(l=>l.slice());
+}
+function migrateV4(st){
+  const has = id => st.nodes.some(n=>n.id===id), get = id => st.nodes.find(n=>n.id===id);
+  const D = defaultNodes();
+  ['X10','X9','X11'].forEach(id=>{ if(has(id)) return; const n=D.find(x=>x.id===id); const after={X10:'T13',X9:'T15',X11:'X2'}[id]; const i=st.nodes.findIndex(x=>x.id===after); if(i>=0) st.nodes.splice(i+1,0,n); else st.nodes.push(n); });
+  const add = (id, reqs) => { const n=get(id); if(n) reqs.forEach(r=>{ if(has(r) && !n.reqs.includes(r)) n.reqs.push(r); }); };
+  add('T17',['X10']); add('T18',['X11']); add('U1',['X9']);
+  const ev = (id, ns) => { const e=st.evals.find(x=>x.id===id); if(e) ns.forEach(k=>{ if(has(k) && !e.nodes.includes(k)) e.nodes.push(k); }); };
+  ev('e7',['X10']); ev('e8',['X9']); ev('e9',['X11']);
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('No se pudo guardar en este navegador'); } }
 function P(id){ return S.progress[id] || (S.progress[id] = {status:'pendiente',count:0,test:null,date:'',notes:'',grade:null}); }
@@ -944,7 +957,7 @@ function topicLinks(n){
     ['Ejercicios PDF','https://www.google.com/search?q='+encodeURIComponent(n.title+' ejercicios resueltos pdf')],
     ['Comprobar con WolframAlpha','https://www.wolframalpha.com/']
   ];
-  if(/^(T12|T13|T14|T16|X2|X3|X6)$/.test(n.id)) L.splice(2,0,['Graficar en GeoGebra','https://www.geogebra.org/graphing']);
+  if(/^(T12|T13|T14|T16|X2|X3|X6|X10|X11)$/.test(n.id)) L.splice(2,0,['Graficar en GeoGebra','https://www.geogebra.org/graphing']);
   return L;
 }
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
@@ -1117,6 +1130,22 @@ function restoreSnap(){
 
 /* ===================== Generadores de los temas nuevos ===================== */
 Object.assign(GEN, {
+  X9:()=>pick([()=>{ const A=[nz(-6,6),rnd(-6,6),rnd(-6,6),nz(-6,6)]; return {q:`Determinante de A = [${num(A[0])} ${num(A[1])}; ${num(A[2])} ${num(A[3])}]`, a:`det A = ${num(A[0]*A[3]-A[1]*A[2])}`}; },
+    ()=>{ const M=[...Array(9)].map(()=>rnd(-3,4)); const [a,b,c,d,e,f,g,h,i]=M; const det=a*(e*i-f*h)-b*(d*i-f*g)+c*(d*h-e*g);
+      return {q:`Determinante de [${num(a)} ${num(b)} ${num(c)}; ${num(d)} ${num(e)} ${num(f)}; ${num(g)} ${num(h)} ${num(i)}] (regla de Sarrus o cofactores)`, a:`det = ${num(det)}`}; },
+    ()=>{ let A,det; do{ A=[nz(-5,5),rnd(-5,5),rnd(-5,5),nz(-5,5)]; det=A[0]*A[3]-A[1]*A[2]; }while(!det);
+      const e=k=>fs(Fr(k,det)); return {q:`Halla la inversa de A = [${num(A[0])} ${num(A[1])}; ${num(A[2])} ${num(A[3])}]`, a:`det = ${num(det)}; A⁻¹ = [${e(A[3])} ${e(-A[1])}; ${e(-A[2])} ${e(A[0])}]`}; }])(),
+  X10:()=>pick([()=>{ const k=rnd(-2,2), m=nz(-3,3), b=rnd(-5,5), x=pick([k-2,k-1,k,k+1,k+2]);
+      const v = x<k ? x*x : m*x+b; return {q:`f(x) = x² si x < ${num(k)}; f(x) = ${terms([[m,'x'],[b,'']])} si x ≥ ${num(k)}. Calcula f(${num(x)})`, a:`f(${num(x)}) = ${num(v)}`}; },
+    ()=>{ const h=nz(-5,5), k=nz(-5,5), f=pick([['x²','(x '+(h<0?'+ '+(-h):'− '+h)+')²'],['|x|','|x '+(h<0?'+ '+(-h):'− '+h)+'|'],['√x','√(x '+(h<0?'+ '+(-h):'− '+h)+')']]);
+      return {q:`¿Cómo se obtiene la gráfica de g(x) = ${f[1]} ${k<0?'− '+(-k):'+ '+k} a partir de f(x) = ${f[0]}?`, a:`Se mueve ${Math.abs(h)} a la ${h>0?'derecha':'izquierda'} y ${Math.abs(k)} hacia ${k>0?'arriba':'abajo'}`}; },
+    ()=>{ const t=pick([['−f(x)','reflejo respecto al eje x'],['f(−x)','reflejo respecto al eje y'],['2·f(x)','estiramiento vertical (factor 2)'],['f(2x)','compresión horizontal (factor 1/2)']]); return {q:`¿Qué transformación produce ${t[0]} sobre la gráfica de f?`, a:t[1]}; },
+    ()=>{ const a=nz(-6,6); return {q:`Escribe |x ${a<0?'+ '+(-a):'− '+a}| como función a trozos`, a:`x ${a<0?'+ '+(-a):'− '+a} si x ≥ ${num(a)}; −x ${a<0?'− '+(-a):'+ '+a} si x < ${num(a)}`}; }])(),
+  X11:()=>pick([()=>{ const [p,q,r]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25]]);
+      return {q:`θ está en el primer cuadrante y sen θ = ${p}/${r}. Calcula cos θ, tan θ y sen 2θ`, a:`cos θ = ${q}/${r}; tan θ = ${fs(Fr(p,q))}; sen 2θ = ${fs(Fr(2*p*q,r*r))}`}; },
+    ()=>{ const [p,q,r]=pick([[3,4,5],[5,12,13],[8,15,17]]); return {q:`Si cos θ = ${q}/${r} (primer cuadrante), calcula cos 2θ`, a:`cos 2θ = cos²θ − sen²θ = ${fs(Fr(q*q-p*p,r*r))}`}; },
+    ()=>{ const t=pick([['sen²x + cos²x','1'],['1 + tan²x','sec²x'],['1 + cot²x','csc²x'],['2 sen x cos x','sen 2x'],['cos²x − sen²x','cos 2x'],['sen x / cos x','tan x'],['(1 − cos²x) / sen x','sen x'],['tan x · cos x','sen x'],['sec²x − tan²x','1']]);
+      return {q:`Simplifica: ${t[0]}`, a:t[1]}; }])(),
   X5:()=>pick([()=>{ const U=[1,2,3,4,5,6,7,8,9]; const A=U.filter(()=>Math.random()<.45), B=U.filter(()=>Math.random()<.45); const f=s=>'{'+(s.length?s.join(', '):'')+'}';
       const op=pick(['∪','∩','−']); const r= op==='∪'?U.filter(x=>A.includes(x)||B.includes(x)):op==='∩'?A.filter(x=>B.includes(x)):A.filter(x=>!B.includes(x));
       return {q:`A = ${f(A)}, B = ${f(B)}. Calcula A ${op} B`, a:r.length?f(r):'∅ (conjunto vacío)'}; },
