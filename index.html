@@ -1,0 +1,1293 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1017">
+<title>Árbol de Matemática</title>
+<script>
+if(/^https?:$/.test(location.protocol)){
+  document.write('<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">');
+  if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Árbol Ali">
+<style>
+:root{
+  --bg:#0d1017; --bg2:#151a23; --bg3:#1d2330; --line:#2a3242; --tx:#e6e8ee; --tx2:#9aa3b2; --tx3:#6b7383;
+  --ok:#4ade80; --mid:#facc15; --bad:#f87171; --acc:#7aa2ff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+#app{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto;height:calc(100vh - 44px);height:calc(100dvh - 44px - env(safe-area-inset-top))}
+#appSw{display:flex;gap:6px;padding:6px 10px;padding-top:max(6px,env(safe-area-inset-top));background:#090c12;border-bottom:1px solid var(--line);height:calc(44px + env(safe-area-inset-top))}
+#appSw button{flex:1;border:1px solid var(--line);background:var(--bg2);color:var(--tx2);border-radius:10px;font-size:14px;font-weight:700}
+#appSw button.on{background:var(--acc);border-color:var(--acc);color:#0b1020}
+#mallaFrame{display:none;width:100%;border:0;height:calc(100vh - 44px);height:calc(100dvh - 44px - env(safe-area-inset-top));background:var(--bg)}
+body.malla #app{display:none} body.malla #mallaFrame{display:block}
+/* Cabecera */
+header{display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--line)}
+#rankIcon{flex:0 0 auto;width:44px;height:50px}
+.hd-txt{min-width:0;flex:1}
+.hd-rank{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hd-rank small{font-weight:500;color:var(--tx2);font-size:12px;margin-left:4px}
+.hd-next{font-size:12.5px;color:var(--tx2);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hd-next b{color:var(--tx)}
+.hd-days{flex:0 0 auto;text-align:center;background:var(--bg3);border-radius:10px;padding:4px 8px;line-height:1.1}
+.hd-days b{display:block;font-size:18px}
+.hd-days span{font-size:10.5px;color:var(--tx2)}
+main{position:relative;overflow:hidden}
+.view{position:absolute;inset:0;overflow:auto;display:none;padding:14px 14px 30px}
+.view.active{display:block}
+#vTree{padding:0;overflow:hidden}
+/* Navegación */
+nav{display:grid;grid-template-columns:repeat(5,1fr);background:var(--bg2);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{background:none;border:0;padding:8px 2px 9px;color:var(--tx3);font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button .ic{font-size:19px;line-height:1}
+nav button.active{color:var(--tx)}
+nav button{position:relative}
+nav .badge{position:absolute;top:4px;left:calc(50% + 6px);background:#f87171;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 5px;line-height:1.3}
+.hd-days .stk{display:block;font-size:11px;color:#fbd3ab;margin-top:2px}
+nav button.active .ic{filter:drop-shadow(0 0 6px var(--acc))}
+/* Árbol */
+#tree{width:100%;height:100%;touch-action:none;display:block;user-select:none;-webkit-user-select:none;background:
+ radial-gradient(circle at 1px 1px,#1c2230 1px,transparent 1.5px) 0 0/22px 22px}
+.node{cursor:pointer;transition:opacity .2s}
+.node .box{stroke-width:2}
+.node text{pointer-events:none}
+.node .nid{font-weight:800;font-size:12px}
+.node .nwk{font-size:10.5px}
+.node .ntl{font-size:12.5px;font-weight:600}
+.st-lock .box{fill:#161a22;stroke:#4a5160}
+.st-lock text{fill:#7d8595}
+.st-avail .box{fill:#141925}
+.st-avail text{fill:#e6e8ee}
+.st-avail .nid,.st-prog .nid{fill:var(--c)}
+.st-prog .box{fill:#141925;stroke-width:3}
+.st-prog .over{fill:var(--c);opacity:.22}
+.st-prog text{fill:#f2f4f8}
+.st-dom .box{fill:var(--c)}
+.st-dom text{fill:#10131a}
+.node .bar-bg{fill:#00000055}
+.node .bar{fill:var(--c)}
+.st-dom .bar{fill:#10131a;opacity:.45}
+.node.dim{opacity:.18}
+.node.sel .box{stroke:#fff;stroke-width:3.5}
+.node.hl .box{filter:drop-shadow(0 0 6px var(--c))}
+.edge{fill:none;stroke:#465064;stroke-width:1.6;transition:opacity .2s}
+.edge.dash{stroke-dasharray:6 5}
+.edge.dim{opacity:.12}
+.edge.hl{stroke:#e8ecf5;stroke-width:2.4}
+.edge.path{stroke:#facc15;stroke-width:2.6}
+.now-ring{fill:none;stroke:#fff;stroke-width:2;stroke-dasharray:4 4;opacity:.8;animation:spin 6s linear infinite}
+@keyframes spin{to{stroke-dashoffset:-80}}
+.now-tag{font-size:10.5px;font-weight:700;fill:#fff}
+.side-lbl{font-size:12px;font-weight:700;letter-spacing:.06em;fill:#4ade80;opacity:.8}
+.lvl-lbl{font-size:12px;font-weight:700;letter-spacing:.06em;opacity:.75}
+.tb{position:absolute;display:flex;gap:6px;flex-wrap:wrap}
+.tb-top{top:10px;left:10px;right:10px}
+@media (max-width:600px){.tb-top .chip{flex:1 1 0;line-height:1.2;font-size:12px;padding:6px 8px}}
+.chip{border:1px solid var(--line);background:#151a23e6;backdrop-filter:blur(4px);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--tx)}
+.chip.on{background:#facc15;color:#111;border-color:#facc15;font-weight:700}
+.tb-zoom{right:10px;bottom:12px;flex-direction:column}
+.zbtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:#151a23e6;font-size:20px;color:var(--tx)}
+.legend{position:absolute;left:10px;bottom:12px;background:#151a23e6;border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:11px;color:var(--tx2);display:grid;grid-template-columns:auto auto;gap:3px 10px}
+.legend.min{grid-template-columns:auto}.legend.min div{display:none}.legend.min::before{content:'Leyenda ▸'}
+@media (max-width:600px){.legend{font-size:10px}}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:2px solid #7aa2ff}
+.banner{flex:1 0 100%;background:#2a2410f2;border:1px solid #facc1580;color:#fde68a;border-radius:12px;padding:9px 12px;font-size:13px;display:none}
+.banner.show{display:block}
+/* Panel de nodo */
+#panel{position:absolute;left:0;right:0;bottom:0;max-height:74%;overflow:auto;background:var(--bg2);border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -10px 30px #0008;transform:translateY(105%);transition:transform .25s ease;padding:0 16px 20px;z-index:5;overscroll-behavior:contain}
+#panel.open{transform:none}
+.grab{position:sticky;top:0;background:var(--bg2);padding:10px 0 8px;z-index:2;display:flex;align-items:flex-start;gap:10px}
+.grab::before{content:"";position:absolute;left:50%;top:5px;width:40px;height:4px;border-radius:2px;background:#3a4252;transform:translateX(-50%)}
+.p-id{font-weight:800;font-size:13px;padding:3px 8px;border-radius:8px;color:#111;margin-top:9px}
+.p-title{flex:1;margin-top:6px}
+.p-title h2{margin:0;font-size:17px;line-height:1.25}
+.p-title div{font-size:12.5px;color:var(--tx2)}
+.xbtn{background:var(--bg3);border:0;border-radius:10px;width:36px;height:36px;font-size:18px;margin-top:6px;flex:0 0 auto}
+.sec{margin-top:12px}
+.sec h3{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.nchip{border:1px solid var(--line);background:var(--bg3);border-radius:8px;padding:5px 9px;font-size:13px}
+.nchip b{color:var(--c)}
+.nchip.done{background:color-mix(in srgb,var(--c) 25%,var(--bg3))}
+.nchip.done::after{content:" ✓";color:var(--ok)}
+.muted{color:var(--tx3);font-size:13px}
+.warn{background:#2b1d10;border:1px solid #f4a26166;color:#fbd3ab;border-radius:10px;padding:8px 10px;font-size:13px;margin-top:10px}
+.goal{background:var(--bg3);border-radius:10px;padding:9px 11px;font-size:14px}
+.counter{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.counter button{background:var(--bg3);border:1px solid var(--line);border-radius:10px;min-width:44px;height:40px;font-size:16px;font-weight:700}
+.counter input[type=number]{width:72px;height:40px;text-align:center;font-size:17px;font-weight:700}
+.counter .of{color:var(--tx2);font-size:15px}
+input[type=number],input[type=text],input[type=date],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;min-height:40px}
+input[type=date]{color-scheme:dark}
+textarea{min-height:80px;resize:vertical}
+.row{display:flex;gap:10px}
+.row>*{flex:1;min-width:0}
+label.f{display:block;font-size:12px;color:var(--tx2);margin-bottom:4px}
+.pbar{height:9px;background:var(--bg3);border-radius:6px;overflow:hidden;margin-top:6px}
+.pbar>i{display:block;height:100%;background:var(--c,var(--acc));border-radius:6px;transition:width .3s}
+.stbtn{width:100%;margin-top:14px;padding:13px;border-radius:12px;border:0;font-weight:800;font-size:15px;color:#111}
+.stnow{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--bg3)}
+.btn{background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:14px}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#0b1020;font-weight:700}
+.btn.danger{background:#3a1518;border-color:#f8717166;color:#fecaca}
+.btn.sm{padding:6px 10px;font-size:13px}
+/* Tarjetas */
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.card h2{margin:0 0 8px;font-size:16px}
+.big{font-size:28px;font-weight:800;line-height:1.1}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--bg3);border-radius:12px;padding:10px}
+.stat span{display:block;font-size:12px;color:var(--tx2)}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12.5px;font-weight:700}
+.pill.ok{background:#14361f;color:#86efac}.pill.mid{background:#3a2f0b;color:#fde68a}.pill.bad{background:#3a1518;color:#fecaca}.pill.info{background:#172443;color:#bfd0ff}
+.ph-row{margin:9px 0}
+.ph-row .t{display:flex;justify-content:space-between;font-size:13.5px}
+.ph-row .t span{color:var(--tx2)}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--line);font-size:13.5px}
+.tl li.cur{background:#1a2338;border-radius:10px;border-bottom-color:transparent}
+.tl .wk{font-weight:800;color:var(--tx2);font-size:12px;text-align:center}
+.tl .d{font-size:11.5px;color:var(--tx3)}
+.tl .rv{color:var(--tx2);font-style:italic}
+.ev{border-left:4px solid var(--line)}
+.ev.next{border-left-color:var(--acc)}
+.ev .meta{font-size:12.5px;color:var(--tx2)}
+.ev .inp{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.ev .inp input[type=number]{width:76px;text-align:center}
+.ev .res{margin-top:9px;font-size:13.5px}
+.rule{font-size:13px;color:var(--tx2)}
+.rule li{margin:3px 0}
+.nlist{display:flex;flex-direction:column;gap:6px}
+.nitem{display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:10px;padding:8px 10px}
+.nitem .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.nitem .tx{flex:1;min-width:0;font-size:13.5px}
+.nitem .tx small{display:block;color:var(--tx3);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ranks{display:flex;flex-direction:column;gap:8px}
+.rk{display:flex;gap:10px;align-items:center;font-size:13.5px}
+.rk svg{flex:0 0 auto}
+.rk.lock{opacity:.4}
+.rk small{display:block;color:var(--tx2);font-size:12px}
+/* Modal */
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;justify-content:center;z-index:20}
+.modal.show{display:flex}
+.mbox{background:var(--bg2);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:560px;max-height:92dvh;overflow:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.mbox h2{margin:0 0 10px;font-size:18px}
+.mbox .fld{margin-bottom:11px}
+.reqbox{display:flex;flex-wrap:wrap;gap:6px}
+.reqbox label{display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:13px}
+.reqbox label.no{opacity:.35}
+.reqbox input{width:auto;min-height:0;margin:0}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px}
+.chk input{width:20px;height:20px;min-height:0}
+.mact{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.err{color:#fca5a5;font-size:13px;min-height:1em}
+#exam{position:fixed;inset:0;background:var(--bg);z-index:18;overflow:auto;display:none;padding:12px 14px calc(30px + env(safe-area-inset-bottom));padding-top:max(12px,env(safe-area-inset-top))}
+#exam.show{display:block}
+.ex-wrap{max-width:700px;margin:0 auto}
+.ex-top{display:flex;gap:10px;align-items:center;justify-content:space-between;position:sticky;top:-12px;background:var(--bg);padding:8px 0;z-index:2;border-bottom:1px solid var(--line)}
+.ex-clock{font-variant-numeric:tabular-nums;font-size:24px;font-weight:800;background:var(--bg3);border-radius:10px;padding:4px 10px;flex:0 0 auto}
+.ex-clock.low{color:#fca5a5}
+.ex-list{padding-left:22px}.ex-list li{margin:12px 0;font-size:16px}
+.ex-mk{display:flex;gap:8px;margin-top:6px}
+.pomo{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--bg3);border-radius:12px;padding:10px;margin-top:10px}
+.pomo .ex-clock{font-size:20px;background:var(--bg)}
+.tips{margin-top:10px;font-size:13.5px}.tips summary{cursor:pointer;color:var(--tx2)}.tips li{margin:5px 0}
+a{color:#9ab8ff}
+#toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);background:#e6e8ee;color:#111;padding:9px 14px;border-radius:10px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+@media (min-width:900px){
+  #panel{left:auto;top:0;width:400px;max-height:none;border-radius:18px 0 0 18px;border-left:1px solid var(--line);transform:translateX(105%)}
+  #panel.open{transform:none}
+  .grab::before{display:none}
+  .view:not(#vTree)>.wrap{max-width:760px;margin:0 auto}
+  .modal{align-items:center}.mbox{border-radius:18px}
+}
+</style>
+</head>
+<body>
+<div id="appSw"><button class="on" data-app="mat">🧮 Matemática</button><button data-app="malla">🎓 Malla</button></div>
+<iframe id="mallaFrame" title="Malla de la carrera"></iframe>
+<div id="app">
+  <header>
+    <svg id="rankIcon" viewBox="0 0 44 50" aria-hidden="true"></svg>
+    <div class="hd-txt">
+      <div class="hd-rank" id="hdRank"></div>
+      <div class="hd-next" id="hdNext"></div>
+    </div>
+    <div class="hd-days" id="hdDays"></div>
+  </header>
+  <main>
+    <section class="view active" id="vTree">
+      <svg id="tree"><defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#465064"/></marker>
+        <marker id="arH" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#e8ecf5"/></marker>
+        <marker id="arP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#facc15"/></marker>
+      </defs><g id="world"></g></svg>
+      <div class="tb tb-top">
+        <button class="chip" data-path="U1">Camino a Matemática para Ingenieros I</button>
+        <button class="chip" data-path="U2">Camino a Matemática para Ingenieros II</button>
+        <div class="banner" id="banner"></div>
+      </div>
+      <div class="legend" id="legend" title="Toca para ocultar">
+        <div><i style="border-color:#4a5160;background:#161a22"></i>Bloqueado</div>
+        <div><i style="background:#141925"></i>Disponible</div>
+        <div><i style="background:#2a3a66;border-width:3px"></i>En progreso</div>
+        <div><i style="background:#7aa2ff"></i>Dominado</div>
+      </div>
+      <div class="tb tb-zoom">
+        <button class="zbtn" id="zIn" aria-label="Acercar">+</button>
+        <button class="zbtn" id="zOut" aria-label="Alejar">−</button>
+        <button class="zbtn" id="zFit" aria-label="Centrar" style="font-size:16px">⌖</button>
+      </div>
+      <aside id="panel" aria-live="polite"></aside>
+    </section>
+    <section class="view" id="vProg"><div class="wrap" id="progWrap"></div></section>
+    <section class="view" id="vStudy"><div class="wrap" id="studyWrap"></div></section>
+    <section class="view" id="vEval"><div class="wrap" id="evalWrap"></div></section>
+    <section class="view" id="vEdit"><div class="wrap" id="editWrap"></div></section>
+  </main>
+  <nav>
+    <button data-v="vTree" class="active"><span class="ic">🌳</span>Árbol</button>
+    <button data-v="vProg"><span class="ic">📈</span>Progreso</button>
+    <button data-v="vStudy"><span class="ic">🔥</span>Estudio<span class="badge" id="dueBadge" hidden></span></button>
+    <button data-v="vEval"><span class="ic">📝</span>Pruebas</button>
+    <button data-v="vEdit"><span class="ic">⚙️</span>Editar</button>
+  </nav>
+</div>
+<div id="exam" role="dialog" aria-label="Modo examen"></div>
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+<div id="toast"></div>
+<script type="text/plain" id="mallaSrc">
+PCFkb2N0eXBlIGh0bWw+CjxodG1sIGxhbmc9ImVzIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9InV0Zi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLCB2aWV3cG9ydC1maXQ9Y292ZXIiPgo8bWV0YSBuYW1lPSJ0aGVtZS1jb2xvciIgY29udGVudD0iIzBkMTAxNyI+Cjx0aXRsZT7DgXJib2wgZGUgbGEgTWFsbGE8L3RpdGxlPgo8c3R5bGU+Cjpyb290ewogIC0tYmc6IzBkMTAxNzsgLS1iZzI6IzE1MWEyMzsgLS1iZzM6IzFkMjMzMDsgLS1saW5lOiMyYTMyNDI7IC0tdHg6I2U2ZThlZTsgLS10eDI6IzlhYTNiMjsgLS10eDM6IzZiNzM4MzsKICAtLW9rOiM0YWRlODA7IC0tbWlkOiNmYWNjMTU7IC0tYmFkOiNmODcxNzE7IC0tYWNjOiM3YWEyZmY7Cn0KKntib3gtc2l6aW5nOmJvcmRlci1ib3g7LXdlYmtpdC10YXAtaGlnaGxpZ2h0LWNvbG9yOnRyYW5zcGFyZW50fQpodG1sLGJvZHl7bWFyZ2luOjA7aGVpZ2h0OjEwMCU7YmFja2dyb3VuZDp2YXIoLS1iZyk7Y29sb3I6dmFyKC0tdHgpO2ZvbnQ6MTVweC8xLjQgc3lzdGVtLXVpLC1hcHBsZS1zeXN0ZW0sIlNlZ29lIFVJIixSb2JvdG8sc2Fucy1zZXJpZn0KYnV0dG9uLGlucHV0LHNlbGVjdCx0ZXh0YXJlYXtmb250OmluaGVyaXQ7Y29sb3I6aW5oZXJpdH0KYnV0dG9ue2N1cnNvcjpwb2ludGVyfQphe2NvbG9yOnZhcigtLWFjYyl9CiNhcHB7ZGlzcGxheTpncmlkO2dyaWQtdGVtcGxhdGUtY29sdW1uczptaW5tYXgoMCwxZnIpO2dyaWQtdGVtcGxhdGUtcm93czphdXRvIDFmciBhdXRvO2hlaWdodDoxMDB2aDtoZWlnaHQ6MTAwZHZofQpoZWFkZXJ7ZGlzcGxheTpmbGV4O2dhcDoxMHB4O2FsaWduLWl0ZW1zOmNlbnRlcjtwYWRkaW5nOjhweCAxMnB4O3BhZGRpbmctdG9wOm1heCg4cHgsZW52KHNhZmUtYXJlYS1pbnNldC10b3ApKTtiYWNrZ3JvdW5kOnZhcigtLWJnMik7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgdmFyKC0tbGluZSl9Ci5oZC10eHR7bWluLXdpZHRoOjA7ZmxleDoxfQouaGQtdHtmb250LXdlaWdodDo3MDA7Zm9udC1zaXplOjE1cHg7d2hpdGUtc3BhY2U6bm93cmFwO292ZXJmbG93OmhpZGRlbjt0ZXh0LW92ZXJmbG93OmVsbGlwc2lzfQouaGQtc3tmb250LXNpemU6MTIuNXB4O2NvbG9yOnZhcigtLXR4Mik7bGluZS1oZWlnaHQ6MS4zO2Rpc3BsYXk6LXdlYmtpdC1ib3g7LXdlYmtpdC1saW5lLWNsYW1wOjI7LXdlYmtpdC1ib3gtb3JpZW50OnZlcnRpY2FsO292ZXJmbG93OmhpZGRlbn0KLmhkLXMgYntjb2xvcjp2YXIoLS10eCl9Ci5oZC1kYXlze2ZsZXg6MCAwIGF1dG87dGV4dC1hbGlnbjpjZW50ZXI7YmFja2dyb3VuZDp2YXIoLS1iZzMpO2JvcmRlci1yYWRpdXM6MTBweDtwYWRkaW5nOjRweCA4cHg7bGluZS1oZWlnaHQ6MS4xfQouaGQtZGF5cyBie2Rpc3BsYXk6YmxvY2s7Zm9udC1zaXplOjE4cHh9Ci5oZC1kYXlzIHNwYW57Zm9udC1zaXplOjEwLjVweDtjb2xvcjp2YXIoLS10eDIpfQoucmluZ3tmbGV4OjAgMCBhdXRvO3dpZHRoOjQ2cHg7aGVpZ2h0OjQ2cHh9Cm1haW57cG9zaXRpb246cmVsYXRpdmU7b3ZlcmZsb3c6aGlkZGVufQoudmlld3twb3NpdGlvbjphYnNvbHV0ZTtpbnNldDowO292ZXJmbG93OmF1dG87ZGlzcGxheTpub25lO3BhZGRpbmc6MTRweCAxNHB4IDMwcHh9Ci52aWV3LmFjdGl2ZXtkaXNwbGF5OmJsb2NrfQojdlRyZWV7cGFkZGluZzowO292ZXJmbG93OmhpZGRlbn0KbmF2e2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDQsMWZyKTtiYWNrZ3JvdW5kOnZhcigtLWJnMik7Ym9yZGVyLXRvcDoxcHggc29saWQgdmFyKC0tbGluZSk7cGFkZGluZy1ib3R0b206ZW52KHNhZmUtYXJlYS1pbnNldC1ib3R0b20pfQpuYXYgYnV0dG9ue2JhY2tncm91bmQ6bm9uZTtib3JkZXI6MDtwYWRkaW5nOjhweCAycHggOXB4O2NvbG9yOnZhcigtLXR4Myk7Zm9udC1zaXplOjExLjVweDtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6MnB4fQpuYXYgYnV0dG9uIC5pY3tmb250LXNpemU6MTlweDtsaW5lLWhlaWdodDoxfQpuYXYgYnV0dG9uLmFjdGl2ZXtjb2xvcjp2YXIoLS10eCl9Cm5hdiBidXR0b24uYWN0aXZlIC5pY3tmaWx0ZXI6ZHJvcC1zaGFkb3coMCAwIDZweCB2YXIoLS1hY2MpKX0KI3RyZWV7d2lkdGg6MTAwJTtoZWlnaHQ6MTAwJTt0b3VjaC1hY3Rpb246bm9uZTtkaXNwbGF5OmJsb2NrO3VzZXItc2VsZWN0Om5vbmU7LXdlYmtpdC11c2VyLXNlbGVjdDpub25lO2JhY2tncm91bmQ6cmFkaWFsLWdyYWRpZW50KGNpcmNsZSBhdCAxcHggMXB4LCMxYzIyMzAgMXB4LHRyYW5zcGFyZW50IDEuNXB4KSAwIDAvMjJweCAyMnB4fQoubm9kZXtjdXJzb3I6cG9pbnRlcjt0cmFuc2l0aW9uOm9wYWNpdHkgLjJzfQoubm9kZSAuYm94e3N0cm9rZS13aWR0aDoyfQoubm9kZSB0ZXh0e3BvaW50ZXItZXZlbnRzOm5vbmV9Ci5ub2RlIC5uaWR7Zm9udC13ZWlnaHQ6ODAwO2ZvbnQtc2l6ZToxMC41cHh9Ci5ub2RlIC5udGx7Zm9udC1zaXplOjEycHg7Zm9udC13ZWlnaHQ6NjAwfQouc3QtbG9jayAuYm94e2ZpbGw6IzE2MWEyMjtzdHJva2U6IzRhNTE2MH0KLnN0LWxvY2sgdGV4dHtmaWxsOiM3ZDg1OTV9Ci5zdC1hdmFpbCAuYm94e2ZpbGw6IzE0MTkyNX0KLnN0LWF2YWlsIHRleHR7ZmlsbDojZTZlOGVlfQouc3QtYXZhaWwgLm5pZCwuc3QtcHJlcCAubmlkLC5zdC1jdXIgLm5pZHtmaWxsOnZhcigtLWMpfQouc3QtcHJlcCAuYm94e2ZpbGw6IzE0MTkyNTtzdHJva2UtZGFzaGFycmF5OjUgM30KLnN0LXByZXAgdGV4dHtmaWxsOiNmMmY0Zjh9Ci5zdC1jdXIgLmJveHtmaWxsOiMxNDE5MjU7c3Ryb2tlLXdpZHRoOjMuNX0KLnN0LWN1ciAub3ZlcntmaWxsOnZhcigtLWMpO29wYWNpdHk6LjIyfQouc3QtY3VyIHRleHR7ZmlsbDojZjJmNGY4fQouc3QtZG9tIC5ib3h7ZmlsbDp2YXIoLS1jKX0KLnN0LWRvbSB0ZXh0e2ZpbGw6IzEwMTMxYX0KLm5vZGUgLmJhci1iZ3tmaWxsOiMwMDAwMDA1NX0KLm5vZGUgLmJhcntmaWxsOnZhcigtLWMpfQouc3QtZG9tIC5iYXJ7ZmlsbDojMTAxMzFhO29wYWNpdHk6LjQ1fQoubm9kZS5kaW17b3BhY2l0eTouMTh9Ci5ub2RlLnNlbCAuYm94e3N0cm9rZTojZmZmO3N0cm9rZS13aWR0aDozLjV9Ci5ub2RlLmhsIC5ib3h7ZmlsdGVyOmRyb3Atc2hhZG93KDAgMCA2cHggdmFyKC0tYykpfQouZWRnZXtmaWxsOm5vbmU7c3Ryb2tlOiM0NjUwNjQ7c3Ryb2tlLXdpZHRoOjEuNTtvcGFjaXR5Oi41NTt0cmFuc2l0aW9uOm9wYWNpdHkgLjJzfQouZWRnZS5kaW17b3BhY2l0eTouMDZ9Ci5lZGdlLmhse3N0cm9rZTojZThlY2Y1O3N0cm9rZS13aWR0aDoyLjQ7b3BhY2l0eToxfQoubHZsLWxibHtmb250LXNpemU6MTNweDtmb250LXdlaWdodDo4MDA7ZmlsbDojN2FhMmZmO29wYWNpdHk6Ljh9Ci5sdmwtc3Vie2ZvbnQtc2l6ZToxMHB4O2ZpbGw6IzZiNzM4M30KLnJvdy1saW5le3N0cm9rZTojMjMyYTM4O3N0cm9rZS13aWR0aDoxfQoudGJ7cG9zaXRpb246YWJzb2x1dGU7ZGlzcGxheTpmbGV4O2dhcDo2cHg7ZmxleC13cmFwOndyYXB9Ci50Yi10b3B7dG9wOjEwcHg7bGVmdDoxMHB4O3JpZ2h0OjEwcHh9Ci5jaGlwe2JvcmRlcjoxcHggc29saWQgdmFyKC0tbGluZSk7YmFja2dyb3VuZDojMTUxYTIzZTY7YmFja2Ryb3AtZmlsdGVyOmJsdXIoNHB4KTtib3JkZXItcmFkaXVzOjk5OXB4O3BhZGRpbmc6N3B4IDEycHg7Zm9udC1zaXplOjEzcHg7Y29sb3I6dmFyKC0tdHgpfQouY2hpcC5vbntiYWNrZ3JvdW5kOiNmYWNjMTU7Y29sb3I6IzExMTtib3JkZXItY29sb3I6I2ZhY2MxNTtmb250LXdlaWdodDo3MDB9Ci50Yi16b29te3JpZ2h0OjEwcHg7Ym90dG9tOjEycHg7ZmxleC1kaXJlY3Rpb246Y29sdW1ufQouemJ0bnt3aWR0aDo0MnB4O2hlaWdodDo0MnB4O2JvcmRlci1yYWRpdXM6MTJweDtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWxpbmUpO2JhY2tncm91bmQ6IzE1MWEyM2U2O2ZvbnQtc2l6ZToyMHB4O2NvbG9yOnZhcigtLXR4KX0KLmxlZ2VuZHtwb3NpdGlvbjphYnNvbHV0ZTtsZWZ0OjEwcHg7Ym90dG9tOjEycHg7YmFja2dyb3VuZDojMTUxYTIzZTY7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtib3JkZXItcmFkaXVzOjEwcHg7cGFkZGluZzo2cHggOXB4O2ZvbnQtc2l6ZToxMXB4O2NvbG9yOnZhcigtLXR4Mik7ZGlzcGxheTpncmlkO2dyaWQtdGVtcGxhdGUtY29sdW1uczphdXRvIGF1dG87Z2FwOjNweCAxMHB4O2N1cnNvcjpwb2ludGVyfQoubGVnZW5kLm1pbntncmlkLXRlbXBsYXRlLWNvbHVtbnM6YXV0b30ubGVnZW5kLm1pbiBkaXZ7ZGlzcGxheTpub25lfS5sZWdlbmQubWluOjpiZWZvcmV7Y29udGVudDonTGV5ZW5kYSDilrgnfQpAbWVkaWEgKG1heC13aWR0aDo2MDBweCl7LmxlZ2VuZHtmb250LXNpemU6MTBweH19Ci5sZWdlbmQgaXtkaXNwbGF5OmlubGluZS1ibG9jazt3aWR0aDoxMXB4O2hlaWdodDoxMXB4O2JvcmRlci1yYWRpdXM6M3B4O21hcmdpbi1yaWdodDo1cHg7dmVydGljYWwtYWxpZ246LTFweH0KI3BhbmVse3Bvc2l0aW9uOmFic29sdXRlO2xlZnQ6MDtyaWdodDowO2JvdHRvbTowO21heC1oZWlnaHQ6NzAlO292ZXJmbG93OmF1dG87YmFja2dyb3VuZDp2YXIoLS1iZzIpO2JvcmRlci10b3A6MXB4IHNvbGlkIHZhcigtLWxpbmUpO2JvcmRlci1yYWRpdXM6MThweCAxOHB4IDAgMDtib3gtc2hhZG93OjAgLTEwcHggMzBweCAjMDAwODt0cmFuc2Zvcm06dHJhbnNsYXRlWSgxMDUlKTt0cmFuc2l0aW9uOnRyYW5zZm9ybSAuMjVzIGVhc2U7cGFkZGluZzowIDE2cHggMjRweDt6LWluZGV4OjU7b3ZlcnNjcm9sbC1iZWhhdmlvcjpjb250YWlufQojcGFuZWwub3Blbnt0cmFuc2Zvcm06bm9uZX0KQG1lZGlhIChtaW4td2lkdGg6OTAwcHgpeyNwYW5lbHtsZWZ0OmF1dG87d2lkdGg6NDQwcHg7dG9wOjA7bWF4LWhlaWdodDpub25lO2JvcmRlci1yYWRpdXM6MDtib3JkZXItbGVmdDoxcHggc29saWQgdmFyKC0tbGluZSk7dHJhbnNmb3JtOnRyYW5zbGF0ZVgoMTA1JSl9fQouZ3JhYntwb3NpdGlvbjpzdGlja3k7dG9wOjA7YmFja2dyb3VuZDp2YXIoLS1iZzIpO3BhZGRpbmc6MTJweCAwIDhweDt6LWluZGV4OjI7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmZsZXgtc3RhcnQ7Z2FwOjEwcHh9Ci5ncmFiOjpiZWZvcmV7Y29udGVudDoiIjtwb3NpdGlvbjphYnNvbHV0ZTtsZWZ0OjUwJTt0b3A6NXB4O3dpZHRoOjQwcHg7aGVpZ2h0OjRweDtib3JkZXItcmFkaXVzOjJweDtiYWNrZ3JvdW5kOiMzYTQyNTI7dHJhbnNmb3JtOnRyYW5zbGF0ZVgoLTUwJSl9Ci5wLWlke2ZvbnQtd2VpZ2h0OjgwMDtmb250LXNpemU6MTJweDtwYWRkaW5nOjNweCA4cHg7Ym9yZGVyLXJhZGl1czo4cHg7Y29sb3I6IzExMTttYXJnaW4tdG9wOjdweDt3aGl0ZS1zcGFjZTpub3dyYXB9Ci5wLXRpdGxle2ZsZXg6MTttYXJnaW4tdG9wOjRweH0KLnAtdGl0bGUgaDJ7bWFyZ2luOjA7Zm9udC1zaXplOjE3cHg7bGluZS1oZWlnaHQ6MS4yNX0KLnAtdGl0bGUgZGl2e2ZvbnQtc2l6ZToxMi41cHg7Y29sb3I6dmFyKC0tdHgyKX0KLnhidG57YmFja2dyb3VuZDp2YXIoLS1iZzMpO2JvcmRlcjowO2JvcmRlci1yYWRpdXM6MTBweDt3aWR0aDozNnB4O2hlaWdodDozNnB4O2ZvbnQtc2l6ZToxOHB4O2ZsZXg6MCAwIGF1dG99Ci5zZWN7bWFyZ2luLXRvcDoxNHB4fQouc2VjIGgze21hcmdpbjowIDAgNnB4O2ZvbnQtc2l6ZToxMnB4O2xldHRlci1zcGFjaW5nOi4wNmVtO3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtjb2xvcjp2YXIoLS10eDIpfQouc2VjIGgzIGVte2ZvbnQtc3R5bGU6bm9ybWFsO3RleHQtdHJhbnNmb3JtOm5vbmU7bGV0dGVyLXNwYWNpbmc6MDtjb2xvcjp2YXIoLS1taWQpO2ZvbnQtd2VpZ2h0OjYwMDttYXJnaW4tbGVmdDo2cHh9Ci5jaGlwc3tkaXNwbGF5OmZsZXg7ZmxleC13cmFwOndyYXA7Z2FwOjZweH0KLm5jaGlwe2JvcmRlcjoxcHggc29saWQgdmFyKC0tbGluZSk7YmFja2dyb3VuZDp2YXIoLS1iZzMpO2JvcmRlci1yYWRpdXM6OTk5cHg7cGFkZGluZzo0cHggMTBweDtmb250LXNpemU6MTIuNXB4fQoubmNoaXAgYntjb2xvcjp2YXIoLS1jKX0KLm5jaGlwLm9re2JvcmRlci1jb2xvcjojNGFkZTgwODB9Ci5uY2hpcC5vazo6YWZ0ZXJ7Y29udGVudDoiIOKckyI7Y29sb3I6dmFyKC0tb2spfQoubXV0ZWR7Y29sb3I6dmFyKC0tdHgzKTtmb250LXNpemU6MTNweH0KLmJveDJ7YmFja2dyb3VuZDp2YXIoLS1iZzMpO2JvcmRlci1yYWRpdXM6MTJweDtwYWRkaW5nOjEwcHggMTJweDtmb250LXNpemU6MTRweH0KLnRvcGlje2Rpc3BsYXk6ZmxleDtnYXA6MTBweDthbGlnbi1pdGVtczpmbGV4LXN0YXJ0O3BhZGRpbmc6N3B4IDJweDtib3JkZXItYm90dG9tOjFweCBzb2xpZCAjMjIyOTM4O2ZvbnQtc2l6ZToxNHB4fQoudG9waWM6bGFzdC1jaGlsZHtib3JkZXItYm90dG9tOjB9Ci50b3BpYyBpbnB1dHt3aWR0aDoyMHB4O2hlaWdodDoyMHB4O21hcmdpbjoxcHggMCAwO2FjY2VudC1jb2xvcjp2YXIoLS1vayk7ZmxleDowIDAgYXV0b30KLnRvcGljLmRvbmUgc3Bhbntjb2xvcjp2YXIoLS10eDIpO3RleHQtZGVjb3JhdGlvbjpsaW5lLXRocm91Z2h9Ci5yZXN7ZGlzcGxheTpibG9jaztwYWRkaW5nOjdweCAwO2JvcmRlci1ib3R0b206MXB4IHNvbGlkICMyMjI5Mzg7Zm9udC1zaXplOjE0cHg7dGV4dC1kZWNvcmF0aW9uOm5vbmV9Ci5yZXM6bGFzdC1jaGlsZHtib3JkZXItYm90dG9tOjB9Ci5yZXMgc21hbGx7ZGlzcGxheTpibG9jaztjb2xvcjp2YXIoLS10eDMpO2ZvbnQtc2l6ZToxMS41cHg7b3ZlcmZsb3c6aGlkZGVuO3RleHQtb3ZlcmZsb3c6ZWxsaXBzaXM7d2hpdGUtc3BhY2U6bm93cmFwfQouc2Vne2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDQsMWZyKTtnYXA6NHB4O2JhY2tncm91bmQ6dmFyKC0tYmczKTtwYWRkaW5nOjRweDtib3JkZXItcmFkaXVzOjEycHh9Ci5zZWcgYnV0dG9ue2JvcmRlcjowO2JhY2tncm91bmQ6bm9uZTtwYWRkaW5nOjhweCAycHg7Ym9yZGVyLXJhZGl1czo5cHg7Zm9udC1zaXplOjEyLjVweDtjb2xvcjp2YXIoLS10eDIpfQouc2VnIGJ1dHRvbi5vbntiYWNrZ3JvdW5kOnZhcigtLWFjYyk7Y29sb3I6IzBkMTAxNztmb250LXdlaWdodDo3MDB9Ci5zZWcgYnV0dG9uLm9uW2RhdGEtcz1hcHJvYmFkb117YmFja2dyb3VuZDp2YXIoLS1vayl9Ci5zZWcgYnV0dG9uLm9uW2RhdGEtcz1jdXJzYW5kb117YmFja2dyb3VuZDp2YXIoLS1taWQpfQoucm93MntkaXNwbGF5OmdyaWQ7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOjFmciAxZnI7Z2FwOjEwcHh9CmxhYmVsLmZ7ZGlzcGxheTpibG9jaztmb250LXNpemU6MTJweDtjb2xvcjp2YXIoLS10eDIpfQpsYWJlbC5mIGlucHV0LGxhYmVsLmYgdGV4dGFyZWEsbGFiZWwuZiBzZWxlY3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6NHB4O2JhY2tncm91bmQ6dmFyKC0tYmczKTtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWxpbmUpO2JvcmRlci1yYWRpdXM6MTBweDtwYWRkaW5nOjlweCAxMHB4O2ZvbnQtc2l6ZToxNXB4fQp0ZXh0YXJlYXtyZXNpemU6dmVydGljYWw7bWluLWhlaWdodDo3MHB4fQoud2FybntiYWNrZ3JvdW5kOiMyYTI0MTA7Ym9yZGVyOjFweCBzb2xpZCAjZmFjYzE1NjA7Y29sb3I6I2ZkZTY4YTtib3JkZXItcmFkaXVzOjEwcHg7cGFkZGluZzo4cHggMTBweDtmb250LXNpemU6MTNweH0KLmNhcmR7YmFja2dyb3VuZDp2YXIoLS1iZzIpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tbGluZSk7Ym9yZGVyLXJhZGl1czoxNHB4O3BhZGRpbmc6MTJweCAxNHB4O21hcmdpbi1ib3R0b206MTJweH0KLmNhcmQgaDJ7bWFyZ2luOjAgMCA4cHg7Zm9udC1zaXplOjE2cHh9Ci5jYXJkIGgyIHNtYWxse2NvbG9yOnZhcigtLXR4Mik7Zm9udC13ZWlnaHQ6NTAwO2ZvbnQtc2l6ZToxMi41cHg7bWFyZ2luLWxlZnQ6NnB4fQoucGJhcntoZWlnaHQ6MTBweDtiYWNrZ3JvdW5kOnZhcigtLWJnMyk7Ym9yZGVyLXJhZGl1czo2cHg7b3ZlcmZsb3c6aGlkZGVufQoucGJhciBpe2Rpc3BsYXk6YmxvY2s7aGVpZ2h0OjEwMCU7YmFja2dyb3VuZDp2YXIoLS1jLHZhcigtLW9rKSk7Ym9yZGVyLXJhZGl1czo2cHh9Ci5wcm93e2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6MTIwcHggMWZyIDUycHg7Z2FwOjEwcHg7YWxpZ24taXRlbXM6Y2VudGVyO2ZvbnQtc2l6ZToxM3B4O21hcmdpbjo3cHggMH0KLnByb3cgc3BhbjpsYXN0LWNoaWxke3RleHQtYWxpZ246cmlnaHQ7Y29sb3I6dmFyKC0tdHgyKX0KLmJpZ3tmb250LXNpemU6MjhweDtmb250LXdlaWdodDo4MDB9Ci5jb3Vyc2V7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6MTBweDtwYWRkaW5nOjlweCA0cHg7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgIzIyMjkzODtjdXJzb3I6cG9pbnRlcn0KLmNvdXJzZTpsYXN0LWNoaWxke2JvcmRlci1ib3R0b206MH0KLmRvdHt3aWR0aDoxMnB4O2hlaWdodDoxMnB4O2JvcmRlci1yYWRpdXM6NTAlO2ZsZXg6MCAwIGF1dG87Ym9yZGVyOjJweCBzb2xpZCB2YXIoLS1jKX0KLmRvdC5me2JhY2tncm91bmQ6dmFyKC0tYyl9Ci5jb3Vyc2UgLm5te2ZsZXg6MTtmb250LXNpemU6MTRweH0KLmNvdXJzZSAubm0gc21hbGx7ZGlzcGxheTpibG9jaztjb2xvcjp2YXIoLS10eDMpO2ZvbnQtc2l6ZToxMS41cHh9Ci50YWd7Zm9udC1zaXplOjExcHg7Ym9yZGVyLXJhZGl1czo2cHg7cGFkZGluZzoycHggNnB4O2JhY2tncm91bmQ6dmFyKC0tYmczKTtjb2xvcjp2YXIoLS10eDIpO3doaXRlLXNwYWNlOm5vd3JhcH0KLnRhZy5hcHJvYmFkb3tiYWNrZ3JvdW5kOiM0YWRlODAzMDtjb2xvcjojODZlZmFjfS50YWcuY3Vyc2FuZG97YmFja2dyb3VuZDojZmFjYzE1MzA7Y29sb3I6I2ZkZTY4YX0udGFnLnByZXBhcmFuZG97YmFja2dyb3VuZDojN2FhMmZmMzA7Y29sb3I6I2JmZDBmZn0KLmJ0bntib3JkZXI6MXB4IHNvbGlkIHZhcigtLWxpbmUpO2JhY2tncm91bmQ6dmFyKC0tYmczKTtib3JkZXItcmFkaXVzOjEwcHg7cGFkZGluZzo5cHggMTRweDtmb250LXNpemU6MTRweH0KLmJ0bi5wcml7YmFja2dyb3VuZDp2YXIoLS1hY2MpO2JvcmRlci1jb2xvcjp2YXIoLS1hY2MpO2NvbG9yOiMwZDEwMTc7Zm9udC13ZWlnaHQ6NzAwfQouYnRuLmRuZ3tib3JkZXItY29sb3I6I2Y4NzE3MTgwO2NvbG9yOiNmY2E1YTV9Ci5idG5ze2Rpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6OHB4fQouZWQtcm93e2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweDtwYWRkaW5nOjhweCAwO2JvcmRlci1ib3R0b206MXB4IHNvbGlkICMyMjI5Mzg7Zm9udC1zaXplOjE0cHh9Ci5lZC1yb3cgLm5te2ZsZXg6MTttaW4td2lkdGg6MH0KLmVkLXJvdyAubm0gc21hbGx7ZGlzcGxheTpibG9jaztjb2xvcjp2YXIoLS10eDMpO2ZvbnQtc2l6ZToxMS41cHh9Ci5lZC1yb3cgYnV0dG9ue3BhZGRpbmc6NnB4IDEwcHg7Zm9udC1zaXplOjEzcHh9CiNtb2RhbHtwb3NpdGlvbjpmaXhlZDtpbnNldDowO2JhY2tncm91bmQ6IzAwMGE7ZGlzcGxheTpub25lO2FsaWduLWl0ZW1zOmZsZXgtZW5kO2p1c3RpZnktY29udGVudDpjZW50ZXI7ei1pbmRleDoyMH0KI21vZGFsLnNob3d7ZGlzcGxheTpmbGV4fQojbWJveHtiYWNrZ3JvdW5kOnZhcigtLWJnMik7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtib3JkZXItcmFkaXVzOjE4cHggMThweCAwIDA7d2lkdGg6MTAwJTttYXgtd2lkdGg6NTYwcHg7bWF4LWhlaWdodDo5MHZoO292ZXJmbG93OmF1dG87cGFkZGluZzoxNnB4IDE2cHggMjRweH0KQG1lZGlhIChtaW4td2lkdGg6NjAwcHgpeyNtb2RhbHthbGlnbi1pdGVtczpjZW50ZXJ9I21ib3h7Ym9yZGVyLXJhZGl1czoxOHB4fX0KI21ib3ggaDJ7bWFyZ2luOjAgMCAxMHB4O2ZvbnQtc2l6ZToxN3B4fQojbWJveCBsYWJlbC5me21hcmdpbi1ib3R0b206MTBweH0KI3RvYXN0e3Bvc2l0aW9uOmZpeGVkO2xlZnQ6NTAlO2JvdHRvbTo4MHB4O3RyYW5zZm9ybTp0cmFuc2xhdGVYKC01MCUpIHRyYW5zbGF0ZVkoMjBweCk7YmFja2dyb3VuZDojZTZlOGVlO2NvbG9yOiMxMTE7Ym9yZGVyLXJhZGl1czoxMHB4O3BhZGRpbmc6OXB4IDE0cHg7Zm9udC1zaXplOjE0cHg7b3BhY2l0eTowO3BvaW50ZXItZXZlbnRzOm5vbmU7dHJhbnNpdGlvbjouMjVzO3otaW5kZXg6MzB9CiN0b2FzdC5zaG93e29wYWNpdHk6MTt0cmFuc2Zvcm06dHJhbnNsYXRlWCgtNTAlKX0KLm5vdGV7Zm9udC1zaXplOjEyLjVweDtjb2xvcjp2YXIoLS10eDIpO21hcmdpbjo2cHggMCAwfQo8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5Pgo8ZGl2IGlkPSJhcHAiPgo8aGVhZGVyPgogIDxzdmcgY2xhc3M9InJpbmciIGlkPSJyaW5nIiB2aWV3Qm94PSIwIDAgNDYgNDYiPjwvc3ZnPgogIDxkaXYgY2xhc3M9ImhkLXR4dCI+CiAgICA8ZGl2IGNsYXNzPSJoZC10IiBpZD0iaGRUIj5JbmdlbmllcsOtYSBlbiBJQSB5IENpZW5jaWEgZGUgRGF0b3M8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImhkLXMiIGlkPSJoZFMiPjwvZGl2PgogIDwvZGl2PgogIDxkaXYgY2xhc3M9ImhkLWRheXMiIGlkPSJoZERheXMiPjwvZGl2Pgo8L2hlYWRlcj4KPG1haW4+CiAgPHNlY3Rpb24gY2xhc3M9InZpZXcgYWN0aXZlIiBpZD0idlRyZWUiPgogICAgPHN2ZyBpZD0idHJlZSI+PC9zdmc+CiAgICA8ZGl2IGNsYXNzPSJ0YiB0Yi10b3AiIGlkPSJ0YlRvcCI+PC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJsZWdlbmQgbWluIiBpZD0ibGVnZW5kIj48L2Rpdj4KICAgIDxkaXYgY2xhc3M9InRiIHRiLXpvb20iPgogICAgICA8YnV0dG9uIGNsYXNzPSJ6YnRuIiBpZD0iekluIiBhcmlhLWxhYmVsPSJBY2VyY2FyIj4rPC9idXR0b24+CiAgICAgIDxidXR0b24gY2xhc3M9InpidG4iIGlkPSJ6T3V0IiBhcmlhLWxhYmVsPSJBbGVqYXIiPuKIkjwvYnV0dG9uPgogICAgICA8YnV0dG9uIGNsYXNzPSJ6YnRuIiBpZD0iekZpdCIgYXJpYS1sYWJlbD0iVmVyIHRvZG8iPuKkojwvYnV0dG9uPgogICAgPC9kaXY+CiAgICA8ZGl2IGlkPSJwYW5lbCI+PC9kaXY+CiAgPC9zZWN0aW9uPgogIDxzZWN0aW9uIGNsYXNzPSJ2aWV3IiBpZD0idkN5Y2xlcyI+PC9zZWN0aW9uPgogIDxzZWN0aW9uIGNsYXNzPSJ2aWV3IiBpZD0idlByb2ciPjwvc2VjdGlvbj4KICA8c2VjdGlvbiBjbGFzcz0idmlldyIgaWQ9InZFZGl0Ij48L3NlY3Rpb24+CjwvbWFpbj4KPG5hdj4KICA8YnV0dG9uIGNsYXNzPSJhY3RpdmUiIGRhdGEtdj0idlRyZWUiPjxzcGFuIGNsYXNzPSJpYyI+8J+Mszwvc3Bhbj5NYWxsYTwvYnV0dG9uPgogIDxidXR0b24gZGF0YS12PSJ2Q3ljbGVzIj48c3BhbiBjbGFzcz0iaWMiPvCfk5o8L3NwYW4+Q2ljbG9zPC9idXR0b24+CiAgPGJ1dHRvbiBkYXRhLXY9InZQcm9nIj48c3BhbiBjbGFzcz0iaWMiPvCfk4g8L3NwYW4+UHJvZ3Jlc288L2J1dHRvbj4KICA8YnV0dG9uIGRhdGEtdj0idkVkaXQiPjxzcGFuIGNsYXNzPSJpYyI+4pyP77iPPC9zcGFuPkVkaXRhcjwvYnV0dG9uPgo8L25hdj4KPC9kaXY+CjxkaXYgaWQ9Im1vZGFsIj48ZGl2IGlkPSJtYm94Ij48L2Rpdj48L2Rpdj4KPGRpdiBpZD0idG9hc3QiPjwvZGl2Pgo8aW5wdXQgdHlwZT0iZmlsZSIgaWQ9ImZpbGVJbiIgYWNjZXB0PSJhcHBsaWNhdGlvbi9qc29uLC5qc29uIiBoaWRkZW4+CjxzY3JpcHQ+Cid1c2Ugc3RyaWN0JzsKY29uc3QgS0VZPSdhcmJvbE1hbGxhQWxpLnYxJywgTUFUSF9LRVk9J2FyYm9sTWF0ZW1hdGljYUFsaS52MSc7CmNvbnN0IFNUQVJUPW5ldyBEYXRlKDIwMjcsMiwyOSk7CmNvbnN0IEFSRUFTPXsKICBnZW46e246J0Zvcm1hY2nDs24gZ2VuZXJhbCcsYzonI2E3OGJmYSd9LAogIG1hdDp7bjonTWF0ZW3DoXRpY2EgeSBlc3RhZMOtc3RpY2EnLGM6JyM2MGE1ZmEnfSwKICBwcm9nOntuOidQcm9ncmFtYWNpw7NuIHkgYWxnb3JpdG1vcycsYzonIzRhZGU4MCd9LAogIGRhdG9zOntuOidEYXRvcyB5IGJhc2VzIGRlIGRhdG9zJyxjOicjMjJkM2VlJ30sCiAgaWE6e246J0lBIHkgbWFjaGluZSBsZWFybmluZycsYzonI2Y0NzJiNid9LAogIG5lZzp7bjonTmVnb2NpbyB5IGdlc3Rpw7NuJyxjOicjZmJiZjI0J30sCiAgaW52OntuOidJbnZlc3RpZ2FjacOzbicsYzonI2ZiOTIzYyd9LAogIGVsZWM6e246J0VsZWN0aXZvJyxjOicjOTRhM2I4J30KfTsKY29uc3QgU1RBVEVTPVtbJ3BlbmRpZW50ZScsJ1BlbmRpZW50ZSddLFsncHJlcGFyYW5kbycsJ1ByZXBhcmFuZG8nXSxbJ2N1cnNhbmRvJywnQ3Vyc2FuZG8nXSxbJ2Fwcm9iYWRvJywnQXByb2JhZG8nXV07CmNvbnN0IE1BVEhfTkFNRVM9e1QxOidGcmFjY2lvbmVzJyxUMjonRXhwb25lbnRlcyB5ICUnLFQzOidSYWRpY2FsZXMnLFQ0OidQb2xpbm9taW9zJyxUNTonRmFjdG9yaXphY2nDs24nLFQ3OidFYy4gbGluZWFsZXMnLFQ4OidGcmFjYy4gYWxnZWJyYWljYXMnLFQ5OidDdWFkcsOhdGljYScsVDEwOidTaXN0ZW1hcycsVDExOidJbmVjdWFjaW9uZXMnLFQxMjonUmVjdGEnLFQxMzonRnVuY2lvbmVzJyxUMTQ6J0NpcmN1bmYuIHkgcGFyw6Fib2xhJyxUMTU6J01hdHJpY2VzJyxUMTY6J0V4cC4geSBsb2cnLFQxNzonTMOtbWl0ZXMnLFQxODonRGVyaXZhZGFzJ307CgovLyBSZWN1cnNvcyBmcmVjdWVudGVzCmNvbnN0IFI9ewogIGNzNTBwOlsnQ1M1MFAgwrcgUHl0aG9uIChIYXJ2YXJkKScsJ2h0dHBzOi8vY3M1MC5oYXJ2YXJkLmVkdS9weXRob24vJ10sCiAgY3M1MHg6WydDUzUweCDCtyBDaWVuY2lhcyBkZSBsYSBjb21wdXRhY2nDs24gKEhhcnZhcmQpJywnaHR0cHM6Ly9jczUwLmhhcnZhcmQuZWR1L3gvJ10sCiAga2hhbjpbJ0toYW4gQWNhZGVteSBlbiBlc3Bhw7FvbCcsJ2h0dHBzOi8vZXMua2hhbmFjYWRlbXkub3JnL21hdGgnXSwKICBiMzpbJzNCbHVlMUJyb3duIChpbnR1aWNpw7NuIHZpc3VhbCknLCdodHRwczovL3d3dy4zYmx1ZTFicm93bi5jb20vJ10sCiAgc3RhdDpbJ1N0YXRRdWVzdCAoWW91VHViZSknLCdodHRwczovL3d3dy55b3V0dWJlLmNvbS9Ac3RhdHF1ZXN0J10sCiAga2FnZ2xlOlsnS2FnZ2xlIExlYXJuIChjdXJzb3MgY29ydG9zKScsJ2h0dHBzOi8vd3d3LmthZ2dsZS5jb20vbGVhcm4nXSwKICBmYXN0OlsnZmFzdC5haSDCtyBQcmFjdGljYWwgRGVlcCBMZWFybmluZycsJ2h0dHBzOi8vY291cnNlLmZhc3QuYWkvJ10sCiAgZ21sOlsnR29vZ2xlIMK3IE1hY2hpbmUgTGVhcm5pbmcgQ3Jhc2ggQ291cnNlJywnaHR0cHM6Ly9kZXZlbG9wZXJzLmdvb2dsZS5jb20vbWFjaGluZS1sZWFybmluZy9jcmFzaC1jb3Vyc2U/aGw9ZXMtNDE5J10sCiAgaGY6WydIdWdnaW5nIEZhY2UgTGVhcm4nLCdodHRwczovL2h1Z2dpbmdmYWNlLmNvL2xlYXJuJ10sCiAgc3FsYm9sdDpbJ1NRTEJvbHQgKFNRTCBpbnRlcmFjdGl2byknLCdodHRwczovL3NxbGJvbHQuY29tLyddLAogIHBndDpbJ1Bvc3RncmVTUUwgVHV0b3JpYWwnLCdodHRwczovL3d3dy5wb3N0Z3Jlc3FsdHV0b3JpYWwuY29tLyddLAogIHI0ZHM6WydSIHBhcmEgQ2llbmNpYSBkZSBEYXRvcyAoZW4gZXNwYcOxb2wpJywnaHR0cHM6Ly9lcy5yNGRzLmhhZGxleS5uei8nXSwKICBwZHNoOlsnUHl0aG9uIERhdGEgU2NpZW5jZSBIYW5kYm9vaycsJ2h0dHBzOi8vamFrZXZkcC5naXRodWIuaW8vUHl0aG9uRGF0YVNjaWVuY2VIYW5kYm9vay8nXSwKICBtaXQxODA2OlsnTUlUIDE4LjA2IMOBbGdlYnJhIGxpbmVhbCAoT0NXKScsJ2h0dHBzOi8vb2N3Lm1pdC5lZHUvY291cnNlcy8xOC0wNi1saW5lYXItYWxnZWJyYS1zcHJpbmctMjAxMC8nXSwKICB2aXN1YWxnbzpbJ1Zpc3VBbGdvIChhbGdvcml0bW9zIGFuaW1hZG9zKScsJ2h0dHBzOi8vdmlzdWFsZ28ubmV0L2VzJ10sCiAgbWlzc2luZzpbJ1RoZSBNaXNzaW5nIFNlbWVzdGVyIChNSVQpOiB0ZXJtaW5hbCB5IEdpdCcsJ2h0dHBzOi8vbWlzc2luZy5jc2FpbC5taXQuZWR1LyddLAogIGVvYWk6WydFbGVtZW50cyBvZiBBSSAoZ3JhdGlzLCBlbiBlc3Bhw7FvbCknLCdodHRwczovL3d3dy5lbGVtZW50c29mYWkuY29tLyddLAogIHNjcnVtOlsnTGEgR3XDrWEgZGUgU2NydW0nLCdodHRwczovL3NjcnVtZ3VpZGVzLm9yZy8nXSwKICBhdGw6WydBdGxhc3NpYW4gwrcgR3XDrWEgw6FnaWwnLCdodHRwczovL3d3dy5hdGxhc3NpYW4uY29tL2VzL2FnaWxlJ10sCiAgbXNsZWFybjpbJ01pY3Jvc29mdCBMZWFybicsJ2h0dHBzOi8vbGVhcm4ubWljcm9zb2Z0LmNvbS9lcy1lcy90cmFpbmluZy8nXSwKICBwYmk6WydNaWNyb3NvZnQgTGVhcm4gwrcgUG93ZXIgQkknLCdodHRwczovL2xlYXJuLm1pY3Jvc29mdC5jb20vZXMtZXMvdHJhaW5pbmcvcG93ZXJwbGF0Zm9ybS9wb3dlci1iaSddLAogIGdjc2I6WydHb29nbGUgQ2xvdWQgU2tpbGxzIEJvb3N0JywnaHR0cHM6Ly93d3cuY2xvdWRza2lsbHNib29zdC5nb29nbGUvJ10sCiAgZGV6OlsnRGF0YSBFbmdpbmVlcmluZyBab29tY2FtcCcsJ2h0dHBzOi8vZ2l0aHViLmNvbS9EYXRhVGFsa3NDbHViL2RhdGEtZW5naW5lZXJpbmctem9vbWNhbXAnXSwKICBtbHo6WydNTE9wcyBab29tY2FtcCcsJ2h0dHBzOi8vZ2l0aHViLmNvbS9EYXRhVGFsa3NDbHViL21sb3BzLXpvb21jYW1wJ10sCiAgbXdtbDpbJ01hZGUgV2l0aCBNTCAoTUxPcHMpJywnaHR0cHM6Ly9tYWRld2l0aG1sLmNvbS8nXSwKICBjczIzMW46WydTdGFuZm9yZCBDUzIzMW4gwrcgVmlzacOzbicsJ2h0dHBzOi8vY3MyMzFuLnN0YW5mb3JkLmVkdS8nXSwKICBjczIyNG46WydTdGFuZm9yZCBDUzIyNG4gwrcgTkxQJywnaHR0cHM6Ly93ZWIuc3RhbmZvcmQuZWR1L2NsYXNzL2NzMjI0bi8nXSwKICBkMmw6WydEaXZlIGludG8gRGVlcCBMZWFybmluZyAobGlicm8pJywnaHR0cHM6Ly9kMmwuYWkvJ10sCiAgc2s6WydzY2lraXQtbGVhcm4gwrcgZ3XDrWEgZGUgdXN1YXJpbycsJ2h0dHBzOi8vc2Npa2l0LWxlYXJuLm9yZy9zdGFibGUvdXNlcl9ndWlkZS5odG1sJ10sCiAgcHQ6WydQeVRvcmNoIMK3IHR1dG9yaWFsZXMnLCdodHRwczovL3B5dG9yY2gub3JnL3R1dG9yaWFscy8nXSwKICBwYW5kYXM6WydwYW5kYXMgwrcgcHJpbWVyb3MgcGFzb3MnLCdodHRwczovL3BhbmRhcy5weWRhdGEub3JnL2RvY3MvZ2V0dGluZ19zdGFydGVkLyddLAogIHNwYXJrOlsnQXBhY2hlIFNwYXJrIMK3IGRvY3VtZW50YWNpw7NuJywnaHR0cHM6Ly9zcGFyay5hcGFjaGUub3JnL2RvY3MvbGF0ZXN0LyddLAogIG9zQ2FsYzpbJ09wZW5TdGF4IMK3IEPDoWxjdWxvIHZvbC4gMSAobGlicm8gZ3JhdGlzKScsJ2h0dHBzOi8vb3BlbnN0YXgub3JnL2RldGFpbHMvYm9va3MvY2FsY3VsdXMtdm9sdW1lLTEnXSwKICBvc1N0YXQ6WydPcGVuU3RheCDCtyBJbnRyb2R1Y3RvcnkgU3RhdGlzdGljcycsJ2h0dHBzOi8vb3BlbnN0YXgub3JnL2RldGFpbHMvYm9va3MvaW50cm9kdWN0b3J5LXN0YXRpc3RpY3MnXSwKICBvc1NjaTpbJ09wZW5TdGF4IMK3IGxpYnJvcyBkZSBjaWVuY2lhcycsJ2h0dHBzOi8vb3BlbnN0YXgub3JnL3N1YmplY3RzL3NjaWVuY2UnXSwKICBraGFuUGh5OlsnS2hhbiBBY2FkZW15IMK3IEbDrXNpY2EnLCdodHRwczovL2VzLmtoYW5hY2FkZW15Lm9yZy9zY2llbmNlL3BoeXNpY3MnXSwKICBzZWVpbmc6WydTZWVpbmcgVGhlb3J5IChwcm9iYWJpbGlkYWQgdmlzdWFsKScsJ2h0dHBzOi8vc2VlaW5nLXRoZW9yeS5icm93bi5lZHUvJ10sCiAgYXBhOlsnTm9ybWFzIEFQQSA3IChzaXRpbyBvZmljaWFsKScsJ2h0dHBzOi8vYXBhc3R5bGUuYXBhLm9yZy8nXSwKICByYWU6WydSQUUgwrcgRGljY2lvbmFyaW8geSBkdWRhcycsJ2h0dHBzOi8vd3d3LnJhZS5lcy8nXSwKICBzY2hvbGFyOlsnR29vZ2xlIEFjYWTDqW1pY28nLCdodHRwczovL3NjaG9sYXIuZ29vZ2xlLmNvbS8nXSwKICB6b3Rlcm86Wydab3Rlcm8gKGdlc3RvciBkZSByZWZlcmVuY2lhcyknLCdodHRwczovL3d3dy56b3Rlcm8ub3JnLyddLAogIGFyeGl2OlsnYXJYaXYgKHBhcGVycyBkZSBJQSknLCdodHRwczovL2FyeGl2Lm9yZy8nXSwKICBpbmVpOlsnSU5FSSAoZGF0b3MgZGVsIFBlcsO6KScsJ2h0dHBzOi8vd3d3LmluZWkuZ29iLnBlLyddLAogIGRhdG9zZ29iOlsnUGxhdGFmb3JtYSBOYWNpb25hbCBkZSBEYXRvcyBBYmllcnRvcycsJ2h0dHBzOi8vd3d3LmRhdG9zYWJpZXJ0b3MuZ29iLnBlLyddLAogIHVuZXNjbzpbJ1VORVNDTyDCtyDDiXRpY2EgZGUgbGEgSUEnLCdodHRwczovL3d3dy51bmVzY28ub3JnL2VzL2FydGlmaWNpYWwtaW50ZWxsaWdlbmNlL3JlY29tbWVuZGF0aW9uLWV0aGljcyddLAogIGRzY2hvb2w6WydTdGFuZm9yZCBkLnNjaG9vbCDCtyByZWN1cnNvcycsJ2h0dHBzOi8vZHNjaG9vbC5zdGFuZm9yZC5lZHUvcmVzb3VyY2VzJ10sCiAgdGVkOlsnVEVEIChjaGFybGFzIGVuIGVzcGHDsW9sKScsJ2h0dHBzOi8vd3d3LnRlZC5jb20vdGFsa3M/bGFuZ3VhZ2U9ZXMnXSwKICBhbmc6WydBbmRyZXcgTmcgwrcgTWFjaGluZSBMZWFybmluZyAoQ291cnNlcmEsIG1vZG8gb3llbnRlKScsJ2h0dHBzOi8vd3d3LmNvdXJzZXJhLm9yZy9zcGVjaWFsaXphdGlvbnMvbWFjaGluZS1sZWFybmluZy1pbnRyb2R1Y3Rpb24nXSwKICBkbGFpOlsnRGVlcExlYXJuaW5nLkFJIMK3IGN1cnNvcyBjb3J0b3MnLCdodHRwczovL3d3dy5kZWVwbGVhcm5pbmcuYWkvc2hvcnQtY291cnNlcy8nXSwKICBhZ2VudHM6WydIdWdnaW5nIEZhY2UgwrcgQ3Vyc28gZGUgYWdlbnRlcycsJ2h0dHBzOi8vaHVnZ2luZ2ZhY2UuY28vbGVhcm4vYWdlbnRzLWNvdXJzZSddLAogIGFudGg6WydBbnRocm9waWMgwrcgQnVpbGRpbmcgZWZmZWN0aXZlIGFnZW50cycsJ2h0dHBzOi8vd3d3LmFudGhyb3BpYy5jb20vZW5naW5lZXJpbmcvYnVpbGRpbmctZWZmZWN0aXZlLWFnZW50cyddLAogIGRhbWE6WydEQU1BIEludGVybmF0aW9uYWwgKGdvYmllcm5vIGRlIGRhdG9zKScsJ2h0dHBzOi8vd3d3LmRhbWEub3JnLyddLAogIHVuOlsnTmFjaW9uZXMgVW5pZGFzIChlc3Bhw7FvbCknLCdodHRwczovL3d3dy51bi5vcmcvZXMvJ10sCiAgYm1jOlsnQnVzaW5lc3MgTW9kZWwgQ2FudmFzIChTdHJhdGVneXplciknLCdodHRwczovL3d3dy5zdHJhdGVneXplci5jb20vbGlicmFyeS90aGUtYnVzaW5lc3MtbW9kZWwtY2FudmFzJ10KfTsKY29uc3Qgcj0oLi4uayk9PmsubWFwKHg9Pih7bjpSW3hdWzBdLHU6Ult4XVsxXX0pKTsKCi8vIGlkLCBjaWNsbywgY29sdW1uYSwgbm9tYnJlLCDDoXJlYSwgcmVxdWlzaXRvcywgdGVtYXMgZGVsIHBsYW4gZGUgbWF0ZW3DoXRpY2EsIHRlbWFzIHByb2JhYmxlcywgcXXDqSBwcmVwYXJhciwgcmVjdXJzb3MKZnVuY3Rpb24gZGVmYXVsdE5vZGVzKCl7CiAgY29uc3QgRD1bClsnQzEwMScsMSwxLCdEZXNlbXBlw7FvIFVuaXZlcnNpdGFyaW8geSBMaWRlcmF6Z28nLCdnZW4nLFtdLFtdLAogWydHZXN0acOzbiBkZWwgdGllbXBvIHBhcmEgZXN0dWRpYXIgdHJhYmFqYW5kbycsJ1TDqWNuaWNhcyBkZSBlc3R1ZGlvIChyZWN1cGVyYWNpw7NuIGFjdGl2YSwgcmVwYXNvIGVzcGFjaWFkbyknLCdVc28gZGVsIGF1bGEgdmlydHVhbCB5IHBsYXRhZm9ybWFzJywnTGlkZXJhemdvIHBlcnNvbmFsIHkgbWV0YXMgU01BUlQnLCdUcmFiYWpvIGVuIGVxdWlwbyB5IGNvbXVuaWNhY2nDs24nXSwKICdBcm1hIHR1IGhvcmFyaW8gc2VtYW5hbCByZWFsICh0cmFiYWpvICsgZXN0dWRpbykuIFBydWViYSByZWN1cGVyYWNpw7NuIGFjdGl2YSB5IHJlcGFzbyBlc3BhY2lhZG8gZHVyYW50ZSB0dSBwbGFuIGRlIG1hdGVtw6F0aWNhLicsCiByKCd0ZWQnKV0sClsnQzEwMicsMSwyLCdNYXRlbcOhdGljYSBwYXJhIEluZ2VuaWVyb3MgSScsJ21hdCcsW10sWydUMTMnLCdUMTQnLCdUMTUnLCdUMTcnLCdUMTgnXSwKIFsnTWF0cmljZXMgeSBkZXRlcm1pbmFudGVzJywnU2lzdGVtYXMgZGUgZWN1YWNpb25lcyBsaW5lYWxlcycsJ0dlb21ldHLDrWEgYW5hbMOtdGljYTogcmVjdGEsIGNpcmN1bmZlcmVuY2lhLCBwYXLDoWJvbGEnLCdGdW5jaW9uZXM6IGRvbWluaW8sIHJhbmdvIHkgZ3LDoWZpY2FzJywnTMOtbWl0ZXMgeSBjb250aW51aWRhZCcsJ0Rlcml2YWRhcyB5IHN1cyBhcGxpY2FjaW9uZXMnXSwKICdFcyBlbCBjdXJzbyBxdWUgcHJlcGFyYSB0dSBwbGFuIFQx4oCTVDE4LiBMbGVnYSBjb24gVDEzLCBUMTQsIFQxNSwgVDE3IHkgVDE4IGRvbWluYWRvcy4nLAogcigna2hhbicsJ29zQ2FsYycsJ2IzJyldLApbJ0MxMDMnLDEsMywnTVVOIFNraWxscycsJ2dlbicsW10sW10sCiBbJ09yYXRvcmlhIHkgZGlzY3Vyc28gcGVyc3Vhc2l2bycsJ05lZ29jaWFjacOzbiB5IGRpcGxvbWFjaWEnLCdEZWJhdGUgeSBhcmd1bWVudGFjacOzbicsJ0ludmVzdGlnYWNpw7NuIGRlIHRlbWFzIGdsb2JhbGVzJywnUmVkYWNjacOzbiBkZSBwb3N0dXJhcyB5IHJlc29sdWNpb25lcyddLAogJ0luZmVyaWRvOiDigJxNVU7igJ0gc3VlbGUgc2VyIE1vZGVsIFVuaXRlZCBOYXRpb25zLiBQcmFjdGljYSBoYWJsYXIgMiBtaW51dG9zIHNvYnJlIHVuIHRlbWEgeSBtaXJhIGPDs21vIHNlIGVzdHJ1Y3R1cmEgdW5hIHBvc3R1cmEgb2ZpY2lhbC4nLAogcigndW4nLCd0ZWQnKV0sClsnQzEwNCcsMSw0LCdJbnRyb2R1Y2Npw7NuIGEgbGEgSW5nZW5pZXLDrWEgZW4gSUEgeSBDaWVuY2lhIGRlIERhdG9zJywnaWEnLFtdLFsnVDInLCdUMTInXSwKIFsnUXXDqSBlcyBJQSwgTUwgeSBjaWVuY2lhIGRlIGRhdG9zJywnQ2ljbG8gZGUgdmlkYSBkZSB1biBwcm95ZWN0byBkZSBkYXRvcycsJ1RpcG9zIGRlIGRhdG9zIHkgZnVlbnRlcycsJ0Nhc29zIGRlIHVzbyBlbiBlbXByZXNhcycsJ0hlcnJhbWllbnRhczogUHl0aG9uLCBKdXB5dGVyLCBHaXQnXSwKICdIYXogbGEgcGFydGUgMSBkZSBFbGVtZW50cyBvZiBBSSB5IGNyZWEgY3VlbnRhcyBlbiBHaXRIdWIgeSBLYWdnbGUuJywKIHIoJ2VvYWknLCdrYWdnbGUnLCdtaXNzaW5nJyldLApbJ0MyMDEnLDIsMSwnQ29tdW5pY2FjacOzbiB5IFJlZGFjY2nDs24gQ2llbnTDrWZpY2EnLCdnZW4nLFsnQzEwMSddLFtdLAogWydFc3RydWN0dXJhIGRlbCB0ZXh0byBhY2Fkw6ltaWNvJywnUMOhcnJhZm8sIGNvaGVzacOzbiB5IGNvaGVyZW5jaWEnLCdDaXRhcyB5IHJlZmVyZW5jaWFzIEFQQSA3JywnQsO6c3F1ZWRhIGRlIGZ1ZW50ZXMgY29uZmlhYmxlcycsJ1Jlc3VtZW4sIGluZm9ybWUgeSBhcnTDrWN1bG8nXSwKICdBcHJlbmRlIGEgY2l0YXIgZW4gQVBBIDcgeSBhIHVzYXIgWm90ZXJvLiBMZWUgdW4gYXJ0w61jdWxvIGNvcnRvIHkgcmVzw7ptZWxvIGVuIDE1MCBwYWxhYnJhcy4nLAogcignYXBhJywnem90ZXJvJywncmFlJywnc2Nob2xhcicpXSwKWydDMjAyJywyLDIsJ01hdGVtw6F0aWNhIHBhcmEgSW5nZW5pZXJvcyBJSScsJ21hdCcsWydDMTAyJ10sWydUMTYnLCdUMTcnLCdUMTgnXSwKIFsnSW50ZWdyYWwgaW5kZWZpbmlkYSB5IHTDqWNuaWNhcyBkZSBpbnRlZ3JhY2nDs24nLCdJbnRlZ3JhbCBkZWZpbmlkYSB5IMOhcmVhJywnQXBsaWNhY2lvbmVzIGRlIGxhIGludGVncmFsJywnRnVuY2lvbmVzIGRlIHZhcmlhcyB2YXJpYWJsZXMgKHBvc2libGUpJywnU2VyaWVzIG8gZWN1YWNpb25lcyBkaWZlcmVuY2lhbGVzIGLDoXNpY2FzIChwb3NpYmxlKSddLAogJ1BvciBjb25maXJtYXIgKHByb2JhYmxlbWVudGUgaW50ZWdyYWxlcykuIFJlcGFzYSBkZXJpdmFkYXM6IGludGVncmFyIGVzIGRlcml2YXIgYWwgcmV2w6lzLicsCiByKCdraGFuJywnb3NDYWxjJywnYjMnKV0sClsnQzIwMycsMiwzLCdBbsOhbGlzaXMgZGUgbGEgUmVhbGlkYWQgTmFjaW9uYWwgeSBBbWJpZW50YWwnLCdnZW4nLFsnQzEwMyddLFtdLAogWydSZWFsaWRhZCBzb2NpYWwsIGVjb27Ds21pY2EgeSBwb2zDrXRpY2EgZGVsIFBlcsO6JywnUHJvYmxlbWFzIGFtYmllbnRhbGVzIHkgZGVzYXJyb2xsbyBzb3N0ZW5pYmxlJywnT2JqZXRpdm9zIGRlIERlc2Fycm9sbG8gU29zdGVuaWJsZSAoT0RTKScsJ0xlY3R1cmEgZGUgaW5kaWNhZG9yZXMgKElORUkpJywnUHJvcHVlc3RhcyBjb24gYmFzZSBlbiBkYXRvcyddLAogJ0V4cGxvcmEgbG9zIGRhdG9zIGRlbCBJTkVJIHkgZGUgZGF0b3MgYWJpZXJ0b3M6IHRlIHNlcnZpcsOhbiBjb21vIGRhdGFzZXRzIHBhcmEgcHJhY3RpY2FyLicsCiByKCdpbmVpJywnZGF0b3Nnb2InKV0sClsnQzIwNCcsMiw0LCdGdW5kYW1lbnRvcyBkZSBJQSB5IFByb2dyYW1hY2nDs24nLCdwcm9nJyxbJ0MxMDQnXSxbJ1Q3JywnVDEzJ10sCiBbJ1ZhcmlhYmxlcywgdGlwb3MgeSBvcGVyYWRvcmVzJywnQ29uZGljaW9uYWxlcyB5IGJ1Y2xlcycsJ0Z1bmNpb25lcycsJ0xpc3RhcywgZGljY2lvbmFyaW9zIHkgYXJjaGl2b3MnLCdCw7pzcXVlZGEgeSBhZ2VudGVzIHNpbXBsZXMgKElBIGNsw6FzaWNhKSddLAogJ1R1IHJhbWEgUDE6IENTNTBQIHNlbWFuYXMgMCBhIDMgYW50ZXMgZGUgbWFyem8uIFRlcm1pbmEgQ1M1MFAgY29tcGxldG8gYW50ZXMgZGUgZXN0ZSBjaWNsby4nLAogcignY3M1MHAnLCdlb2FpJyldLApbJ0MzMDEnLDMsMSwnRXN0YWTDrXN0aWNhJywnbWF0JyxbJ0MxMDInXSxbJ1QxJywnVDInLCdUMTMnLCdUMTYnXSwKIFsnRXN0YWTDrXN0aWNhIGRlc2NyaXB0aXZhOiBtZWRpYSwgbWVkaWFuYSwgZGVzdmlhY2nDs24nLCdQcm9iYWJpbGlkYWQgeSByZWdsYXMgZGUgY29udGVvJywnRGlzdHJpYnVjaW9uZXM6IGJpbm9taWFsLCBub3JtYWwnLCdNdWVzdHJlbyBlIGludGVydmFsb3MgZGUgY29uZmlhbnphJywnUHJ1ZWJhcyBkZSBoaXDDs3Rlc2lzJywnQ29ycmVsYWNpw7NuIHkgcmVncmVzacOzbiBsaW5lYWwnXSwKICdOZWNlc2l0YXMgZnJhY2Npb25lcywgcG9yY2VudGFqZXMgeSBmdW5jaW9uZXMgY29uIHNvbHR1cmEuIE1pcmEgbG9zIHZpZGVvcyBiw6FzaWNvcyBkZSBTdGF0UXVlc3QuJywKIHIoJ3N0YXQnLCdzZWVpbmcnLCdvc1N0YXQnLCdraGFuJyldLApbJ0MzMDInLDMsMiwnRnVuZGFtZW50b3MgQ2llbnTDrWZpY29zJywnbWF0JyxbJ0MxMDInXSxbJ1QyJywnVDcnLCdUMTMnLCdUMTYnXSwKIFsnTcOpdG9kbyBjaWVudMOtZmljbyB5IG1lZGljacOzbicsJ1VuaWRhZGVzLCBub3RhY2nDs24gY2llbnTDrWZpY2EgeSBlcnJvcmVzJywnRsOtc2ljYSBiw6FzaWNhOiBjaW5lbcOhdGljYSB5IGRpbsOhbWljYScsJ0VuZXJnw61hIHkgdHJhYmFqbycsJ01vZGVsb3MgbWF0ZW3DoXRpY29zIGRlIGZlbsOzbWVub3MnXSwKICdJbmZlcmlkbzogcHJvYmFibGVtZW50ZSBmw61zaWNhL2NpZW5jaWFzIGLDoXNpY2FzLiBSZXBhc2Egbm90YWNpw7NuIGNpZW50w61maWNhIChUMikgeSBkZXNwZWplIGRlIGVjdWFjaW9uZXMgKFQ3KS4nLAogcigna2hhblBoeScsJ29zU2NpJyldLApbJ0MzMDMnLDMsMywnQWxnb3JpdG1vcyB5IEVzdHJ1Y3R1cmEgZGUgRGF0b3MnLCdwcm9nJyxbJ0MyMDQnXSxbJ1QyJywnVDE2J10sCiBbJ0NvbXBsZWppZGFkOiBub3RhY2nDs24gTyBncmFuZGUnLCdBcnJlZ2xvcywgbGlzdGFzIGVubGF6YWRhcywgcGlsYXMgeSBjb2xhcycsJ1JlY3Vyc2nDs24nLCdPcmRlbmFtaWVudG8geSBiw7pzcXVlZGEnLCfDgXJib2xlcyB5IGdyYWZvcycsJ1RhYmxhcyBoYXNoJ10sCiAnTG9zIGxvZ2FyaXRtb3MgKFQxNikgZXhwbGljYW4gcG9yIHF1w6kgbGEgYsO6c3F1ZWRhIGJpbmFyaWEgZXMgTyhsb2cgbikuIENTNTB4IGF5dWRhIG11Y2hvIGFxdcOtLicsCiByKCdjczUweCcsJ3Zpc3VhbGdvJyldLApbJ0MzMDQnLDMsNCwnRGF0YSBTY2llbmNlIEZ1bmRhbWVudGFscyAoTGFib3JhdG9yaW8gQUkpJywnZGF0b3MnLFsnQzIwNCcsJ0MxMDQnXSxbJ1QyJywnVDEyJywnVDE1J10sCiBbJ0p1cHl0ZXIgeSBQeXRob24gcGFyYSBkYXRvcycsJ3BhbmRhczogbGltcGllemEgeSB0cmFuc2Zvcm1hY2nDs24nLCdWaXN1YWxpemFjacOzbiAobWF0cGxvdGxpYiwgc2VhYm9ybiknLCdBbsOhbGlzaXMgZXhwbG9yYXRvcmlvIChFREEpJywnUHJpbWVyIG1vZGVsbyBwcmVkaWN0aXZvJ10sCiAnSGF6IGxvcyBjdXJzb3MgZGUgS2FnZ2xlIOKAnFBhbmRhc+KAnSB5IOKAnERhdGEgVmlzdWFsaXphdGlvbuKAnS4nLAogcigna2FnZ2xlJywncGFuZGFzJywncGRzaCcpXSwKWydDNDAxJyw0LDEsJ0Z1bmRhbWVudG9zIGRlIEJhc2UgZGUgRGF0b3MnLCdkYXRvcycsWydDMzAzJ10sW10sCiBbJ01vZGVsbyBlbnRpZGFkLXJlbGFjacOzbicsJ01vZGVsbyByZWxhY2lvbmFsIHkgbm9ybWFsaXphY2nDs24nLCdTUUwgYsOhc2ljbzogU0VMRUNULCBKT0lOLCBHUk9VUCBCWScsJ0xsYXZlcyBwcmltYXJpYXMgeSBmb3LDoW5lYXMnLCdUcmFuc2FjY2lvbmVzJ10sCiAnU1FMQm9sdCBzZSB0ZXJtaW5hIGVuIHVuIGZpbiBkZSBzZW1hbmEuJywKIHIoJ3NxbGJvbHQnLCdwZ3QnKV0sClsnQzQwMicsNCwyLCdQcm9ncmFtYWNpw7NuIGVuIFIgcGFyYSBBbmFseXRpY3MnLCdwcm9nJyxbJ0MzMDEnXSxbJ1QyJywnVDEzJ10sCiBbJ1NpbnRheGlzIGRlIFIgeSBSU3R1ZGlvJywnVGlkeXZlcnNlOiBkcGx5ciB5IHRpZHlyJywnR3LDoWZpY29zIGNvbiBnZ3Bsb3QyJywnRXN0YWTDrXN0aWNhIGFwbGljYWRhIGVuIFInLCdSZXBvcnRlcyBjb24gUiBNYXJrZG93biAvIFF1YXJ0byddLAogJ0xlZSBsb3MgcHJpbWVyb3MgY2Fww610dWxvcyBkZSDigJxSIHBhcmEgQ2llbmNpYSBkZSBEYXRvc+KAnS4nLAogcigncjRkcycpXSwKWydDNDAzJyw0LDMsJ0Z1bmRhbWVudG9zIGRlIFRyYW5zZm9ybWFjacOzbiBEaWdpdGFsJywnbmVnJyxbJ0MxMDQnXSxbXSwKIFsnUXXDqSBlcyBsYSB0cmFuc2Zvcm1hY2nDs24gZGlnaXRhbCcsJ01vZGVsb3MgZGUgbmVnb2NpbyBkaWdpdGFsZXMnLCdUZWNub2xvZ8OtYXM6IG51YmUsIElBLCBJb1QnLCdFeHBlcmllbmNpYSBkZWwgY2xpZW50ZScsJ0Nhc29zIGVuIGVtcHJlc2FzIHBlcnVhbmFzJ10sCiAnUGllbnNhIGVuIGPDs21vIHR1IHRyYWJham8gYWN0dWFsIHBvZHLDrWEgdXNhciBkYXRvcyBvIElBOiBzZXLDoSBidWVuIGNhc28gcGFyYSBlc3RlIGN1cnNvLicsCiByKCdibWMnLCdtc2xlYXJuJyldLApbJ0M0MDQnLDQsNCwnUHJvZ3JhbWFjacOzbiBQeXRob24gcGFyYSBJQSB5IEFwbGljYWNpb25lcyBkZSBEYXRvcycsJ3Byb2cnLFsnQzMwMycsJ0MzMDQnXSxbJ1QxNSddLAogWydQeXRob24gaW50ZXJtZWRpbzogUE9PIHkgbcOzZHVsb3MnLCdOdW1QeSB5IHBhbmRhcyBhIGZvbmRvJywnQVBJcyB5IGNvbnN1bW8gZGUgZGF0b3MgKHJlcXVlc3RzKScsJ0FwcHMgZGUgZGF0b3MgKFN0cmVhbWxpdCBvIEZsYXNrKScsJ0VudG9ybm9zIHZpcnR1YWxlcyB5IEdpdCddLAogJ051bVB5IHVzYSBtYXRyaWNlcyAoVDE1KS4gSGF6IHVuIG1pbmkgcHJveWVjdG8gcHJvcGlvIHkgc8O6YmVsbyBhIEdpdEh1Yi4nLAogcigncGRzaCcsJ21pc3NpbmcnLCdjczUwcCcpXSwKWydDNTAxJyw1LDEsJ1NRTCBwYXJhIEFuYWx5dGljcycsJ2RhdG9zJyxbJ0M0MDEnXSxbJ1QxMSddLAogWydDb25zdWx0YXMgYXZhbnphZGFzIHkgc3ViY29uc3VsdGFzJywnRnVuY2lvbmVzIGRlIHZlbnRhbmEnLCdDVEUgKFdJVEgpJywnTcOpdHJpY2FzIGRlIG5lZ29jaW8gY29uIFNRTCcsJ09wdGltaXphY2nDs24gYsOhc2ljYSddLAogJ1ByYWN0aWNhIGZ1bmNpb25lcyBkZSB2ZW50YW5hIGVuIFBvc3RncmVTUUwgVHV0b3JpYWwuJywKIHIoJ3BndCcsJ3NxbGJvbHQnLCdrYWdnbGUnKV0sClsnQzUwMicsNSwyLCdBcHBsaWVkIElubm92YXRpb24gUHJvamVjdCcsJ25lZycsWydDNDAzJ10sW10sCiBbJ0Rlc2lnbiB0aGlua2luZycsJ0lkZW50aWZpY2FyIHVuIHByb2JsZW1hIHJlYWwnLCdQcm90b3RpcGFkbyByw6FwaWRvJywnVmFsaWRhY2nDs24gY29uIHVzdWFyaW9zJywnUHJlc2VudGFjacOzbiAocGl0Y2gpJ10sCiAnQW5vdGEgcHJvYmxlbWFzIHJlYWxlcyBkZSB0dSB0cmFiYWpvIHF1ZSBzZSBwdWVkYW4gcmVzb2x2ZXIgY29uIGRhdG9zLicsCiByKCdkc2Nob29sJywnYm1jJyldLApbJ0M1MDMnLDUsMywnTWV0b2RvbG9nw61hcyDDgWdpbGVzIHkgR2VzdGnDs24gTGVhbicsJ25lZycsWydDNDAzJ10sW10sCiBbJ01hbmlmaWVzdG8gw6FnaWwnLCdTY3J1bTogcm9sZXMsIGV2ZW50b3MgeSBhcnRlZmFjdG9zJywnS2FuYmFuJywnTGVhbjogZGVzcGVyZGljaW9zIHkgbWVqb3JhIGNvbnRpbnVhJywnSGVycmFtaWVudGFzIChKaXJhLCBUcmVsbG8pJ10sCiAnTGEgR3XDrWEgZGUgU2NydW0gc29uIHVuYXMgMTUgcMOhZ2luYXM6IGzDqWVsYSB1bmEgdmV6LicsCiByKCdzY3J1bScsJ2F0bCcpXSwKWydDNTA0Jyw1LDQsJ01hY2hpbmUgTGVhcm5pbmcgeSBNb2RlbGFkbyBFc3RhZMOtc3RpY28nLCdpYScsWydDMzAxJywnQzIwMicsJ0M0MDQnXSxbJ1QxMicsJ1QxMycsJ1QxNScsJ1QxNicsJ1QxOCddLAogWydSZWdyZXNpw7NuIGxpbmVhbCB5IGxvZ8Otc3RpY2EnLCfDgXJib2xlcywgcmFuZG9tIGZvcmVzdCB5IGJvb3N0aW5nJywnVmFsaWRhY2nDs24gY3J1emFkYSB5IG3DqXRyaWNhcycsJ1NvYnJlYWp1c3RlIHkgcmVndWxhcml6YWNpw7NuJywnQ2x1c3RlcmluZyB5IHJlZHVjY2nDs24gZGUgZGltZW5zacOzbicsJ0Rlc2NlbnNvIGRlIGdyYWRpZW50ZSddLAogJ0FxdcOtIHNlIHVzYSB0b2RvOiByZWN0YSAoVDEyKSwgbWF0cmljZXMgKFQxNSksIGxvZ2FyaXRtb3MgKFQxNikgeSBkZXJpdmFkYXMgKFQxOCkgcGFyYSBlbCBncmFkaWVudGUuJywKIHIoJ2FuZycsJ2dtbCcsJ3NrJywnc3RhdCcpXSwKWydDNjAxJyw2LDEsJ1Npc3RlbWFzIEF2YW56YWRvcyBkZSBCYXNlcyBkZSBEYXRvcycsJ2RhdG9zJyxbJ0M1MDEnXSxbXSwKIFsnw41uZGljZXMgeSBwbGFuZXMgZGUgZWplY3VjacOzbicsJ0Jhc2VzIE5vU1FMIChkb2N1bWVudG9zLCBjbGF2ZS12YWxvciknLCdCYXNlcyBkaXN0cmlidWlkYXMgeSByZXBsaWNhY2nDs24nLCdCYXNlcyB2ZWN0b3JpYWxlcyBwYXJhIElBJywnU2VndXJpZGFkIHkgcmVzcGFsZG9zJ10sCiAnUmVwYXNhIFNRTCBhdmFuemFkbyBhbnRlcyBkZSBlbXBlemFyLicsCiByKCdwZ3QnLCdkZXonKV0sClsnQzYwMicsNiwyLCdEZWVwIExlYXJuaW5nIHkgUmVkZXMgTmV1cm9uYWxlcycsJ2lhJyxbJ0M1MDQnXSxbJ1QxNScsJ1QxNicsJ1QxOCddLAogWydQZXJjZXB0csOzbiB5IHJlZGVzIG11bHRpY2FwYScsJ1JldHJvcHJvcGFnYWNpw7NuIChyZWdsYSBkZSBsYSBjYWRlbmEpJywnUmVkZXMgY29udm9sdWNpb25hbGVzIChDTk4pJywnUmVkZXMgcmVjdXJyZW50ZXMgeSB0cmFuc2Zvcm1lcnMnLCdFbnRyZW5hbWllbnRvIGNvbiBQeVRvcmNoJ10sCiAnTWlyYSBsYSBzZXJpZSBkZSByZWRlcyBuZXVyb25hbGVzIGRlIDNCbHVlMUJyb3duLiBMYSByZWdsYSBkZSBsYSBjYWRlbmEgKFQxOCkgZXMgbGEgYmFzZS4nLAogcignZmFzdCcsJ2IzJywnZDJsJywncHQnKV0sClsnQzYwMycsNiwzLCdEYXRhc2V0cyBlIEludmVzdGlnYWNpw7NuIGVuIElBJywnaW52JyxbJ0M1MDQnLCdDMjAxJ10sWydUMiddLAogWydDb25zdHJ1Y2Npw7NuIHkgZXRpcXVldGFkbyBkZSBkYXRhc2V0cycsJ1Nlc2dvcyB5IGNhbGlkYWQgZGUgZGF0b3MnLCdMZWVyIHBhcGVycyBkZSBJQScsJ0Rpc2XDsW8gZGUgZXhwZXJpbWVudG9zJywnUmVwcm9kdWNpYmlsaWRhZCddLAogJ0xlZSB1biBwYXBlciBjb3J0byBkZSBhclhpdiB5IGV4cGxpY2Egc3UgaWRlYSBlbiB1biBww6FycmFmby4nLAogcignYXJ4aXYnLCdoZicsJ2thZ2dsZScsJ3NjaG9sYXInKV0sClsnQzYwNCcsNiw0LCdMYWJvcmF0b3JpbyBkZSBBZ2VudGVzIElBIHkgU2lzdGVtYXMgQXV0w7Nub21vcycsJ2lhJyxbJ0M0MDQnLCdDNTA0J10sW10sCiBbJ0xMTXMgeSBwcm9tcHRzJywnVXNvIGRlIGhlcnJhbWllbnRhcyAodG9vbCB1c2UpJywnQWdlbnRlcyB5IGZsdWpvcyBkZSB0cmFiYWpvJywnUkFHIChiw7pzcXVlZGEgKyBnZW5lcmFjacOzbiknLCdFdmFsdWFjacOzbiBkZSBhZ2VudGVzJ10sCiAnSGF6IGVsIGN1cnNvIGdyYXR1aXRvIGRlIGFnZW50ZXMgZGUgSHVnZ2luZyBGYWNlLicsCiByKCdhZ2VudHMnLCdhbnRoJywnZGxhaScpXSwKWydDNzAxJyw3LDEsJ0FuYWzDrXRpY2EgRW1wcmVzYXJpYWwgQXZhbnphZGEgeSBCdXNpbmVzcyBJbnRlbGxpZ2VuY2UnLCdkYXRvcycsWydDNTAxJywnQzQwMiddLFtdLAogWydLUElzIHkgbW9kZWxvcyBkZSBkYXRvcycsJ0Rhc2hib2FyZHMgY29uIFBvd2VyIEJJIG8gVGFibGVhdScsJ0VUTCBwYXJhIEJJJywnU3Rvcnl0ZWxsaW5nIGNvbiBkYXRvcycsJ0FuYWzDrXRpY2EgcHJlZGljdGl2YSBlbiBuZWdvY2lvJ10sCiAnUnV0YSBncmF0dWl0YSBkZSBQb3dlciBCSSBlbiBNaWNyb3NvZnQgTGVhcm4uJywKIHIoJ3BiaScpXSwKWydDNzAyJyw3LDIsJ0VzdHJhdGVnaWEgZGUgR29iaWVybm8gZGUgRGF0b3MnLCduZWcnLFsnQzYwMSddLFtdLAogWydNYXJjb3MgZGUgZ29iaWVybm8gKERBTUEtRE1CT0spJywnQ2FsaWRhZCB5IGxpbmFqZSBkZSBkYXRvcycsJ1JvbGVzOiBkYXRhIG93bmVyLCBzdGV3YXJkJywnUHJpdmFjaWRhZCAoTGV5IDI5NzMzIGVuIFBlcsO6KScsJ1BvbMOtdGljYXMgeSBtZXRhZGF0b3MnXSwKICdSZXZpc2EgcXXDqSBlcyBEQU1BLURNQk9LIHkgbGEgbGV5IHBlcnVhbmEgZGUgcHJvdGVjY2nDs24gZGUgZGF0b3MgcGVyc29uYWxlcyAoTGV5IDI5NzMzKS4nLAogcignZGFtYScpXSwKWydDNzAzJyw3LDMsJ8OJdGljYSBlIElBIFJlc3BvbnNhYmxlJywnZ2VuJyxbJ0M2MDMnXSxbXSwKIFsnU2VzZ28geSBlcXVpZGFkIGVuIG1vZGVsb3MnLCdUcmFuc3BhcmVuY2lhIHkgZXhwbGljYWJpbGlkYWQnLCdQcml2YWNpZGFkIHkgY29uc2VudGltaWVudG8nLCdSZWd1bGFjacOzbiBkZSBJQScsJ0ltcGFjdG8gc29jaWFsIHkgbGFib3JhbCddLAogJ0xlZSBsYSBSZWNvbWVuZGFjacOzbiBkZSBsYSBVTkVTQ08gc29icmUgw6l0aWNhIGRlIGxhIElBLicsCiByKCd1bmVzY28nLCdlb2FpJyldLApbJ0M3MDQnLDcsNCwnQmlnIERhdGEgeSBDb21wdXRhY2nDs24gZW4gbGEgTnViZScsJ2RhdG9zJyxbJ0M2MDEnXSxbXSwKIFsnTGFzIDUgViBkZWwgYmlnIGRhdGEnLCdQcm9jZXNhbWllbnRvIGRpc3RyaWJ1aWRvIGNvbiBTcGFyaycsJ1NlcnZpY2lvcyBlbiBsYSBudWJlIChBV1MsIEF6dXJlLCBHQ1ApJywnQWxtYWNlbmFtaWVudG8geSBjw7NtcHV0byBlc2NhbGFibGUnLCdDb3N0b3MgeSBzZWd1cmlkYWQgZW4gbGEgbnViZSddLAogJ0xhYnMgZ3JhdGlzIGRlIEdvb2dsZSBDbG91ZCBTa2lsbHMgQm9vc3QgbyBNaWNyb3NvZnQgTGVhcm4gKEF6dXJlIGZ1bmRhbWVudGFscykuJywKIHIoJ2djc2InLCdtc2xlYXJuJywnc3BhcmsnKV0sClsnQzgwMScsOCwxLCdQcm9jZXNhbWllbnRvIGRlIExlbmd1YWplIE5hdHVyYWwgeSBWaXNpw7NuIENvbXB1dGFjaW9uYWwnLCdpYScsWydDNjAyJ10sWydUMTUnLCdUMTYnXSwKIFsnVG9rZW5pemFjacOzbiB5IGVtYmVkZGluZ3MnLCdUcmFuc2Zvcm1lcnMgeSBtb2RlbG9zIGRlIGxlbmd1YWplJywnQ2xhc2lmaWNhY2nDs24geSBkZXRlY2Npw7NuIGRlIG9iamV0b3MnLCdTZWdtZW50YWNpw7NuIGRlIGltw6FnZW5lcycsJ0FqdXN0ZSBmaW5vIChmaW5lLXR1bmluZyknXSwKICdDdXJzbyBkZSBOTFAgZGUgSHVnZ2luZyBGYWNlOyBDUzIzMW4gcGFyYSB2aXNpw7NuLicsCiByKCdoZicsJ2NzMjI0bicsJ2NzMjMxbicpXSwKWydDODAyJyw4LDIsJ0luZ2VuaWVyw61hIGRlIERhdG9zIHkgQXJxdWl0ZWN0dXJhIGRlIERhdGEgTGFrZXMnLCdkYXRvcycsWydDNzA0J10sW10sCiBbJ1BpcGVsaW5lcyBFVEwvRUxUJywnT3JxdWVzdGFjacOzbiAoQWlyZmxvdyknLCdEYXRhIGxha2UsIHdhcmVob3VzZSB5IGxha2Vob3VzZScsJ0Zvcm1hdG9zIChQYXJxdWV0LCBEZWx0YSknLCdTdHJlYW1pbmcgZGUgZGF0b3MnXSwKICdEYXRhIEVuZ2luZWVyaW5nIFpvb21jYW1wIGVzIGdyYXRpcyB5IG11eSBjb21wbGV0by4nLAogcignZGV6Jywnc3BhcmsnKV0sClsnQzgwMycsOCwzLCdTaXN0ZW1hcyBkZSBJQSB5IE1MT3BzJywnaWEnLFsnQzYwMicsJ0M3MDQnXSxbXSwKIFsnVmVyc2lvbmFkbyBkZSBkYXRvcyB5IG1vZGVsb3MnLCdTZWd1aW1pZW50byBkZSBleHBlcmltZW50b3MgKE1MZmxvdyknLCdEZXNwbGllZ3VlIGRlIG1vZGVsb3MgKEFQSXMsIGNvbnRlbmVkb3JlcyknLCdNb25pdG9yZW8geSBkcmlmdCcsJ0NJL0NEIHBhcmEgTUwnXSwKICdNYWRlIFdpdGggTUwgeSBNTE9wcyBab29tY2FtcC4gQXByZW5kZSBEb2NrZXIgYsOhc2ljby4nLAogcignbXdtbCcsJ21seicpXSwKWydDODA0Jyw4LDQsJ1NlbWluYXJpbyBkZSBJbnZlc3RpZ2FjacOzbicsJ2ludicsWydDNjAzJ10sW10sCiBbJ0VsZWdpciB0ZW1hIHkgcHJlZ3VudGEgZGUgaW52ZXN0aWdhY2nDs24nLCdFc3RhZG8gZGVsIGFydGUnLCdNZXRvZG9sb2fDrWEnLCdQbGFuIGRlIHRlc2lzJywnUmVkYWNjacOzbiBkZWwgcHJveWVjdG8nXSwKICdFbXBpZXphIGEgZ3VhcmRhciBpZGVhcyBkZSB0ZW1hIGRlc2RlIGVsIGNpY2xvIDYuJywKIHIoJ3NjaG9sYXInLCd6b3Rlcm8nLCdhcGEnLCdhcnhpdicpXSwKWydDOTAxJyw5LDEsJ0VsZWN0aXZvIDEnLCdlbGVjJyxbXSxbXSxbJ1BvciBkZWZpbmlyIGN1YW5kbyBlbGlqYXMgZWwgY3Vyc28nXSwnRWRpdGEgZXN0ZSBub2RvIGNvbiBlbCBjdXJzbyBxdWUgZWxpamFzLiBJZGVhczogc2VyaWVzIGRlIHRpZW1wbywgSUEgZ2VuZXJhdGl2YSwgc2lzdGVtYXMgZGUgcmVjb21lbmRhY2nDs24sIGNpYmVyc2VndXJpZGFkLCB2aXN1YWxpemFjacOzbiBhdmFuemFkYS4nLFtdXSwKWydDOTAyJyw5LDIsJ0VsZWN0aXZvIDInLCdlbGVjJyxbXSxbXSxbJ1BvciBkZWZpbmlyIGN1YW5kbyBlbGlqYXMgZWwgY3Vyc28nXSwnRWRpdGEgZXN0ZSBub2RvIGNvbiBlbCBjdXJzbyBxdWUgZWxpamFzLicsW11dLApbJ0M5MDMnLDksMywnRWxlY3Rpdm8gMycsJ2VsZWMnLFtdLFtdLFsnUG9yIGRlZmluaXIgY3VhbmRvIGVsaWphcyBlbCBjdXJzbyddLCdFZGl0YSBlc3RlIG5vZG8gY29uIGVsIGN1cnNvIHF1ZSBlbGlqYXMuJyxbXV0sClsnQzkwNCcsOSw0LCdFbGVjdGl2byA0JywnZWxlYycsW10sW10sWydQb3IgZGVmaW5pciBjdWFuZG8gZWxpamFzIGVsIGN1cnNvJ10sJ0VkaXRhIGVzdGUgbm9kbyBjb24gZWwgY3Vyc28gcXVlIGVsaWphcy4nLFtdXSwKWydDMTAwMScsMTAsMSwnVHJhYmFqbyBkZSBJbnZlc3RpZ2FjacOzbicsJ2ludicsWydDODA0J10sW10sCiBbJ0Rlc2Fycm9sbG8gZGVsIHByb3llY3RvJywnRXhwZXJpbWVudG9zIHkgcmVzdWx0YWRvcycsJ1JlZGFjY2nDs24gZmluYWwnLCdTdXN0ZW50YWNpw7NuJ10sCiAnQ29udGluw7phIGVsIHBsYW4gZGVsIFNlbWluYXJpbyBkZSBJbnZlc3RpZ2FjacOzbi4nLAogcignc2Nob2xhcicsJ3pvdGVybycsJ2FwYScpXSwKWydDMTAwMicsMTAsMiwnRWxlY3Rpdm8gNScsJ2VsZWMnLFtdLFtdLFsnUG9yIGRlZmluaXIgY3VhbmRvIGVsaWphcyBlbCBjdXJzbyddLCdFZGl0YSBlc3RlIG5vZG8gY29uIGVsIGN1cnNvIHF1ZSBlbGlqYXMuJyxbXV0sClsnQzEwMDMnLDEwLDMsJ0VsZWN0aXZvIDYnLCdlbGVjJyxbXSxbXSxbJ1BvciBkZWZpbmlyIGN1YW5kbyBlbGlqYXMgZWwgY3Vyc28nXSwnRWRpdGEgZXN0ZSBub2RvIGNvbiBlbCBjdXJzbyBxdWUgZWxpamFzLicsW11dLApbJ0MxMDA0JywxMCw0LCdFbGVjdGl2byA3JywnZWxlYycsW10sW10sWydQb3IgZGVmaW5pciBjdWFuZG8gZWxpamFzIGVsIGN1cnNvJ10sJ0VkaXRhIGVzdGUgbm9kbyBjb24gZWwgY3Vyc28gcXVlIGVsaWphcy4nLFtdXQogIF07CiAgcmV0dXJuIEQubWFwKGQ9Pih7aWQ6ZFswXSxjeWNsZTpkWzFdLGNvbDpkWzJdLG5hbWU6ZFszXSxhcmVhOmRbNF0scmVxczpkWzVdLG1hdGg6ZFs2XSx0b3BpY3M6ZFs3XSxwcmVwOmRbOF0scmVzOmRbOV19KSk7Cn0KY29uc3QgUFJFUD1bCiAgWydtYXRoJywnVGVybWluYXIgZWwgcGxhbiBkZSBtYXRlbcOhdGljYSBUMeKAk1QxOCAoYXJib2wtbWF0ZW1hdGljYS5odG1sKSddLAogIFsnY3M1MHAnLCdDUzUwUDogc2VtYW5hcyAwIGEgMyAocmFtYSBQMSknXSwKICBbJ2VvYWknLCdFbGVtZW50cyBvZiBBSTogcGFydGUgMSddLAogIFsndG9vbHMnLCdJbnN0YWxhciBQeXRob24geSBWUyBDb2RlOyBjcmVhciBjdWVudGFzIGVuIEdpdEh1YiB5IEthZ2dsZSddLAogIFsnYXBhJywnQXByZW5kZXIgbG8gYsOhc2ljbyBkZSBjaXRhcyBBUEEgNyB5IFpvdGVybyddLAogIFsncGxhbicsJ0FybWFyIG1pIGhvcmFyaW8gc2VtYW5hbDogdHJhYmFqbyArIGVzdHVkaW8nXSwKICBbJ2V4Y2VsJywnRXhjZWwgYsOhc2ljbzogZsOzcm11bGFzLCB0YWJsYXMgeSB1biBncsOhZmljbyddLAogIFsnb3JhdG9yaWEnLCdPcmF0b3JpYTogcHJhY3RpY2FyIGhhYmxhciAyIG1pbnV0b3Mgc29icmUgdW4gdGVtYSddLAogIFsnZGViYXRlJywnRGViYXRlOiBlc3RydWN0dXJhIHBvc3R1cmEg4oaSIGFyZ3VtZW50byDihpIgZXZpZGVuY2lhJ10KXTsKY29uc3QgUFJFUF9DT1VSU0U9ewogIEMxMDE6W1sncGxhbicsJ0dlc3Rpw7NuIGRlbCB0aWVtcG86IGFybWEgdHUgaG9yYXJpbyBzZW1hbmFsICh0cmFiYWpvICsgZXN0dWRpbykgeSBwcnVlYmEgYmxvcXVlcyBwb21vZG9ybyddLFsnYXBhJywnQ2l0YXMgeSByZWZlcmVuY2lhcyBBUEEgNyAobG8gYsOhc2ljbykgeSBab3Rlcm8nXV0sCiAgQzEwMzpbWydvcmF0b3JpYScsJ09yYXRvcmlhOiBncsOhYmF0ZSBoYWJsYW5kbyAyIG1pbnV0b3Mgc29icmUgdW4gdGVtYSB5IHJldmlzYSBtdWxldGlsbGFzJ10sWydkZWJhdGUnLCdEZWJhdGUgeSBhcmd1bWVudGFjacOzbjogcG9zdHVyYSwgYXJndW1lbnRvLCBldmlkZW5jaWEgeSByZXNwdWVzdGEnXV0sCiAgQzEwNDpbWydlb2FpJywnQ29uY2VwdG9zIGRlIElBOiBFbGVtZW50cyBvZiBBSSwgcGFydGUgMSddLFsnZXhjZWwnLCdFeGNlbCBiw6FzaWNvOiBmw7NybXVsYXMgKFNVTUEsIFBST01FRElPLCBTSSksIGZpbHRyb3MgeSBncsOhZmljb3MnXV0KfTsKCmxldCBTPWxvYWQoKSwgc2VsZWN0ZWQ9bnVsbCwgdmlldz17eDowLHk6MCxrOjF9OwpmdW5jdGlvbiBmcmVzaCgpeyByZXR1cm4ge3ZlcnNpb246MSxub2RlczpkZWZhdWx0Tm9kZXMoKSxwcm9ncmVzczp7fSxwcmVwOnt9fTsgfQpmdW5jdGlvbiBsb2FkKCl7IHRyeXsgY29uc3QgcmF3PWxvY2FsU3RvcmFnZS5nZXRJdGVtKEtFWSk7IGlmKHJhdyl7IGNvbnN0IGQ9bm9ybWFsaXplKEpTT04ucGFyc2UocmF3KSk7IGlmKGQpIHJldHVybiBkOyB9IH1jYXRjaChlKXt9IHJldHVybiBmcmVzaCgpOyB9CmZ1bmN0aW9uIG5vcm1hbGl6ZShkKXsKICBpZighZHx8IUFycmF5LmlzQXJyYXkoZC5ub2RlcykpIHJldHVybiBudWxsOwogIGNvbnN0IG5vZGVzPWQubm9kZXMuZmlsdGVyKG49Pm4mJnR5cGVvZiBuLmlkPT09J3N0cmluZycpLm1hcChuPT4oewogICAgaWQ6bi5pZCwgY3ljbGU6TWF0aC5tYXgoMSxNYXRoLm1pbigxMixwYXJzZUludChuLmN5Y2xlKXx8MSkpLCBjb2w6cGFyc2VJbnQobi5jb2wpfHwxLCBuYW1lOlN0cmluZyhuLm5hbWV8fG4uaWQpLAogICAgYXJlYTpBUkVBU1tuLmFyZWFdP24uYXJlYTonZ2VuJywgcmVxczpBcnJheS5pc0FycmF5KG4ucmVxcyk/bi5yZXFzLm1hcChTdHJpbmcpOltdLCBtYXRoOkFycmF5LmlzQXJyYXkobi5tYXRoKT9uLm1hdGgubWFwKFN0cmluZyk6W10sCiAgICB0b3BpY3M6QXJyYXkuaXNBcnJheShuLnRvcGljcyk/bi50b3BpY3MubWFwKFN0cmluZyk6W10sIHByZXA6U3RyaW5nKG4ucHJlcHx8JycpLAogICAgcmVzOkFycmF5LmlzQXJyYXkobi5yZXMpP24ucmVzLmZpbHRlcih4PT54JiZ4Lm4pLm1hcCh4PT4oe246U3RyaW5nKHgubiksdTpTdHJpbmcoeC51fHwnJyl9KSk6W10KICB9KSk7CiAgcmV0dXJuIHt2ZXJzaW9uOjEsbm9kZXMscHJvZ3Jlc3M6KGQucHJvZ3Jlc3MmJnR5cGVvZiBkLnByb2dyZXNzPT09J29iamVjdCcpP2QucHJvZ3Jlc3M6e30scHJlcDooZC5wcmVwJiZ0eXBlb2YgZC5wcmVwPT09J29iamVjdCcpP2QucHJlcDp7fX07Cn0KZnVuY3Rpb24gc2F2ZSgpeyB0cnl7IGxvY2FsU3RvcmFnZS5zZXRJdGVtKEtFWSxKU09OLnN0cmluZ2lmeShTKSk7IH1jYXRjaChlKXsgdG9hc3QoJ05vIHNlIHB1ZG8gZ3VhcmRhciBlbiBlc3RlIG5hdmVnYWRvcicpOyB9IH0KZnVuY3Rpb24gUChpZCl7IHJldHVybiBTLnByb2dyZXNzW2lkXXx8KFMucHJvZ3Jlc3NbaWRdPXtzdGF0dXM6J3BlbmRpZW50ZScsZ3JhZGU6bnVsbCxub3RlczonJyx0b3BpY3M6W119KTsgfQpjb25zdCBieUlkPSgpPT5PYmplY3QuZnJvbUVudHJpZXMoUy5ub2Rlcy5tYXAobj0+W24uaWQsbl0pKTsKY29uc3Qgc3Q9aWQ9PihTLnByb2dyZXNzW2lkXXx8e30pLnN0YXR1c3x8J3BlbmRpZW50ZSc7CmNvbnN0IHBhc3NlZD1pZD0+c3QoaWQpPT09J2Fwcm9iYWRvJzsKZnVuY3Rpb24gbm9kZVN0YXRlKG4pewogIGNvbnN0IHM9c3Qobi5pZCk7CiAgaWYocz09PSdhcHJvYmFkbycpIHJldHVybiAnZG9tJzsgaWYocz09PSdjdXJzYW5kbycpIHJldHVybiAnY3VyJzsgaWYocz09PSdwcmVwYXJhbmRvJykgcmV0dXJuICdwcmVwJzsKICBjb25zdCBCPWJ5SWQoKTsgcmV0dXJuIG4ucmVxcy5zb21lKHE9PkJbcV0mJiFwYXNzZWQocSkpPydsb2NrJzonYXZhaWwnOwp9CmZ1bmN0aW9uIHRvcGljUGN0KG4peyBjb25zdCB0PShTLnByb2dyZXNzW24uaWRdfHx7fSkudG9waWNzfHxbXTsgcmV0dXJuIG4udG9waWNzLmxlbmd0aD90LmZpbHRlcihpPT5pPG4udG9waWNzLmxlbmd0aCkubGVuZ3RoL24udG9waWNzLmxlbmd0aDowOyB9CmZ1bmN0aW9uIGFuY2VzdG9ycyhpZCxCPWJ5SWQoKSxhY2M9bmV3IFNldCgpKXsgKEJbaWRdPy5yZXFzfHxbXSkuZm9yRWFjaChxPT57IGlmKEJbcV0mJiFhY2MuaGFzKHEpKXthY2MuYWRkKHEpO2FuY2VzdG9ycyhxLEIsYWNjKTt9IH0pOyByZXR1cm4gYWNjOyB9CmZ1bmN0aW9uIGRlc2NlbmRhbnRzKGlkLGFjYz1uZXcgU2V0KCkpeyBTLm5vZGVzLmZvckVhY2gobj0+eyBpZihuLnJlcXMuaW5jbHVkZXMoaWQpJiYhYWNjLmhhcyhuLmlkKSl7YWNjLmFkZChuLmlkKTtkZXNjZW5kYW50cyhuLmlkLGFjYyk7fSB9KTsgcmV0dXJuIGFjYzsgfQpmdW5jdGlvbiBtYXRoRG9tKCl7IHRyeXsgY29uc3QgZD1KU09OLnBhcnNlKGxvY2FsU3RvcmFnZS5nZXRJdGVtKE1BVEhfS0VZKXx8J251bGwnKTsgaWYoIWR8fCFkLnByb2dyZXNzKSByZXR1cm4gbnVsbDsgY29uc3Qgbz17fTsgZm9yKGNvbnN0IGsgaW4gZC5wcm9ncmVzcykgb1trXT1kLnByb2dyZXNzW2tdJiZkLnByb2dyZXNzW2tdLnN0YXR1cz09PSdkb21pbmFkbyc7IHJldHVybiBvOyB9Y2F0Y2goZSl7IHJldHVybiBudWxsOyB9IH0KY29uc3QgZXNjPXM9PlN0cmluZyhzKS5yZXBsYWNlKC9bJjw+IiddL2csYz0+KHsnJic6JyZhbXA7JywnPCc6JyZsdDsnLCc+JzonJmd0OycsJyInOicmcXVvdDsnLCInIjonJiMzOTsnfVtjXSkpOwpjb25zdCBzYWZlVXJsPXU9Pi9eaHR0cHM/OlwvXC8vaS50ZXN0KHUpP3U6Jyc7CmNvbnN0IGRheXNMZWZ0PSgpPT57IGNvbnN0IHQ9bmV3IERhdGUoKTsgdC5zZXRIb3VycygwLDAsMCwwKTsgcmV0dXJuIE1hdGgucm91bmQoKFNUQVJULXQpLzg2NGU1KTsgfTsKZnVuY3Rpb24gY3VyQ3ljbGUoKXsgY29uc3QgYz1TLm5vZGVzLmZpbHRlcihuPT5zdChuLmlkKT09PSdjdXJzYW5kbycpLm1hcChuPT5uLmN5Y2xlKTsgcmV0dXJuIGMubGVuZ3RoP01hdGgubWluKC4uLmMpOm51bGw7IH0KCi8qIENhYmVjZXJhICovCmZ1bmN0aW9uIHJlbmRlckhlYWRlcigpewogIGNvbnN0IHRvdGFsPVMubm9kZXMubGVuZ3RoLCBvaz1TLm5vZGVzLmZpbHRlcihuPT5wYXNzZWQobi5pZCkpLmxlbmd0aCwgcGN0PXRvdGFsP29rL3RvdGFsOjA7CiAgY29uc3QgQz0yKk1hdGguUEkqMTk7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3JpbmcnKS5pbm5lckhUTUw9YDxjaXJjbGUgY3g9IjIzIiBjeT0iMjMiIHI9IjE5IiBmaWxsPSJub25lIiBzdHJva2U9IiMyYTMyNDIiIHN0cm9rZS13aWR0aD0iNSIvPgogICA8Y2lyY2xlIGN4PSIyMyIgY3k9IjIzIiByPSIxOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNGFkZTgwIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWRhc2hhcnJheT0iJHtDKnBjdH0gJHtDfSIgdHJhbnNmb3JtPSJyb3RhdGUoLTkwIDIzIDIzKSIvPgogICA8dGV4dCB4PSIyMyIgeT0iMjciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNlNmU4ZWUiPiR7TWF0aC5yb3VuZChwY3QqMTAwKX0lPC90ZXh0PmA7CiAgY29uc3QgY2M9Y3VyQ3ljbGUoKSwgQj1ieUlkKCk7CiAgY29uc3QgbmV4dD1TLm5vZGVzLmZpbHRlcihuPT4hcGFzc2VkKG4uaWQpKS5zb3J0KChhLGIpPT5hLmN5Y2xlLWIuY3ljbGV8fGEuY29sLWIuY29sKVswXTsKICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnaGRTJykuaW5uZXJIVE1MPWA8Yj4ke29rfS8ke3RvdGFsfTwvYj4gY3Vyc29zIGFwcm9iYWRvcyDCtyAke2NjP2BjdXJzYW5kbyA8Yj5jaWNsbyAke2NjfTwvYj5gOidhw7puIG5vIGVtcGllemFzJ30ke25leHQ/YCDCtyBTaWd1aWVudGU6IDxiPiR7ZXNjKG5leHQubmFtZSl9PC9iPmA6Jyd9YDsKICBjb25zdCBkPWRheXNMZWZ0KCk7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2hkRGF5cycpLmlubmVySFRNTD1kPjA/YDxiPiR7ZH08L2I+PHNwYW4+ZMOtYXMgYWw8YnI+MjkgbWFyPC9zcGFuPmA6YDxiPvCfjpM8L2I+PHNwYW4+ZW4gY2xhc2VzPC9zcGFuPmA7Cn0KCi8qIMOBcmJvbCAqLwpjb25zdCBOVz0xNzYsTkg9NzgsR1g9MTk2LEdZPTEyNCxPWD03NCxPWT0zNjsKY29uc3Qgc3ZnPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCd0cmVlJyk7CmNvbnN0IHBvcz1uPT4oe3g6T1grKG4uY29sLTEpKkdYLCB5Ok9ZKyhuLmN5Y2xlLTEpKkdZfSk7CmZ1bmN0aW9uIHdyYXAodCxtYXg9MjIpeyBjb25zdCB3PXQuc3BsaXQoJyAnKSxMPVtdOyBsZXQgY3VyPScnOyB3LmZvckVhY2goeD0+eyBpZigoY3VyKycgJyt4KS50cmltKCkubGVuZ3RoPm1heCYmY3VyKXtMLnB1c2goY3VyKTtjdXI9eDt9IGVsc2UgY3VyPShjdXIrJyAnK3gpLnRyaW0oKTsgfSk7IGlmKGN1cilMLnB1c2goY3VyKTsgaWYoTC5sZW5ndGg+Myl7TC5sZW5ndGg9MztMWzJdPUxbMl0ucmVwbGFjZSgvLnswLDJ9JC8sJ+KApicpO30gcmV0dXJuIEw7IH0KZnVuY3Rpb24gYm91bmRzKCl7IGNvbnN0IHhzPVMubm9kZXMubWFwKG49PnBvcyhuKSk7IGNvbnN0IG14PU1hdGgubWF4KC4uLnhzLm1hcChwPT5wLngpLE9YKStOVysyMCwgbXk9TWF0aC5tYXgoLi4ueHMubWFwKHA9PnAueSksT1kpK05IKzMwOyByZXR1cm4ge3c6bXgsaDpteX07IH0KZnVuY3Rpb24gcmVuZGVyVHJlZSgpewogIGNvbnN0IEI9YnlJZCgpLCBiPWJvdW5kcygpOyBjb25zdCBtYXhDPU1hdGgubWF4KC4uLlMubm9kZXMubWFwKG49Pm4uY3ljbGUpLDEwKTsKICBsZXQgaD1gPGcgaWQ9InZwIj5gOwogIGZvcihsZXQgYz0xO2M8PW1heEM7YysrKXsgY29uc3QgeT1PWSsoYy0xKSpHWTsgaCs9YDxsaW5lIGNsYXNzPSJyb3ctbGluZSIgeDE9IjgiIHgyPSIke2Iud30iIHkxPSIke3ktMTh9IiB5Mj0iJHt5LTE4fSIvPjx0ZXh0IGNsYXNzPSJsdmwtbGJsIiB4PSIxNCIgeT0iJHt5K05ILzJ9Ij4ke2N9wrA8L3RleHQ+PHRleHQgY2xhc3M9Imx2bC1zdWIiIHg9IjEyIiB5PSIke3krTkgvMisxNH0iPmNpY2xvPC90ZXh0PmA7IH0KICBTLm5vZGVzLmZvckVhY2gobj0+bi5yZXFzLmZvckVhY2gocT0+eyBjb25zdCBhPUJbcV07IGlmKCFhKSByZXR1cm47IGNvbnN0IHA9cG9zKGEpLHQ9cG9zKG4pOwogICAgY29uc3QgeDE9cC54K05XLzIseTE9cC55K05ILHgyPXQueCtOVy8yLHkyPXQueTsgY29uc3QgbXk9KHkxK3kyKS8yOwogICAgY29uc3QgZD0odC5jeWNsZS1hLmN5Y2xlPT09MSk/YE0ke3gxfSwke3kxfSBDJHt4MX0sJHtteX0gJHt4Mn0sJHtteX0gJHt4Mn0sJHt5Mn1gOmBNJHt4MX0sJHt5MX0gQyR7eDF9LCR7eTErNjB9ICR7eDJ9LCR7eTItNjB9ICR7eDJ9LCR7eTJ9YDsKICAgIGgrPWA8cGF0aCBjbGFzcz0iZWRnZSIgZGF0YS1hPSIke2VzYyhxKX0iIGRhdGEtYj0iJHtlc2Mobi5pZCl9IiBkPSIke2R9IiBtYXJrZXItZW5kPSJ1cmwoI2FyKSIvPmA7IH0pKTsKICBTLm5vZGVzLmZvckVhY2gobj0+eyBjb25zdCBwPXBvcyhuKSwgcz1ub2RlU3RhdGUobiksIGM9QVJFQVNbbi5hcmVhXS5jLCBMPXdyYXAobi5uYW1lKSwgcGM9dG9waWNQY3QobiksIGc9KFMucHJvZ3Jlc3Nbbi5pZF18fHt9KS5ncmFkZTsKICAgIGgrPWA8ZyBjbGFzcz0ibm9kZSBzdC0ke3N9IiBkYXRhLWlkPSIke2VzYyhuLmlkKX0iIHN0eWxlPSItLWM6JHtjfSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoJHtwLnh9LCR7cC55fSkiPgogICAgICA8cmVjdCBjbGFzcz0iYm94IiB3aWR0aD0iJHtOV30iIGhlaWdodD0iJHtOSH0iIHJ4PSIxMiIgc3Ryb2tlPSIke3M9PT0nbG9jayc/JyM0YTUxNjAnOmN9Ii8+CiAgICAgICR7cz09PSdjdXInP2A8cmVjdCBjbGFzcz0ib3ZlciIgd2lkdGg9IiR7Tld9IiBoZWlnaHQ9IiR7Tkh9IiByeD0iMTIiLz5gOicnfQogICAgICA8dGV4dCBjbGFzcz0ibmlkIiB4PSIxMCIgeT0iMTYiPiR7bi5jeWNsZX3CsCDCtyAke2VzYyhBUkVBU1tuLmFyZWFdLm4uc3BsaXQoJyAnKVswXSl9JHtzPT09J3ByZXAnPycgwrcgcHJlcGFyYW5kbyc6Jyd9JHtzPT09J2N1cic/JyDCtyBjdXJzYW5kbyc6Jyd9PC90ZXh0PgogICAgICAke2chPW51bGwmJmchPT0nJz9gPHRleHQgY2xhc3M9Im5pZCIgeD0iJHtOVy0xMH0iIHk9IjE2IiB0ZXh0LWFuY2hvcj0iZW5kIj4ke2VzYyhnKX0vMjA8L3RleHQ+YDonJ30KICAgICAgJHtMLm1hcCgobCxpKT0+YDx0ZXh0IGNsYXNzPSJudGwiIHg9IjEwIiB5PSIkezMzK2kqMTR9Ij4ke2VzYyhsKX08L3RleHQ+YCkuam9pbignJyl9CiAgICAgIDxyZWN0IGNsYXNzPSJiYXItYmciIHg9IjEwIiB5PSIke05ILTl9IiB3aWR0aD0iJHtOVy0yMH0iIGhlaWdodD0iNCIgcng9IjIiLz48cmVjdCBjbGFzcz0iYmFyIiB4PSIxMCIgeT0iJHtOSC05fSIgd2lkdGg9IiR7KE5XLTIwKSpwY30iIGhlaWdodD0iNCIgcng9IjIiLz4KICAgIDwvZz5gOyB9KTsKICBoKz1gPC9nPjxkZWZzPjxtYXJrZXIgaWQ9ImFyIiB2aWV3Qm94PSIwIDAgMTAgMTAiIHJlZlg9IjkiIHJlZlk9IjUiIG1hcmtlcldpZHRoPSI2IiBtYXJrZXJIZWlnaHQ9IjYiIG9yaWVudD0iYXV0by1zdGFydC1yZXZlcnNlIj48cGF0aCBkPSJNMCwwIEwxMCw1IEwwLDEwIHoiIGZpbGw9IiM1YTY0NzgiLz48L21hcmtlcj48L2RlZnM+YDsKICBzdmcuaW5uZXJIVE1MPWg7IGFwcGx5VmlldygpOyBoaWdobGlnaHQoKTsKfQpmdW5jdGlvbiBoaWdobGlnaHQoKXsKICBjb25zdCBub2Rlcz1zdmcucXVlcnlTZWxlY3RvckFsbCgnLm5vZGUnKSwgZWRnZXM9c3ZnLnF1ZXJ5U2VsZWN0b3JBbGwoJy5lZGdlJyk7CiAgaWYoIXNlbGVjdGVkKXsgbm9kZXMuZm9yRWFjaChlPT5lLmNsYXNzTGlzdC5yZW1vdmUoJ2RpbScsJ2hsJywnc2VsJykpOyBlZGdlcy5mb3JFYWNoKGU9PmUuY2xhc3NMaXN0LnJlbW92ZSgnZGltJywnaGwnKSk7IHJldHVybjsgfQogIGNvbnN0IHVwPWFuY2VzdG9ycyhzZWxlY3RlZCksIGRvd249ZGVzY2VuZGFudHMoc2VsZWN0ZWQpLCBvbj1uZXcgU2V0KFtzZWxlY3RlZCwuLi51cCwuLi5kb3duXSk7CiAgbm9kZXMuZm9yRWFjaChlPT57IGNvbnN0IGlkPWUuZGF0YXNldC5pZDsgZS5jbGFzc0xpc3QudG9nZ2xlKCdkaW0nLCFvbi5oYXMoaWQpKTsgZS5jbGFzc0xpc3QudG9nZ2xlKCdobCcsb24uaGFzKGlkKSYmaWQhPT1zZWxlY3RlZCk7IGUuY2xhc3NMaXN0LnRvZ2dsZSgnc2VsJyxpZD09PXNlbGVjdGVkKTsgfSk7CiAgZWRnZXMuZm9yRWFjaChlPT57IGNvbnN0IGE9ZS5kYXRhc2V0LmEsYj1lLmRhdGFzZXQuYjsgY29uc3QgbGl0PShvbi5oYXMoYSkmJm9uLmhhcyhiKSkmJigodXAuaGFzKGEpfHxhPT09c2VsZWN0ZWQpJiYodXAuaGFzKGIpfHxiPT09c2VsZWN0ZWQpfHwoZG93bi5oYXMoYikmJihkb3duLmhhcyhhKXx8YT09PXNlbGVjdGVkKSkpOyBlLmNsYXNzTGlzdC50b2dnbGUoJ2hsJyxsaXQpOyBlLmNsYXNzTGlzdC50b2dnbGUoJ2RpbScsIWxpdCk7IH0pOwp9CmZ1bmN0aW9uIGFwcGx5VmlldygpeyBjb25zdCB2cD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndnAnKTsgaWYodnApIHZwLnNldEF0dHJpYnV0ZSgndHJhbnNmb3JtJyxgdHJhbnNsYXRlKCR7dmlldy54fSwke3ZpZXcueX0pIHNjYWxlKCR7dmlldy5rfSlgKTsgfQpmdW5jdGlvbiBmaXRWaWV3KCl7IGNvbnN0IHI9c3ZnLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpLCBiPWJvdW5kcygpOyBpZighci53aWR0aCkgcmV0dXJuOyBjb25zdCBrPU1hdGgubWluKHIud2lkdGgvYi53LChyLmhlaWdodC01MCkvYi5oKTsgdmlldy5rPU1hdGgubWF4KC4yNSxNYXRoLm1pbihrLDEuMikpOyB2aWV3Lng9KHIud2lkdGgtYi53KnZpZXcuaykvMjsgdmlldy55PTUwOyBhcHBseVZpZXcoKTsgfQpmdW5jdGlvbiBzdGFydFZpZXcoKXsgY29uc3Qgcj1zdmcuZ2V0Qm91bmRpbmdDbGllbnRSZWN0KCksIGI9Ym91bmRzKCk7IGlmKCFyLndpZHRoKSByZXR1cm47IGNvbnN0IGs9TWF0aC5tYXgoLjQyLE1hdGgubWluKDEuMSxyLndpZHRoL2IudykpOyB2aWV3Lms9azsgdmlldy54PShyLndpZHRoLWIudyprKS8yOyB2aWV3Lnk9NTI7IGFwcGx5VmlldygpOyB9CmZ1bmN0aW9uIHpvb21BdChmLGN4LGN5KXsgY29uc3Qgaz1NYXRoLm1heCguMixNYXRoLm1pbigzLHZpZXcuaypmKSk7IGNvbnN0IHI9c3ZnLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpOyBjeD8/PXIud2lkdGgvMjsgY3k/Pz1yLmhlaWdodC8yOyB2aWV3Lng9Y3gtKGN4LXZpZXcueCkqKGsvdmlldy5rKTsgdmlldy55PWN5LShjeS12aWV3LnkpKihrL3ZpZXcuayk7IHZpZXcuaz1rOyBhcHBseVZpZXcoKTsgfQpmdW5jdGlvbiByZXZlYWxOb2RlKGlkKXsgY29uc3Qgbj1ieUlkKClbaWRdOyBpZighbikgcmV0dXJuOyBjb25zdCByPXN2Zy5nZXRCb3VuZGluZ0NsaWVudFJlY3QoKSwgcD1wb3Mobik7IGNvbnN0IHBhbmVsSD13aW5kb3cuaW5uZXJXaWR0aD49OTAwPzA6ci5oZWlnaHQqLjY7CiAgaWYodmlldy5rPC43NSkgdmlldy5rPS44NTsgY29uc3QgYXZhaWw9ci53aWR0aC0od2luZG93LmlubmVyV2lkdGg+PTkwMD80NDA6MCk7CiAgdmlldy54PWF2YWlsLzItKHAueCtOVy8yKSp2aWV3Lms7IHZpZXcueT1wYW5lbEg/NjItcC55KnZpZXcuazpNYXRoLm1heCg0MCxyLmhlaWdodC8yLShwLnkrTkgvMikqdmlldy5rKTsgYXBwbHlWaWV3KCk7IH0KLy8gZ2VzdG9zCmNvbnN0IHB0cnM9bmV3IE1hcCgpOyBsZXQgbW92ZWQ9ZmFsc2UsIHBpbmNoPW51bGwsIGRvd25BdD1udWxsOwpzdmcuYWRkRXZlbnRMaXN0ZW5lcigncG9pbnRlcmRvd24nLGU9Pnsgc3ZnLnNldFBvaW50ZXJDYXB0dXJlKGUucG9pbnRlcklkKTsgcHRycy5zZXQoZS5wb2ludGVySWQse3g6ZS5jbGllbnRYLHk6ZS5jbGllbnRZfSk7IG1vdmVkPWZhbHNlOyBkb3duQXQ9e3g6ZS5jbGllbnRYLHk6ZS5jbGllbnRZLHQ6ZS50YXJnZXR9OwogIGlmKHB0cnMuc2l6ZT09PTIpeyBjb25zdCBbYSxiXT1bLi4ucHRycy52YWx1ZXMoKV07IHBpbmNoPXtkOk1hdGguaHlwb3QoYS54LWIueCxhLnktYi55KSxrOnZpZXcua307IH0gfSk7CnN2Zy5hZGRFdmVudExpc3RlbmVyKCdwb2ludGVybW92ZScsZT0+eyBpZighcHRycy5oYXMoZS5wb2ludGVySWQpKSByZXR1cm47IGNvbnN0IHByZXY9cHRycy5nZXQoZS5wb2ludGVySWQpOyBwdHJzLnNldChlLnBvaW50ZXJJZCx7eDplLmNsaWVudFgseTplLmNsaWVudFl9KTsKICBpZihwdHJzLnNpemU9PT0yJiZwaW5jaCl7IGNvbnN0IFthLGJdPVsuLi5wdHJzLnZhbHVlcygpXSwgcj1zdmcuZ2V0Qm91bmRpbmdDbGllbnRSZWN0KCk7IGNvbnN0IGQ9TWF0aC5oeXBvdChhLngtYi54LGEueS1iLnkpOyB6b29tQXQoKHBpbmNoLmsqZC9waW5jaC5kKS92aWV3LmssKGEueCtiLngpLzItci5sZWZ0LChhLnkrYi55KS8yLXIudG9wKTsgbW92ZWQ9dHJ1ZTsgcmV0dXJuOyB9CiAgaWYocHRycy5zaXplPT09MSl7IGNvbnN0IGR4PWUuY2xpZW50WC1wcmV2LngsIGR5PWUuY2xpZW50WS1wcmV2Lnk7IGlmKE1hdGguaHlwb3QoZS5jbGllbnRYLWRvd25BdC54LGUuY2xpZW50WS1kb3duQXQueSk+NikgbW92ZWQ9dHJ1ZTsgaWYobW92ZWQpeyB2aWV3LngrPWR4OyB2aWV3LnkrPWR5OyBhcHBseVZpZXcoKTsgfSB9IH0pOwpmdW5jdGlvbiBlbmRQdHIoZSl7IGlmKCFwdHJzLmhhcyhlLnBvaW50ZXJJZCkpIHJldHVybjsgcHRycy5kZWxldGUoZS5wb2ludGVySWQpOyBpZihwdHJzLnNpemU8MikgcGluY2g9bnVsbDsKICBpZihwdHJzLnNpemU9PT0wJiYhbW92ZWQmJmRvd25BdCl7IGNvbnN0IGc9ZG93bkF0LnQuY2xvc2VzdCYmZG93bkF0LnQuY2xvc2VzdCgnLm5vZGUnKTsgaWYoZykgc2VsZWN0Tm9kZShnLmRhdGFzZXQuaWQpOyBlbHNlIGlmKHNlbGVjdGVkKSBjbG9zZVBhbmVsKCk7IH0gfQpzdmcuYWRkRXZlbnRMaXN0ZW5lcigncG9pbnRlcnVwJyxlbmRQdHIpOyBzdmcuYWRkRXZlbnRMaXN0ZW5lcigncG9pbnRlcmNhbmNlbCcsZT0+e3B0cnMuZGVsZXRlKGUucG9pbnRlcklkKTtwaW5jaD1udWxsO30pOwpzdmcuYWRkRXZlbnRMaXN0ZW5lcignd2hlZWwnLGU9PnsgZS5wcmV2ZW50RGVmYXVsdCgpOyBjb25zdCByPXN2Zy5nZXRCb3VuZGluZ0NsaWVudFJlY3QoKTsgem9vbUF0KGUuZGVsdGFZPDA/MS4xMjoxLzEuMTIsZS5jbGllbnRYLXIubGVmdCxlLmNsaWVudFktci50b3ApOyB9LHtwYXNzaXZlOmZhbHNlfSk7CmRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCd6SW4nKS5vbmNsaWNrPSgpPT56b29tQXQoMS4yNSk7IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCd6T3V0Jykub25jbGljaz0oKT0+em9vbUF0KC44KTsgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3pGaXQnKS5vbmNsaWNrPWZpdFZpZXc7CgpmdW5jdGlvbiByZW5kZXJUb29sYmFyKCl7CiAgY29uc3QgTD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnbGVnZW5kJyk7CiAgTC5pbm5lckhUTUw9T2JqZWN0LnZhbHVlcyhBUkVBUykubWFwKGE9PmA8ZGl2PjxpIHN0eWxlPSJiYWNrZ3JvdW5kOiR7YS5jfSI+PC9pPiR7YS5ufTwvZGl2PmApLmpvaW4oJycpKwogICBgPGRpdj48aSBzdHlsZT0iYmFja2dyb3VuZDojMTYxYTIyO2JvcmRlcjoycHggc29saWQgIzRhNTE2MCI+PC9pPkJsb3F1ZWFkbzwvZGl2PjxkaXY+PGkgc3R5bGU9ImJvcmRlcjoycHggZGFzaGVkICM3YWEyZmYiPjwvaT5QcmVwYXJhbmRvPC9kaXY+PGRpdj48aSBzdHlsZT0iYm9yZGVyOjNweCBzb2xpZCAjZmFjYzE1Ij48L2k+Q3Vyc2FuZG88L2Rpdj48ZGl2PjxpIHN0eWxlPSJiYWNrZ3JvdW5kOiM0YWRlODAiPjwvaT5BcHJvYmFkbzwvZGl2PmA7CiAgTC5vbmNsaWNrPSgpPT5MLmNsYXNzTGlzdC50b2dnbGUoJ21pbicpOwogIGNvbnN0IGNjPWN1ckN5Y2xlKCl8fDE7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3RiVG9wJykuaW5uZXJIVE1MPWA8YnV0dG9uIGNsYXNzPSJjaGlwIiBpZD0iZ29DdXIiPklyIGFsIGNpY2xvICR7Y2N9PC9idXR0b24+PGJ1dHRvbiBjbGFzcz0iY2hpcCIgaWQ9ImdvUHJlcCI+QW50ZXMgZGVsIDI5IGRlIG1hcnpvPC9idXR0b24+YDsKICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZ29DdXInKS5vbmNsaWNrPSgpPT57IGNvbnN0IG49Uy5ub2Rlcy5maW5kKHg9PnguY3ljbGU9PT1jYyk7IGlmKG4peyBjbG9zZVBhbmVsKCk7IGNvbnN0IHI9c3ZnLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpLHA9cG9zKG4pOyB2aWV3Lms9TWF0aC5tYXgodmlldy5rLC43KTsgdmlldy54PShyLndpZHRoLSg0KkdYKSp2aWV3LmspLzItKE9YLTEwKSp2aWV3Lms7IHZpZXcueT02MC1wLnkqdmlldy5rOyBhcHBseVZpZXcoKTsgfSB9OwogIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdnb1ByZXAnKS5vbmNsaWNrPSgpPT5zaG93KCd2Q3ljbGVzJyk7Cn0KCi8qIFBhbmVsICovCmNvbnN0IHBhbmVsPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdwYW5lbCcpOwpmdW5jdGlvbiBzZWxlY3ROb2RlKGlkKXsgc2VsZWN0ZWQ9aWQ7IGhpZ2hsaWdodCgpOyBvcGVuUGFuZWwoKTsgcmV2ZWFsTm9kZShpZCk7IH0KZnVuY3Rpb24gY2xvc2VQYW5lbCgpeyBzZWxlY3RlZD1udWxsOyBwYW5lbC5jbGFzc0xpc3QucmVtb3ZlKCdvcGVuJyk7IGhpZ2hsaWdodCgpOyB9CmZ1bmN0aW9uIG9wZW5QYW5lbCgpewogIGNvbnN0IEI9YnlJZCgpLCBuPUJbc2VsZWN0ZWRdOyBpZighbikgcmV0dXJuIGNsb3NlUGFuZWwoKTsKICBjb25zdCBwPVAobi5pZCksIGE9QVJFQVNbbi5hcmVhXSwgcz1ub2RlU3RhdGUobiksIG1kPW1hdGhEb20oKTsKICBjb25zdCByZXFzPW4ucmVxcy5maWx0ZXIocT0+QltxXSksIG9wZW5zPVMubm9kZXMuZmlsdGVyKHg9PngucmVxcy5pbmNsdWRlcyhuLmlkKSk7CiAgY29uc3QgbWlzcz1yZXFzLmZpbHRlcihxPT4hcGFzc2VkKHEpKTsKICBjb25zdCBjaGlwPSh4KT0+YDxidXR0b24gY2xhc3M9Im5jaGlwICR7cGFzc2VkKHguaWQpPydvayc6Jyd9IiBzdHlsZT0iLS1jOiR7QVJFQVNbeC5hcmVhXS5jfSIgZGF0YS1nbz0iJHtlc2MoeC5pZCl9Ij48Yj4ke3guY3ljbGV9wrA8L2I+ICR7ZXNjKHgubmFtZSl9PC9idXR0b24+YDsKICBjb25zdCBkb25lPW5ldyBTZXQocC50b3BpY3N8fFtdKTsKICBwYW5lbC5pbm5lckhUTUw9YDxkaXYgY2xhc3M9ImdyYWIiPjxzcGFuIGNsYXNzPSJwLWlkIiBzdHlsZT0iYmFja2dyb3VuZDoke2EuY30iPkNpY2xvICR7bi5jeWNsZX08L3NwYW4+PGRpdiBjbGFzcz0icC10aXRsZSI+PGgyPiR7ZXNjKG4ubmFtZSl9PC9oMj48ZGl2PiR7ZXNjKGEubil9PC9kaXY+PC9kaXY+PGJ1dHRvbiBjbGFzcz0ieGJ0biIgaWQ9InBDbG9zZSIgYXJpYS1sYWJlbD0iQ2VycmFyIj7inJU8L2J1dHRvbj48L2Rpdj4KICAke3M9PT0nbG9jayc/YDxkaXYgY2xhc3M9Indhcm4iPkJsb3F1ZWFkbzogdGUgZmFsdGEgYXByb2JhciAke21pc3MubWFwKHE9PmVzYyhCW3FdLm5hbWUpKS5qb2luKCcsICcpfS4gU29sbyBlcyB1biBhdmlzbywgaWd1YWwgcHVlZGVzIG1hcmNhcmxvLjwvZGl2PmA6Jyd9CiAgPGRpdiBjbGFzcz0ic2VjIj48aDM+RXN0YWRvPC9oMz48ZGl2IGNsYXNzPSJzZWciPiR7U1RBVEVTLm1hcCgoW2ssbF0pPT5gPGJ1dHRvbiBkYXRhLXM9IiR7a30iIGNsYXNzPSIkeyhwLnN0YXR1c3x8J3BlbmRpZW50ZScpPT09az8nb24nOicnfSI+JHtsfTwvYnV0dG9uPmApLmpvaW4oJycpfTwvZGl2PjwvZGl2PgogIDxkaXYgY2xhc3M9InNlYyI+PGgzPlF1w6kgcHJlcGFyYXIgYW50ZXM8L2gzPjxkaXYgY2xhc3M9ImJveDIiPiR7ZXNjKG4ucHJlcHx8J+KAlCcpfSR7KFBSRVBfQ09VUlNFW24uaWRdfHxbXSkubWFwKChbayx0XSk9PmA8bGFiZWwgY2xhc3M9InRvcGljICR7Uy5wcmVwW2tdPydkb25lJzonJ30iPjxpbnB1dCB0eXBlPSJjaGVja2JveCIgZGF0YS1wcD0iJHtrfSIgJHtTLnByZXBba10/J2NoZWNrZWQnOicnfT48c3Bhbj4ke2VzYyh0KX08L3NwYW4+PC9sYWJlbD5gKS5qb2luKCcnKX08L2Rpdj4ke1BSRVBfQ09VUlNFW24uaWRdPyc8cCBjbGFzcz0ibm90ZSI+RXN0b3MgdGVtYXMgdGFtYmnDqW4gY3VlbnRhbiBlbiBsYSBsaXN0YSAiQW50ZXMgZGVsIDI5IGRlIG1hcnpvIi48L3A+JzonJ308L2Rpdj4KICA8ZGl2IGNsYXNzPSJzZWMiPjxoMz5UZW1hcyBwcm9iYWJsZXMgPGVtPmluZmVyaWRvPC9lbT48L2gzPjxkaXYgY2xhc3M9ImJveDIiPiR7bi50b3BpY3MubGVuZ3RoP24udG9waWNzLm1hcCgodCxpKT0+YDxsYWJlbCBjbGFzcz0idG9waWMgJHtkb25lLmhhcyhpKT8nZG9uZSc6Jyd9Ij48aW5wdXQgdHlwZT0iY2hlY2tib3giIGRhdGEtdD0iJHtpfSIgJHtkb25lLmhhcyhpKT8nY2hlY2tlZCc6Jyd9PjxzcGFuPiR7ZXNjKHQpfTwvc3Bhbj48L2xhYmVsPmApLmpvaW4oJycpOic8c3BhbiBjbGFzcz0ibXV0ZWQiPlNpbiB0ZW1hcyBhw7puLiBBZ3LDqWdhbG9zIGVuIEVkaXRhci48L3NwYW4+J308L2Rpdj48L2Rpdj4KICA8ZGl2IGNsYXNzPSJzZWMiPjxoMz5OZWNlc2l0YSA8ZW0+aW5mZXJpZG88L2VtPjwvaDM+PGRpdiBjbGFzcz0iY2hpcHMiPiR7cmVxcy5sZW5ndGg/cmVxcy5tYXAocT0+Y2hpcChCW3FdKSkuam9pbignJyk6JzxzcGFuIGNsYXNzPSJtdXRlZCI+TmluZ8O6biBjdXJzbyBwcmV2aW8uPC9zcGFuPid9PC9kaXY+PC9kaXY+CiAgJHtuLm1hdGgubGVuZ3RoP2A8ZGl2IGNsYXNzPSJzZWMiPjxoMz5EZSB0dSBwbGFuIGRlIG1hdGVtw6F0aWNhPC9oMz48ZGl2IGNsYXNzPSJjaGlwcyI+JHtuLm1hdGgubWFwKHQ9PmA8c3BhbiBjbGFzcz0ibmNoaXAgJHttZCYmbWRbdF0/J29rJzonJ30iIHN0eWxlPSItLWM6IzYwYTVmYSI+PGI+JHtlc2ModCl9PC9iPiAke2VzYyhNQVRIX05BTUVTW3RdfHwnJyl9PC9zcGFuPmApLmpvaW4oJycpfTwvZGl2PiR7bWQ/Jyc6JzxwIGNsYXNzPSJub3RlIj5BYnJlIGVzdGEgYXBwIGVuIGVsIG1pc21vIG5hdmVnYWRvciBxdWUgbGEgZGUgbWF0ZW3DoXRpY2EgcGFyYSB2ZXIgdHVzIHRlbWFzIGRvbWluYWRvcyAo4pyTKS48L3A+J308L2Rpdj5gOicnfQogIDxkaXYgY2xhc3M9InNlYyI+PGgzPkFicmU8L2gzPjxkaXYgY2xhc3M9ImNoaXBzIj4ke29wZW5zLmxlbmd0aD9vcGVucy5tYXAoY2hpcCkuam9pbignJyk6JzxzcGFuIGNsYXNzPSJtdXRlZCI+Tm8gZXMgcmVxdWlzaXRvIGRlIG90cm8gY3Vyc28uPC9zcGFuPid9PC9kaXY+PC9kaXY+CiAgPGRpdiBjbGFzcz0ic2VjIj48aDM+UmVjdXJzb3MgZ3JhdGlzPC9oMz48ZGl2IGNsYXNzPSJib3gyIj4ke24ucmVzLmxlbmd0aD9uLnJlcy5tYXAoeD0+e2NvbnN0IHU9c2FmZVVybCh4LnUpO3JldHVybiB1P2A8YSBjbGFzcz0icmVzIiBocmVmPSIke2VzYyh1KX0iIHRhcmdldD0iX2JsYW5rIiByZWw9Im5vb3BlbmVyIj4ke2VzYyh4Lm4pfTxzbWFsbD4ke2VzYyh1LnJlcGxhY2UoL15odHRwcz86XC9cLy8sJycpKX08L3NtYWxsPjwvYT5gOmA8ZGl2IGNsYXNzPSJyZXMiPiR7ZXNjKHgubil9PC9kaXY+YDt9KS5qb2luKCcnKTonPHNwYW4gY2xhc3M9Im11dGVkIj5BZ3JlZ2EgcmVjdXJzb3MgZW4gRWRpdGFyLjwvc3Bhbj4nfTwvZGl2PjwvZGl2PgogIDxkaXYgY2xhc3M9InNlYyByb3cyIj48bGFiZWwgY2xhc3M9ImYiPk5vdGEgZmluYWwgKHNvYnJlIDIwKTxpbnB1dCBpZD0icEdyYWRlIiB0eXBlPSJudW1iZXIiIGlucHV0bW9kZT0iZGVjaW1hbCIgbWluPSIwIiBtYXg9IjIwIiBzdGVwPSIwLjUiIHZhbHVlPSIke3AuZ3JhZGU/PycnfSI+PC9sYWJlbD48ZGl2PjwvZGl2PjwvZGl2PgogIDxkaXYgY2xhc3M9InNlYyI+PGxhYmVsIGNsYXNzPSJmIj5Ob3Rhczx0ZXh0YXJlYSBpZD0icE5vdGVzIiBwbGFjZWhvbGRlcj0iRHVkYXMsIHByb2Zlc29yLCBmZWNoYXMgZGUgZXhhbWVu4oCmIj4ke2VzYyhwLm5vdGVzfHwnJyl9PC90ZXh0YXJlYT48L2xhYmVsPjwvZGl2PgogIDxkaXYgY2xhc3M9InNlYyBidG5zIj48YnV0dG9uIGNsYXNzPSJidG4iIGlkPSJwRWRpdCI+RWRpdGFyIGVzdGUgY3Vyc288L2J1dHRvbj48L2Rpdj5gOwogIHBhbmVsLmNsYXNzTGlzdC5hZGQoJ29wZW4nKTsgcGFuZWwuc2Nyb2xsVG9wPTA7CiAgcGFuZWwucXVlcnlTZWxlY3RvcignI3BDbG9zZScpLm9uY2xpY2s9Y2xvc2VQYW5lbDsKICBwYW5lbC5xdWVyeVNlbGVjdG9yQWxsKCcuc2VnIGJ1dHRvbicpLmZvckVhY2goYj0+Yi5vbmNsaWNrPSgpPT57IFAobi5pZCkuc3RhdHVzPWIuZGF0YXNldC5zOyBjb21taXQoKTsgb3BlblBhbmVsKCk7IH0pOwogIHBhbmVsLnF1ZXJ5U2VsZWN0b3JBbGwoJ1tkYXRhLXRdJykuZm9yRWFjaChjPT5jLm9uY2hhbmdlPSgpPT57IGNvbnN0IHNldD1uZXcgU2V0KFAobi5pZCkudG9waWNzfHxbXSk7IGNvbnN0IGk9K2MuZGF0YXNldC50OyBjLmNoZWNrZWQ/c2V0LmFkZChpKTpzZXQuZGVsZXRlKGkpOyBQKG4uaWQpLnRvcGljcz1bLi4uc2V0XS5zb3J0KChhLGIpPT5hLWIpOyBjLmNsb3Nlc3QoJy50b3BpYycpLmNsYXNzTGlzdC50b2dnbGUoJ2RvbmUnLGMuY2hlY2tlZCk7IGNvbW1pdCh0cnVlKTsgfSk7CiAgcGFuZWwucXVlcnlTZWxlY3RvckFsbCgnW2RhdGEtZ29dJykuZm9yRWFjaChiPT5iLm9uY2xpY2s9KCk9PnNlbGVjdE5vZGUoYi5kYXRhc2V0LmdvKSk7CiAgcGFuZWwucXVlcnlTZWxlY3RvcignI3BHcmFkZScpLm9uY2hhbmdlPWU9PnsgY29uc3Qgdj1lLnRhcmdldC52YWx1ZT09PScnP251bGw6TWF0aC5tYXgoMCxNYXRoLm1pbigyMCwrZS50YXJnZXQudmFsdWUpKTsgUChuLmlkKS5ncmFkZT12OyBjb21taXQodHJ1ZSk7IH07CiAgcGFuZWwucXVlcnlTZWxlY3RvcignI3BOb3RlcycpLm9uaW5wdXQ9ZT0+eyBQKG4uaWQpLm5vdGVzPWUudGFyZ2V0LnZhbHVlOyBzYXZlKCk7IH07CiAgcGFuZWwucXVlcnlTZWxlY3RvcignI3BFZGl0Jykub25jbGljaz0oKT0+b3BlbkVkaXRvcihuLmlkKTsKICBwYW5lbC5xdWVyeVNlbGVjdG9yQWxsKCdbZGF0YS1wcF0nKS5mb3JFYWNoKGM9PmMub25jaGFuZ2U9KCk9PnsgUy5wcmVwW2MuZGF0YXNldC5wcF09Yy5jaGVja2VkOyBzYXZlKCk7IGMuY2xvc2VzdCgnLnRvcGljJykuY2xhc3NMaXN0LnRvZ2dsZSgnZG9uZScsYy5jaGVja2VkKTsgaWYoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3ZDeWNsZXMnKS5jbGFzc0xpc3QuY29udGFpbnMoJ2FjdGl2ZScpKSByZW5kZXJDeWNsZXMoKTsgfSk7Cn0KZnVuY3Rpb24gY29tbWl0KGtlZXBQYW5lbCl7IHNhdmUoKTsgcmVuZGVySGVhZGVyKCk7IHJlbmRlclRyZWUoKTsgcmVuZGVyVG9vbGJhcigpOyBpZihkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndkN5Y2xlcycpLmNsYXNzTGlzdC5jb250YWlucygnYWN0aXZlJykpIHJlbmRlckN5Y2xlcygpOyBpZihkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndlByb2cnKS5jbGFzc0xpc3QuY29udGFpbnMoJ2FjdGl2ZScpKSByZW5kZXJQcm9ncmVzcygpOyB9CgovKiBDaWNsb3MgKi8KZnVuY3Rpb24gcmVuZGVyQ3ljbGVzKCl7CiAgY29uc3QgZWw9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3ZDeWNsZXMnKSwgZD1kYXlzTGVmdCgpLCBtZD1tYXRoRG9tKCk7CiAgY29uc3QgdERvbmU9bWQ/T2JqZWN0LmtleXMoTUFUSF9OQU1FUykuZmlsdGVyKGs9Pm1kW2tdKS5sZW5ndGg6bnVsbDsKICBsZXQgaD1gPGRpdiBjbGFzcz0iY2FyZCI+PGgyPkFudGVzIGRlbCAyOSBkZSBtYXJ6bzxzbWFsbD4ke2Q+MD9gZmFsdGFuICR7ZH0gZMOtYXNgOifCoXlhIGVtcGV6YXN0ZSEnfTwvc21hbGw+PC9oMj4KICAgJHtQUkVQLm1hcCgoW2ssdF0pPT5gPGxhYmVsIGNsYXNzPSJ0b3BpYyAke1MucHJlcFtrXT8nZG9uZSc6Jyd9Ij48aW5wdXQgdHlwZT0iY2hlY2tib3giIGRhdGEtcD0iJHtrfSIgJHtTLnByZXBba10/J2NoZWNrZWQnOicnfT48c3Bhbj4ke2VzYyh0KX0ke2s9PT0nbWF0aCcmJnREb25lIT1udWxsP2AgwrcgJHt0RG9uZX0vMTcgZG9taW5hZG9zYDonJ308L3NwYW4+PC9sYWJlbD5gKS5qb2luKCcnKX0KICAgPHAgY2xhc3M9Im5vdGUiPkxvcyBjb250ZW5pZG9zIGRlIGNhZGEgY3Vyc28gc29uIGluZmVyaWRvczogbGEgdW5pdmVyc2lkYWQgbm8gcHVibGljYSBsb3Mgc8OtbGFib3MuIENvcnLDrWdlbG9zIGVuIEVkaXRhciBjdWFuZG8gdGVuZ2FzIGVsIHPDrWxhYm8gcmVhbC48L3A+PC9kaXY+YDsKICBjb25zdCBtYXhDPU1hdGgubWF4KC4uLlMubm9kZXMubWFwKG49Pm4uY3ljbGUpKTsKICBmb3IobGV0IGM9MTtjPD1tYXhDO2MrKyl7IGNvbnN0IEw9Uy5ub2Rlcy5maWx0ZXIobj0+bi5jeWNsZT09PWMpLnNvcnQoKGEsYik9PmEuY29sLWIuY29sKTsgaWYoIUwubGVuZ3RoKSBjb250aW51ZTsKICAgIGNvbnN0IG9rPUwuZmlsdGVyKG49PnBhc3NlZChuLmlkKSkubGVuZ3RoOwogICAgaCs9YDxkaXYgY2xhc3M9ImNhcmQiPjxoMj5DaWNsbyAke2N9PHNtYWxsPiR7b2t9LyR7TC5sZW5ndGh9IGFwcm9iYWRvczwvc21hbGw+PC9oMj4ke0wubWFwKG49Pntjb25zdCBzPXN0KG4uaWQpLHBjPU1hdGgucm91bmQodG9waWNQY3QobikqMTAwKSxnPShTLnByb2dyZXNzW24uaWRdfHx7fSkuZ3JhZGU7CiAgICAgIHJldHVybiBgPGRpdiBjbGFzcz0iY291cnNlIiBkYXRhLWdvPSIke2VzYyhuLmlkKX0iIHN0eWxlPSItLWM6JHtBUkVBU1tuLmFyZWFdLmN9Ij48c3BhbiBjbGFzcz0iZG90ICR7cz09PSdhcHJvYmFkbyc/J2YnOicnfSI+PC9zcGFuPjxzcGFuIGNsYXNzPSJubSI+JHtlc2Mobi5uYW1lKX08c21hbGw+JHtlc2MoQVJFQVNbbi5hcmVhXS5uKX0gwrcgdGVtYXMgJHtwY30lJHtnIT1udWxsJiZnIT09Jyc/YCDCtyBub3RhICR7ZXNjKGcpfWA6Jyd9PC9zbWFsbD48L3NwYW4+JHtzIT09J3BlbmRpZW50ZSc/YDxzcGFuIGNsYXNzPSJ0YWcgJHtzfSI+JHtTVEFURVMuZmluZCh4PT54WzBdPT09cylbMV19PC9zcGFuPmA6Jyd9PC9kaXY+YDt9KS5qb2luKCcnKX08L2Rpdj5gOyB9CiAgZWwuaW5uZXJIVE1MPWg7CiAgZWwucXVlcnlTZWxlY3RvckFsbCgnW2RhdGEtcF0nKS5mb3JFYWNoKGM9PmMub25jaGFuZ2U9KCk9PnsgUy5wcmVwW2MuZGF0YXNldC5wXT1jLmNoZWNrZWQ7IHNhdmUoKTsgYy5jbG9zZXN0KCcudG9waWMnKS5jbGFzc0xpc3QudG9nZ2xlKCdkb25lJyxjLmNoZWNrZWQpOyB9KTsKICBlbC5xdWVyeVNlbGVjdG9yQWxsKCdbZGF0YS1nb10nKS5mb3JFYWNoKGI9PmIub25jbGljaz0oKT0+eyBzaG93KCd2VHJlZScpOyBzZXRUaW1lb3V0KCgpPT5zZWxlY3ROb2RlKGIuZGF0YXNldC5nbyksMzApOyB9KTsKfQoKLyogUHJvZ3Jlc28gKi8KZnVuY3Rpb24gcmVuZGVyUHJvZ3Jlc3MoKXsKICBjb25zdCBlbD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndlByb2cnKSwgTj1TLm5vZGVzLCBvaz1OLmZpbHRlcihuPT5wYXNzZWQobi5pZCkpOwogIGNvbnN0IGdyYWRlcz1OLm1hcChuPT4oUy5wcm9ncmVzc1tuLmlkXXx8e30pLmdyYWRlKS5maWx0ZXIoZz0+ZyE9bnVsbCYmZyE9PScnKS5tYXAoTnVtYmVyKTsKICBjb25zdCBhdmc9Z3JhZGVzLmxlbmd0aD8oZ3JhZGVzLnJlZHVjZSgoYSxiKT0+YStiLDApL2dyYWRlcy5sZW5ndGgpOm51bGw7CiAgY29uc3QgdFRvdD1OLnJlZHVjZSgoYSxuKT0+YStuLnRvcGljcy5sZW5ndGgsMCksIHREb25lPU4ucmVkdWNlKChhLG4pPT5hK01hdGgucm91bmQodG9waWNQY3Qobikqbi50b3BpY3MubGVuZ3RoKSwwKTsKICBjb25zdCByb3c9KGxibCxhLGIsYyk9PmA8ZGl2IGNsYXNzPSJwcm93IiBzdHlsZT0iLS1jOiR7Y30iPjxzcGFuPiR7ZXNjKGxibCl9PC9zcGFuPjxkaXYgY2xhc3M9InBiYXIiPjxpIHN0eWxlPSJ3aWR0aDoke2I/YS9iKjEwMDowfSUiPjwvaT48L2Rpdj48c3Bhbj4ke2F9LyR7Yn08L3NwYW4+PC9kaXY+YDsKICBsZXQgaD1gPGRpdiBjbGFzcz0iY2FyZCI+PGgyPkdlbmVyYWw8L2gyPjxkaXYgY2xhc3M9InJvdzIiPjxkaXY+PGRpdiBjbGFzcz0iYmlnIj4ke29rLmxlbmd0aH0vJHtOLmxlbmd0aH08L2Rpdj48ZGl2IGNsYXNzPSJtdXRlZCI+Y3Vyc29zIGFwcm9iYWRvczwvZGl2PjwvZGl2PjxkaXY+PGRpdiBjbGFzcz0iYmlnIj4ke2F2ZyE9bnVsbD9hdmcudG9GaXhlZCgxKTon4oCUJ308L2Rpdj48ZGl2IGNsYXNzPSJtdXRlZCI+cHJvbWVkaW8gc2ltcGxlIC8yMDwvZGl2PjwvZGl2PjwvZGl2PgogICA8ZGl2IHN0eWxlPSJtYXJnaW4tdG9wOjEwcHgiPiR7cm93KCdDdXJzb3MnLG9rLmxlbmd0aCxOLmxlbmd0aCwnIzRhZGU4MCcpfSR7cm93KCdUZW1hcyByZXBhc2Fkb3MnLHREb25lLHRUb3QsJyM3YWEyZmYnKX08L2Rpdj48L2Rpdj5gOwogIGgrPWA8ZGl2IGNsYXNzPSJjYXJkIj48aDI+UG9yIMOhcmVhPC9oMj4ke09iamVjdC5lbnRyaWVzKEFSRUFTKS5tYXAoKFtrLGFdKT0+e2NvbnN0IEw9Ti5maWx0ZXIobj0+bi5hcmVhPT09ayk7IHJldHVybiBMLmxlbmd0aD9yb3coYS5uLEwuZmlsdGVyKG49PnBhc3NlZChuLmlkKSkubGVuZ3RoLEwubGVuZ3RoLGEuYyk6Jyc7fSkuam9pbignJyl9PC9kaXY+YDsKICBjb25zdCBtYXhDPU1hdGgubWF4KC4uLk4ubWFwKG49Pm4uY3ljbGUpKTsKICBoKz1gPGRpdiBjbGFzcz0iY2FyZCI+PGgyPlBvciBjaWNsbzwvaDI+JHtBcnJheS5mcm9tKHtsZW5ndGg6bWF4Q30sKF8saSk9Pntjb25zdCBMPU4uZmlsdGVyKG49Pm4uY3ljbGU9PT1pKzEpO3JldHVybiBMLmxlbmd0aD9yb3coJ0NpY2xvICcrKGkrMSksTC5maWx0ZXIobj0+cGFzc2VkKG4uaWQpKS5sZW5ndGgsTC5sZW5ndGgsJyNmYWNjMTUnKTonJzt9KS5qb2luKCcnKX08L2Rpdj5gOwogIGVsLmlubmVySFRNTD1oOwp9CgovKiBFZGl0b3IgKi8KZnVuY3Rpb24gcmVuZGVyRWRpdG9yKCl7CiAgY29uc3QgZWw9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3ZFZGl0Jyk7CiAgY29uc3QgTD1bLi4uUy5ub2Rlc10uc29ydCgoYSxiKT0+YS5jeWNsZS1iLmN5Y2xlfHxhLmNvbC1iLmNvbCk7CiAgZWwuaW5uZXJIVE1MPWA8ZGl2IGNsYXNzPSJjYXJkIj48aDI+Q3Vyc29zPHNtYWxsPiR7TC5sZW5ndGh9PC9zbWFsbD48L2gyPjxkaXYgY2xhc3M9ImJ0bnMiIHN0eWxlPSJtYXJnaW4tYm90dG9tOjZweCI+PGJ1dHRvbiBjbGFzcz0iYnRuIHByaSIgaWQ9ImVBZGQiPisgQWdyZWdhciBjdXJzbzwvYnV0dG9uPjwvZGl2PgogICAke0wubWFwKG49PmA8ZGl2IGNsYXNzPSJlZC1yb3ciPjxzcGFuIGNsYXNzPSJkb3QgZiIgc3R5bGU9Ii0tYzoke0FSRUFTW24uYXJlYV0uY30iPjwvc3Bhbj48c3BhbiBjbGFzcz0ibm0iPiR7ZXNjKG4ubmFtZSl9PHNtYWxsPkNpY2xvICR7bi5jeWNsZX0gwrcgY29sLiAke24uY29sfSDCtyAke2VzYyhuLmlkKX08L3NtYWxsPjwvc3Bhbj48YnV0dG9uIGNsYXNzPSJidG4iIGRhdGEtZT0iJHtlc2Mobi5pZCl9Ij5FZGl0YXI8L2J1dHRvbj48L2Rpdj5gKS5qb2luKCcnKX08L2Rpdj4KICAgPGRpdiBjbGFzcz0iY2FyZCI+PGgyPlJlc3BhbGRvPC9oMj48ZGl2IGNsYXNzPSJidG5zIj48YnV0dG9uIGNsYXNzPSJidG4iIGlkPSJlRXhwIj5FeHBvcnRhciBKU09OPC9idXR0b24+PGJ1dHRvbiBjbGFzcz0iYnRuIiBpZD0iZUltcCI+SW1wb3J0YXIgSlNPTjwvYnV0dG9uPjxidXR0b24gY2xhc3M9ImJ0biBkbmciIGlkPSJlUmVzZXQiPlJlaW5pY2lhciB0b2RvPC9idXR0b24+PC9kaXY+CiAgIDxwIGNsYXNzPSJub3RlIj5Ub2RvIHNlIGd1YXJkYSBlbiBlc3RlIG5hdmVnYWRvci4gRXhwb3J0YSBkZSB2ZXogZW4gY3VhbmRvIHBhcmEgbm8gcGVyZGVybG8uPC9wPjwvZGl2PmA7CiAgZWwucXVlcnlTZWxlY3RvcignI2VBZGQnKS5vbmNsaWNrPSgpPT5vcGVuRWRpdG9yKG51bGwpOwogIGVsLnF1ZXJ5U2VsZWN0b3JBbGwoJ1tkYXRhLWVdJykuZm9yRWFjaChiPT5iLm9uY2xpY2s9KCk9Pm9wZW5FZGl0b3IoYi5kYXRhc2V0LmUpKTsKICBlbC5xdWVyeVNlbGVjdG9yKCcjZUV4cCcpLm9uY2xpY2s9ZXhwb3J0SlNPTjsKICBlbC5xdWVyeVNlbGVjdG9yKCcjZUltcCcpLm9uY2xpY2s9KCk9PmRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdmaWxlSW4nKS5jbGljaygpOwogIGVsLnF1ZXJ5U2VsZWN0b3IoJyNlUmVzZXQnKS5vbmNsaWNrPSgpPT5jb25maXJtQm94KCfCv1JlaW5pY2lhciB0b2RvPycsJ1NlIGJvcnJhbiB0dSBwcm9ncmVzbyB5IHR1cyBjYW1iaW9zIGEgbGEgbWFsbGEuIE5vIHNlIHB1ZWRlIGRlc2hhY2VyLicsJ1JlaW5pY2lhcicsKCk9PnsgUz1mcmVzaCgpOyBzYXZlKCk7IGNsb3NlUGFuZWwoKTsgcmVmcmVzaEFsbCgpOyB0b2FzdCgnVG9kbyByZWluaWNpYWRvJyk7IH0pOwp9CmNvbnN0IG1vZGFsPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdtb2RhbCcpLCBtYm94PWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdtYm94Jyk7CmZ1bmN0aW9uIHNob3dNb2RhbChoKXsgbWJveC5pbm5lckhUTUw9aDsgbW9kYWwuY2xhc3NMaXN0LmFkZCgnc2hvdycpOyB9CmZ1bmN0aW9uIGhpZGVNb2RhbCgpeyBtb2RhbC5jbGFzc0xpc3QucmVtb3ZlKCdzaG93Jyk7IH0KbW9kYWwuYWRkRXZlbnRMaXN0ZW5lcignY2xpY2snLGU9PnsgaWYoZS50YXJnZXQ9PT1tb2RhbCkgaGlkZU1vZGFsKCk7IH0pOwpmdW5jdGlvbiBjb25maXJtQm94KHQsbXNnLG9rLGZuKXsgc2hvd01vZGFsKGA8aDI+JHtlc2ModCl9PC9oMj48cD4ke2VzYyhtc2cpfTwvcD48ZGl2IGNsYXNzPSJidG5zIj48YnV0dG9uIGNsYXNzPSJidG4iIGlkPSJjTm8iPkNhbmNlbGFyPC9idXR0b24+PGJ1dHRvbiBjbGFzcz0iYnRuIGRuZyIgaWQ9ImNPayI+JHtlc2Mob2spfTwvYnV0dG9uPjwvZGl2PmApOyBtYm94LnF1ZXJ5U2VsZWN0b3IoJyNjTm8nKS5vbmNsaWNrPWhpZGVNb2RhbDsgbWJveC5xdWVyeVNlbGVjdG9yKCcjY09rJykub25jbGljaz0oKT0+e2hpZGVNb2RhbCgpO2ZuKCk7fTsgfQpmdW5jdGlvbiBvcGVuRWRpdG9yKGlkKXsKICBjb25zdCBCPWJ5SWQoKSwgbj1pZD9CW2lkXTpudWxsOwogIGNvbnN0IHY9bnx8e2lkOidYJytEYXRlLm5vdygpLnRvU3RyaW5nKDM2KS5zbGljZSgtNSkudG9VcHBlckNhc2UoKSxjeWNsZTo5LGNvbDoxLG5hbWU6JycsYXJlYTonZWxlYycscmVxczpbXSxtYXRoOltdLHRvcGljczpbXSxwcmVwOicnLHJlczpbXX07CiAgc2hvd01vZGFsKGA8aDI+JHtuPydFZGl0YXIgY3Vyc28nOidOdWV2byBjdXJzbyd9PC9oMj4KICAgPGxhYmVsIGNsYXNzPSJmIj5Ob21icmU8aW5wdXQgaWQ9ImZOYW1lIiB2YWx1ZT0iJHtlc2Modi5uYW1lKX0iPjwvbGFiZWw+CiAgIDxkaXYgY2xhc3M9InJvdzIiPjxsYWJlbCBjbGFzcz0iZiI+Q2ljbG88aW5wdXQgaWQ9ImZDeWNsZSIgdHlwZT0ibnVtYmVyIiBtaW49IjEiIG1heD0iMTIiIHZhbHVlPSIke3YuY3ljbGV9Ij48L2xhYmVsPjxsYWJlbCBjbGFzcz0iZiI+Q29sdW1uYSAoMeKAkzQpPGlucHV0IGlkPSJmQ29sIiB0eXBlPSJudW1iZXIiIG1pbj0iMSIgbWF4PSI2IiB2YWx1ZT0iJHt2LmNvbH0iPjwvbGFiZWw+PC9kaXY+CiAgIDxsYWJlbCBjbGFzcz0iZiI+w4FyZWE8c2VsZWN0IGlkPSJmQXJlYSI+JHtPYmplY3QuZW50cmllcyhBUkVBUykubWFwKChbayxhXSk9PmA8b3B0aW9uIHZhbHVlPSIke2t9IiAke2s9PT12LmFyZWE/J3NlbGVjdGVkJzonJ30+JHthLm59PC9vcHRpb24+YCkuam9pbignJyl9PC9zZWxlY3Q+PC9sYWJlbD4KICAgPGxhYmVsIGNsYXNzPSJmIj5SZXF1aXNpdG9zIChpZHMgc2VwYXJhZG9zIHBvciBjb21hKTxpbnB1dCBpZD0iZlJlcXMiIHZhbHVlPSIke2VzYyh2LnJlcXMuam9pbignLCAnKSl9IiBwbGFjZWhvbGRlcj0iQzEwMSwgQzIwNCI+PC9sYWJlbD4KICAgPHAgY2xhc3M9Im5vdGUiIHN0eWxlPSJtYXJnaW4tdG9wOi02cHg7bWFyZ2luLWJvdHRvbToxMHB4Ij5JZHM6ICR7Uy5ub2Rlcy5maWx0ZXIoeD0+eC5pZCE9PXYuaWQpLm1hcCh4PT5gJHtlc2MoeC5pZCl9PSR7ZXNjKHgubmFtZS5zbGljZSgwLDE0KSl9YCkuam9pbignIMK3ICcpfTwvcD4KICAgPGxhYmVsIGNsYXNzPSJmIj5UZW1hcyBkZWwgcGxhbiBkZSBtYXRlbcOhdGljYSAoZWouIFQxMywgVDE4KTxpbnB1dCBpZD0iZk1hdGgiIHZhbHVlPSIke2VzYyh2Lm1hdGguam9pbignLCAnKSl9Ij48L2xhYmVsPgogICA8bGFiZWwgY2xhc3M9ImYiPlRlbWFzIGRlbCBjdXJzbyAodW5vIHBvciBsw61uZWEpPHRleHRhcmVhIGlkPSJmVG9waWNzIj4ke2VzYyh2LnRvcGljcy5qb2luKCdcbicpKX08L3RleHRhcmVhPjwvbGFiZWw+CiAgIDxsYWJlbCBjbGFzcz0iZiI+UXXDqSBwcmVwYXJhciBhbnRlczx0ZXh0YXJlYSBpZD0iZlByZXAiPiR7ZXNjKHYucHJlcCl9PC90ZXh0YXJlYT48L2xhYmVsPgogICA8bGFiZWwgY2xhc3M9ImYiPlJlY3Vyc29zICh1bm8gcG9yIGzDrW5lYTogbm9tYnJlIHwgZW5sYWNlKTx0ZXh0YXJlYSBpZD0iZlJlcyI+JHtlc2Modi5yZXMubWFwKHg9PngubisoeC51PycgfCAnK3gudTonJykpLmpvaW4oJ1xuJykpfTwvdGV4dGFyZWE+PC9sYWJlbD4KICAgPGRpdiBjbGFzcz0iYnRucyI+JHtuPyc8YnV0dG9uIGNsYXNzPSJidG4gZG5nIiBpZD0iZkRlbCI+Qm9ycmFyPC9idXR0b24+JzonJ308c3BhbiBzdHlsZT0iZmxleDoxIj48L3NwYW4+PGJ1dHRvbiBjbGFzcz0iYnRuIiBpZD0iZkNhbmNlbCI+Q2FuY2VsYXI8L2J1dHRvbj48YnV0dG9uIGNsYXNzPSJidG4gcHJpIiBpZD0iZlNhdmUiPkd1YXJkYXI8L2J1dHRvbj48L2Rpdj5gKTsKICBtYm94LnF1ZXJ5U2VsZWN0b3IoJyNmQ2FuY2VsJykub25jbGljaz1oaWRlTW9kYWw7CiAgaWYobikgbWJveC5xdWVyeVNlbGVjdG9yKCcjZkRlbCcpLm9uY2xpY2s9KCk9PmNvbmZpcm1Cb3goJ8K/Qm9ycmFyIGN1cnNvPycsYFNlIGJvcnJhIOKAnCR7bi5uYW1lfeKAnSB5IHNlIHF1aXRhIGNvbW8gcmVxdWlzaXRvIGRlIG90cm9zIGN1cnNvcy5gLCdCb3JyYXInLCgpPT57CiAgICBTLm5vZGVzPVMubm9kZXMuZmlsdGVyKHg9PnguaWQhPT1uLmlkKTsgUy5ub2Rlcy5mb3JFYWNoKHg9PngucmVxcz14LnJlcXMuZmlsdGVyKHE9PnEhPT1uLmlkKSk7IGRlbGV0ZSBTLnByb2dyZXNzW24uaWRdOyBpZihzZWxlY3RlZD09PW4uaWQpIGNsb3NlUGFuZWwoKTsgY29tbWl0KCk7IHJlbmRlckVkaXRvcigpOyB0b2FzdCgnQ3Vyc28gYm9ycmFkbycpOyB9KTsKICBtYm94LnF1ZXJ5U2VsZWN0b3IoJyNmU2F2ZScpLm9uY2xpY2s9KCk9PnsKICAgIGNvbnN0IGc9aT0+bWJveC5xdWVyeVNlbGVjdG9yKGkpLnZhbHVlOwogICAgY29uc3QgbmFtZT1nKCcjZk5hbWUnKS50cmltKCk7IGlmKCFuYW1lKSByZXR1cm4gdG9hc3QoJ1BvbmxlIHVuIG5vbWJyZScpOwogICAgY29uc3QgaWRzPW5ldyBTZXQoUy5ub2Rlcy5tYXAoeD0+eC5pZCkpOwogICAgY29uc3QgcmVxcz1nKCcjZlJlcXMnKS5zcGxpdCgnLCcpLm1hcChzPT5zLnRyaW0oKSkuZmlsdGVyKHM9PnMmJnMhPT12LmlkKTsKICAgIGNvbnN0IGJhZD1yZXFzLmZpbHRlcihxPT4haWRzLmhhcyhxKSk7IGlmKGJhZC5sZW5ndGgpIHJldHVybiB0b2FzdCgnTm8gZXhpc3RlOiAnK2JhZC5qb2luKCcsICcpKTsKICAgIC8vIGV2aXRhciBjaWNsb3MKICAgIGNvbnN0IHRtcD17Li4udixyZXFzfTsgY29uc3QgQjI9T2JqZWN0LmZyb21FbnRyaWVzKFMubm9kZXMubWFwKHg9Plt4LmlkLHguaWQ9PT12LmlkP3RtcDp4XSkpOyBCMlt2LmlkXT10bXA7CiAgICBjb25zdCBzZWVuPW5ldyBTZXQoKTsKICAgIGlmKHJlcXMuc29tZShxPT57IHNlZW4uY2xlYXIoKTsgc2Vlbi5hZGQodi5pZCk7IHJldHVybiAoZnVuY3Rpb24gd2Fsayh4KXsgaWYoeD09PXYuaWQpIHJldHVybiB0cnVlOyBpZihzZWVuLmhhcyh4KSkgcmV0dXJuIGZhbHNlOyBzZWVuLmFkZCh4KTsgcmV0dXJuIChCMlt4XT8ucmVxc3x8W10pLnNvbWUod2Fsayk7IH0pKHEpOyB9KSkgcmV0dXJuIHRvYXN0KCdFc28gY3JlYSB1biBjaWNsbyBkZSByZXF1aXNpdG9zJyk7CiAgICBjb25zdCBvYmo9e2lkOnYuaWQsbmFtZSxjeWNsZTpNYXRoLm1heCgxLE1hdGgubWluKDEyLHBhcnNlSW50KGcoJyNmQ3ljbGUnKSl8fDEpKSxjb2w6TWF0aC5tYXgoMSxNYXRoLm1pbig2LHBhcnNlSW50KGcoJyNmQ29sJykpfHwxKSksYXJlYTpnKCcjZkFyZWEnKSxyZXFzLAogICAgICBtYXRoOmcoJyNmTWF0aCcpLnNwbGl0KCcsJykubWFwKHM9PnMudHJpbSgpLnRvVXBwZXJDYXNlKCkpLmZpbHRlcihCb29sZWFuKSwKICAgICAgdG9waWNzOmcoJyNmVG9waWNzJykuc3BsaXQoJ1xuJykubWFwKHM9PnMudHJpbSgpKS5maWx0ZXIoQm9vbGVhbiksIHByZXA6ZygnI2ZQcmVwJykudHJpbSgpLAogICAgICByZXM6ZygnI2ZSZXMnKS5zcGxpdCgnXG4nKS5tYXAocz0+cy50cmltKCkpLmZpbHRlcihCb29sZWFuKS5tYXAocz0+e2NvbnN0IFthLC4uLmJdPXMuc3BsaXQoJ3wnKTsgcmV0dXJuIHtuOmEudHJpbSgpLHU6Yi5qb2luKCd8JykudHJpbSgpfTt9KX07CiAgICBpZihuKXsgT2JqZWN0LmFzc2lnbihuLG9iaik7IGlmKFMucHJvZ3Jlc3Nbbi5pZF0pIFMucHJvZ3Jlc3Nbbi5pZF0udG9waWNzPShTLnByb2dyZXNzW24uaWRdLnRvcGljc3x8W10pLmZpbHRlcihpPT5pPG9iai50b3BpY3MubGVuZ3RoKTsgfSBlbHNlIFMubm9kZXMucHVzaChvYmopOwogICAgaGlkZU1vZGFsKCk7IGNvbW1pdCgpOyByZW5kZXJFZGl0b3IoKTsgaWYoc2VsZWN0ZWQ9PT12LmlkKSBvcGVuUGFuZWwoKTsgdG9hc3QoJ0d1YXJkYWRvJyk7CiAgfTsKfQpmdW5jdGlvbiBleHBvcnRKU09OKCl7IGNvbnN0IGI9bmV3IEJsb2IoW0pTT04uc3RyaW5naWZ5KFMsbnVsbCwxKV0se3R5cGU6J2FwcGxpY2F0aW9uL2pzb24nfSk7IGNvbnN0IGE9ZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnYScpOyBhLmhyZWY9VVJMLmNyZWF0ZU9iamVjdFVSTChiKTsgYS5kb3dubG9hZD0nbWFsbGEtYWxpLScrbmV3IERhdGUoKS50b0lTT1N0cmluZygpLnNsaWNlKDAsMTApKycuanNvbic7IGRvY3VtZW50LmJvZHkuYXBwZW5kQ2hpbGQoYSk7IGEuY2xpY2soKTsgYS5yZW1vdmUoKTsgc2V0VGltZW91dCgoKT0+VVJMLnJldm9rZU9iamVjdFVSTChhLmhyZWYpLDEwMDApOyB0b2FzdCgnQXJjaGl2byBleHBvcnRhZG8nKTsgfQpkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZmlsZUluJykub25jaGFuZ2U9ZT0+eyBjb25zdCBmPWUudGFyZ2V0LmZpbGVzWzBdOyBpZighZikgcmV0dXJuOyBjb25zdCByZD1uZXcgRmlsZVJlYWRlcigpOyByZC5vbmxvYWQ9KCk9PnsgdHJ5eyBjb25zdCBkPW5vcm1hbGl6ZShKU09OLnBhcnNlKHJkLnJlc3VsdCkpOyBpZighZCkgdGhyb3cgMDsgUz1kOyBzYXZlKCk7IGNsb3NlUGFuZWwoKTsgcmVmcmVzaEFsbCgpOyB0b2FzdCgnUHJvZ3Jlc28gaW1wb3J0YWRvJyk7IH1jYXRjaCh4KXsgdG9hc3QoJ0FyY2hpdm8gbm8gdsOhbGlkbycpOyB9IGUudGFyZ2V0LnZhbHVlPScnOyB9OyByZC5yZWFkQXNUZXh0KGYpOyB9OwpsZXQgdHQ7IGZ1bmN0aW9uIHRvYXN0KG0peyBjb25zdCB0PWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCd0b2FzdCcpOyB0LnRleHRDb250ZW50PW07IHQuY2xhc3NMaXN0LmFkZCgnc2hvdycpOyBjbGVhclRpbWVvdXQodHQpOyB0dD1zZXRUaW1lb3V0KCgpPT50LmNsYXNzTGlzdC5yZW1vdmUoJ3Nob3cnKSwyMjAwKTsgfQoKLyogTmF2ZWdhY2nDs24gKi8KZnVuY3Rpb24gc2hvdyh2KXsgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnLnZpZXcnKS5mb3JFYWNoKGU9PmUuY2xhc3NMaXN0LnRvZ2dsZSgnYWN0aXZlJyxlLmlkPT09dikpOyBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCduYXYgYnV0dG9uJykuZm9yRWFjaChiPT5iLmNsYXNzTGlzdC50b2dnbGUoJ2FjdGl2ZScsYi5kYXRhc2V0LnY9PT12KSk7CiAgaWYodj09PSd2Q3ljbGVzJykgcmVuZGVyQ3ljbGVzKCk7IGlmKHY9PT0ndlByb2cnKSByZW5kZXJQcm9ncmVzcygpOyBpZih2PT09J3ZFZGl0JykgcmVuZGVyRWRpdG9yKCk7IH0KZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnbmF2IGJ1dHRvbicpLmZvckVhY2goYj0+Yi5vbmNsaWNrPSgpPT5zaG93KGIuZGF0YXNldC52KSk7CmZ1bmN0aW9uIHJlZnJlc2hBbGwoKXsgcmVuZGVySGVhZGVyKCk7IHJlbmRlclRyZWUoKTsgcmVuZGVyVG9vbGJhcigpOyBjb25zdCBhPWRvY3VtZW50LnF1ZXJ5U2VsZWN0b3IoJy52aWV3LmFjdGl2ZScpLmlkOyBpZihhIT09J3ZUcmVlJykgc2hvdyhhKTsgfQp3aW5kb3cuYWRkRXZlbnRMaXN0ZW5lcignc3RvcmFnZScsZT0+eyBpZihlLmtleT09PU1BVEhfS0VZJiZzZWxlY3RlZCkgb3BlblBhbmVsKCk7IH0pOwpyZWZyZXNoQWxsKCk7IHJlcXVlc3RBbmltYXRpb25GcmFtZShzdGFydFZpZXcpOwo8L3NjcmlwdD4KPC9ib2R5Pgo8L2h0bWw+Cg==
+</script>
+<input type="file" id="fileIn" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+/* ===================== Datos base ===================== */
+const KEY = 'arbolMatematicaAli.v1';
+const PHASES = {
+  F1:{name:'F1 · Aritmética', color:'#f4a261'},
+  F2:{name:'F2 · Álgebra', color:'#4cc9f0'},
+  F3:{name:'F3 · Geometría, funciones y matrices', color:'#a78bfa'},
+  F4:{name:'F4 · Cálculo', color:'#f472b6'},
+  U:{name:'U · Universidad', color:'#facc15'},
+  P:{name:'P · Programación', color:'#4ade80'},
+  R:{name:'R · Preparación para la carrera', color:'#fb7185'}
+};
+const T = (id,week,dates,phase,title,target,goal,reqs) => ({id,week,dates,phase,title,target,goal,reqs,desc:'',dashed:false,grade20:false});
+const P1_LINKS=[['CS50P (curso oficial)','https://cs50.harvard.edu/python/'],['CS50P en edX','https://www.edx.org/learn/python/harvard-university-cs50-s-introduction-to-programming-with-python']];
+const R_NODES=[
+  {id:'R1',week:null,dates:'Antes del 29/3',phase:'R',title:'Elements of AI',target:0,goal:'Terminar la parte 1 (Introducción a la IA)',reqs:[],desc:'Curso gratis de la Universidad de Helsinki. Prepara Introducción a la Ingeniería en IA (ciclo 1).',dashed:false,grade20:false,links:[['Elements of AI','https://www.elementsofai.com/']]},
+  {id:'R2',week:null,dates:'Antes del 29/3',phase:'R',title:'Excel básico',target:0,goal:'Hacer una tabla con fórmulas (SUMA, PROMEDIO, SI), filtros y un gráfico',reqs:[],desc:'Útil en Introducción a la Ingeniería en IA y en el trabajo.',dashed:false,grade20:false,links:[['Excel en GCFGlobal','https://edu.gcfglobal.org/es/excel-2016/'],['Ayuda de Excel (Microsoft)','https://support.microsoft.com/es-es/excel']]},
+  {id:'R3',week:null,dates:'Antes del 29/3',phase:'R',title:'Inglés técnico',target:0,goal:'Leer un texto técnico corto por semana y anotar 20 palabras clave',reqs:[],desc:'La documentación de Python, IA y datos casi siempre está en inglés.',dashed:false,grade20:false,links:[['BBC Learning English','https://www.bbc.co.uk/learningenglish'],['Duolingo','https://www.duolingo.com/']]},
+  {id:'R4',week:null,dates:'Antes del 29/3',phase:'R',title:'Git y GitHub',target:0,goal:'Crear un repositorio, hacer commits y subir un proyecto',reqs:[],desc:'Se usa en casi todos los cursos de programación.',dashed:false,grade20:false,links:[['Guía de GitHub','https://docs.github.com/es/get-started'],['Learn Git Branching','https://learngitbranching.js.org/?locale=es_ES']]},
+  {id:'R5',week:null,dates:'Opcional',phase:'R',title:'Estadística en Khan Academy (opcional)',target:0,goal:'Unidades de análisis de datos y probabilidad',reqs:[],desc:'Opcional: adelanta el curso de Estadística (ciclo 3).',dashed:true,grade20:false,links:[['Khan Academy: Estadística','https://es.khanacademy.org/math/statistics-probability']]}
+];
+function defaultNodes(){ return [
+  T('T1',1,'16–22 nov 2026','F1','Signos, jerarquía y fracciones',80,'8/10 operaciones combinadas con fracciones en 20 min',[]),
+  T('T2',2,'23–29 nov 2026','F1','Decimales, porcentajes y exponentes',80,'8/10 expresiones con exponentes',['T1']),
+  T('T3',3,'30 nov–6 dic 2026','F1','Radicales',70,'8/10 simplificaciones tipo √50 + √18 − √8',['T2']),
+  T('T4',4,'7–13 dic 2026','F2','Polinomios y productos notables',90,'8/10 productos notables en 10 min',['T2']),
+  T('T5',5,'14–20 dic 2026','F2','Factorización',100,'8/10 expresiones, nombrando el caso',['T4']),
+  T('T7',7,'28 dic 2026–3 ene 2027','F2','Ecuaciones lineales',50,'8/10 ecuaciones con fracciones',['T4']),
+  T('T8',8,'4–10 ene 2027','F2','Fracciones algebraicas y ecuaciones racionales',80,'8/10 fracciones simplificadas',['T1','T5']),
+  {...T('X1',6,'21–27 dic 2026 (repaso)','F2','División de polinomios y Ruffini',40,'8/10 divisiones con Ruffini y factorizaciones de cúbicas',['T4']), desc:'Tema agregado en la auditoría. Se estudia en la semana 6, junto al repaso.'},
+  T('T9',9,'11–17 ene 2027','F2','Ecuación cuadrática',80,'8/10 eligiendo el método',['T3','T5','T7']),
+  T('T10',10,'18–24 ene 2027','F2','Sistemas de ecuaciones',70,'8/10 sistemas',['T7']),
+  T('T11',11,'25–31 ene 2027','F2','Inecuaciones y valor absoluto',70,'8/10 con la solución como intervalo',['T9']),
+  T('T12',12,'1–7 feb 2027','F3','Recta y distancia',70,'8/10 ecuaciones de la recta',['T7']),
+  T('T13',13,'8–14 feb 2027','F3','Funciones: dominio, rango y gráfica',70,'8/10 funciones graficadas a mano',['T9','T11','T12']),
+  T('T14',14,'15–21 feb 2027','F3','Circunferencia y parábola',60,'8/10 ecuaciones (centro y radio, vértice y foco)',['T9','T12']),
+  T('T15',15,'22–28 feb 2027','F3','Matrices',70,'8/10 operaciones y un sistema 3×3',['T10']),
+  T('T16',16,'1–7 mar 2027','F3','Exponenciales y logaritmos',60,'8/10 ecuaciones',['T2','T13','X6']),
+  T('T17',17,'8–14 mar 2027','F4','Límites y continuidad',50,'8/10 límites algebraicos',['T5','T8','T13','X1']),
+  {...T('X2',null,'Extra (sin semana fija)','F3','Trigonometría',80,'8/10 problemas de razones, identidades y ecuaciones trigonométricas',['T3','T13']), desc:'Tema agregado en la auditoría: hace falta para derivar seno y coseno.'},
+  {...T('X3',null,'Extra (sin semana fija)','F3','Elipse e hipérbola',50,'8/10 ecuaciones de elipse e hipérbola (centro, ejes y focos)',['T14']), desc:'Tema agregado en la auditoría: completa las cónicas de geometría analítica.'},
+  {...T('X4',null,'Extra (sin semana fija)','F3','Vectores',50,'8/10 operaciones con vectores (suma, producto escalar, norma y ángulo)',['T12']), desc:'Tema agregado en la auditoría.'},
+  {...T('X5',null,'Extra (sin semana fija)','F1','Lógica y conjuntos',40,'8/10 operaciones con conjuntos y tablas de verdad',['T1']), desc:'Base de la programación (condiciones if) y de la probabilidad.'},
+  {...T('X6',null,'Extra (sin semana fija)','F3','Funciones inversa y compuesta',50,'8/10 composiciones e inversas',['T13']), desc:'El logaritmo es la inversa de la exponencial, y la regla de la cadena deriva funciones compuestas.'},
+  {...T('X7',null,'Extra (sin semana fija)','F3','Sumatorias y sucesiones',40,'8/10 sumas con Σ y progresiones',['T2','T7']), desc:'Las integrales (MI II) se definen como sumas. También aparecen en algoritmos.'},
+  {...T('X8',null,'Extra (sin semana fija)','F3','Probabilidad básica y conteo',50,'8/10 problemas de conteo y probabilidad',['T1','X5']), desc:'Prepara el curso de Estadística (ciclo 3) y Machine Learning.'},
+  T('T18',18,'15–21 mar 2027','F4','Derivadas',60,'8/10 funciones derivadas',['T16','T17','X2','X6']),
+  {id:'U1',week:null,dates:'Ciclo 1',phase:'U',title:'Matemática para Ingenieros I',target:0,goal:'Aprobar el curso con 16 o más',reqs:['T13','T14','T15','T17','T18','X3','X4'],desc:'Contenido probable: matrices, geometría analítica, funciones, límites y continuidad, derivadas.',dashed:false,grade20:true},
+  {id:'U2',week:null,dates:'Ciclo 2',phase:'U',title:'Matemática para Ingenieros II',target:0,goal:'Aprobar el curso con 16 o más',reqs:['U1','X7'],desc:'Contenido por confirmar (probablemente integrales).',dashed:false,grade20:true},
+  {id:'U3',week:null,dates:'Ciclo 3 o después',phase:'U',title:'Matemática III (por confirmar)',target:0,goal:'Por confirmar con la malla oficial',reqs:['U2'],desc:'Curso por confirmar.',dashed:true,grade20:true},
+  {id:'P1',week:null,dates:'Domingos hasta marzo',phase:'P',title:'Python con CS50P (Harvard)',target:0,goal:'Terminar las primeras 4 semanas de CS50P',reqs:[],desc:'Se estudia los domingos, en paralelo a la matemática.',dashed:false,grade20:false,links:P1_LINKS},
+  {id:'P2',week:null,dates:'Ciclo 2',phase:'P',title:'Fundamentos de IA y Programación',target:0,goal:'Aprobar el curso',reqs:['P1'],desc:'Curso de la universidad.',dashed:false,grade20:false,row:9},
+  ...R_NODES.map(n=>({...n, links:n.links.map(l=>l.slice())}))
+];}
+function defaultEvals(){ return withNodes([
+  {id:'e1',name:'Evaluación 1',date:'2026-11-28',topic:'Fracciones y exponentes',max:10,score:null},
+  {id:'e2',name:'Evaluación 2',date:'2026-12-12',topic:'Radicales, polinomios y productos notables',max:10,score:null},
+  {id:'e3',name:'Evaluación 3',date:'2026-12-26',topic:'Acumulativa de las semanas 1 a 5',max:10,score:null},
+  {id:'e4',name:'Evaluación 4',date:'2027-01-09',topic:'Ecuaciones lineales y fracciones algebraicas',max:10,score:null},
+  {id:'e5',name:'Evaluación 5',date:'2027-01-23',topic:'Toda el álgebra (semanas 4 a 10)',max:10,score:null},
+  {id:'e6',name:'Evaluación 6',date:'2027-02-06',topic:'Inecuaciones, recta y distancia',max:10,score:null},
+  {id:'e7',name:'Evaluación 7',date:'2027-02-20',topic:'Funciones, circunferencia y parábola',max:10,score:null},
+  {id:'e8',name:'Evaluación 8',date:'2027-03-06',topic:'Matrices, exponenciales y logaritmos',max:10,score:null},
+  {id:'e9',name:'Evaluación 9',date:'2027-03-20',topic:'Límites, continuidad y derivadas',max:10,score:null},
+  {id:'final',name:'Simulacro final',date:'2027-03-27',topic:'Simulacro de todo (15 ejercicios)',max:15,score:null}
+]);}
+function withNodes(a){ a.forEach(e=>e.nodes=(EVAL_NODES[e.id]||[]).slice()); return a; }
+const EVAL_NODES = {e1:['T1','T2'], e2:['T3','T4'], e3:['T1','T2','T3','T4','T5'], e4:['T7','T8'], e5:['T4','T5','T7','T8','T9','T10'], e6:['T11','T12'], e7:['T13','T14'], e8:['T15','T16'], e9:['T17','T18'], final:['T1','T2','T3','T4','T5','T7','T8','T9','T10','T11','T12','T13','T14','T15','T16','T17','T18']};
+const REVIEW_WEEKS = {6:'Repaso de las semanas 1 a 5, división de polinomios y Ruffini', 19:'Repaso general y simulacro final'};
+
+/* ===================== Fechas ===================== */
+const DAY = 864e5;
+function ymd(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const START = ymd('2026-11-16'), UNI = ymd('2027-03-29');
+function today(){
+  const q = new URLSearchParams(location.search).get('hoy');
+  const t = q && /^\d{4}-\d{2}-\d{2}$/.test(q) ? ymd(q) : new Date();
+  return new Date(t.getFullYear(),t.getMonth(),t.getDate());
+}
+const daysBetween = (a,b) => Math.round((b-a)/DAY);
+function curWeek(){ return Math.floor(daysBetween(START,today())/7)+1; }
+const fmt = (d,o) => d.toLocaleDateString('es-PE',o||{day:'numeric',month:'short',year:'numeric'});
+function weekRange(w){ const a=new Date(START); a.setDate(a.getDate()+(w-1)*7); const b=new Date(a); b.setDate(b.getDate()+6); return fmt(a,{day:'numeric',month:'short'})+' – '+fmt(b,{day:'numeric',month:'short'}); }
+
+/* ===================== Estado ===================== */
+let S = load();
+function fresh(){ return {version:3, errors:[], dayDone:{}, nodes:defaultNodes(), progress:{}, evals:defaultEvals(), study:{log:{}}, meta:{firstUse:iso(today())}}; }
+function load(){
+  try{ const raw = localStorage.getItem(KEY); if(raw){ const d = normalize(JSON.parse(raw)); if(d) return d; } }catch(e){}
+  return fresh();
+}
+function normalize(d){
+  if(!d || !Array.isArray(d.nodes)) return null;
+  const nodes = d.nodes.filter(n=>n && typeof n.id==='string').map(n=>({
+    id:String(n.id), week: Number.isFinite(+n.week)&&n.week!==null&&n.week!=='' ? +n.week : null,
+    dates:String(n.dates||''), phase: PHASES[n.phase]?n.phase:'F1', title:String(n.title||n.id),
+    target: Math.max(0, +n.target||0), goal:String(n.goal||''), reqs: Array.isArray(n.reqs)?n.reqs.map(String):[],
+    desc:String(n.desc||''), dashed:!!n.dashed, grade20:!!n.grade20, links:Array.isArray(n.links)?n.links.filter(l=>Array.isArray(l)&&/^https?:\/\//i.test(String(l[1]))).map(l=>[String(l[0]||l[1]),String(l[1])]):[], row: Number.isFinite(+n.row)&&n.row!==null&&n.row!==''?+n.row:undefined
+  }));
+  const evals = Array.isArray(d.evals) && d.evals.length ? d.evals.map(e=>({id:String(e.id),name:String(e.name||''),date:String(e.date||''),topic:String(e.topic||''),max:+e.max||10,nodes:Array.isArray(e.nodes)?e.nodes.map(String):(EVAL_NODES[e.id]||[]),score:(e.score===null||e.score===undefined||e.score==='')?null:+e.score})) : defaultEvals();
+  const progress = (d.progress && typeof d.progress==='object') ? d.progress : {};
+  const out = {version:3, errors:Array.isArray(d.errors)?d.errors.filter(e=>e&&e.q).map(e=>({id:String(e.id||Math.random().toString(36).slice(2)),topic:String(e.topic||''),q:String(e.q),a:String(e.a||''),added:String(e.added||iso(today())),due:/^\d{4}-\d{2}-\d{2}$/.test(e.due)?e.due:iso(today()),tries:+e.tries||0,fixed:e.fixed||''})):[], dayDone:(d.dayDone&&typeof d.dayDone==='object')?d.dayDone:{}, nodes, progress, evals, study:(d.study&&typeof d.study==='object'&&d.study.log&&typeof d.study.log==='object')?{log:d.study.log}:{log:{}}, meta:(d.meta&&typeof d.meta==='object')?d.meta:{}};
+  if(!(d.version>=2)) migrateV2(out);
+  if(!(d.version>=3)) migrateV3(out);
+  return out;
+}
+function migrateV2(st){
+  const has = id => st.nodes.some(n=>n.id===id), get = id => st.nodes.find(n=>n.id===id);
+  defaultNodes().filter(n=>/^X\d$/.test(n.id) && !has(n.id)).forEach(n=>st.nodes.push(n));
+  const add = (id, reqs) => { const n=get(id); if(n) reqs.forEach(r=>{ if(has(r) && !n.reqs.includes(r)) n.reqs.push(r); }); };
+  add('T13',['T11']); add('T17',['T8','X1']); add('T18',['X2']); add('U1',['X3','X4']);
+}
+function migrateV3(st){
+  const has = id => st.nodes.some(n=>n.id===id), get = id => st.nodes.find(n=>n.id===id);
+  defaultNodes().filter(n=>/^(X[5-8]|R\d)$/.test(n.id) && !has(n.id)).forEach(n=>st.nodes.push(n));
+  const add = (id, reqs) => { const n=get(id); if(n) reqs.forEach(r=>{ if(has(r) && !n.reqs.includes(r)) n.reqs.push(r); }); };
+  add('T16',['X6']); add('T18',['X6']); add('U2',['X7']);
+  const p1=get('P1'); if(p1 && !(p1.links&&p1.links.length)) p1.links=P1_LINKS.map(l=>l.slice());
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('No se pudo guardar en este navegador'); } }
+function P(id){ return S.progress[id] || (S.progress[id] = {status:'pendiente',count:0,test:null,date:'',notes:'',grade:null}); }
+const byId = () => Object.fromEntries(S.nodes.map(n=>[n.id,n]));
+const isDom = id => (S.progress[id]||{}).status === 'dominado';
+function nodeState(n){
+  const p = S.progress[n.id]||{};
+  if(p.status==='dominado') return 'dom';
+  if(p.status==='progreso') return 'prog';
+  const B = byId();
+  return n.reqs.some(r=>B[r] && !isDom(r)) ? 'lock' : 'avail';
+}
+function missingReqs(n){ const B=byId(); return n.reqs.filter(r=>B[r] && !isDom(r)); }
+function children(){ const c={}; S.nodes.forEach(n=>c[n.id]=[]); S.nodes.forEach(n=>n.reqs.forEach(r=>{ if(c[r]) c[r].push(n.id); })); return c; }
+function ancestors(id){ const B=byId(), out=new Set(), st=[id]; while(st.length){ const x=st.pop(); (B[x]?.reqs||[]).forEach(r=>{ if(B[r]&&!out.has(r)){out.add(r);st.push(r);} }); } out.delete(id); return out; }
+function descendants(id){ const C=children(), out=new Set(), st=[id]; while(st.length){ const x=st.pop(); (C[x]||[]).forEach(c=>{ if(!out.has(c)){out.add(c);st.push(c);} }); } out.delete(id); return out; }
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const col = n => (PHASES[n.phase]||PHASES.F1).color;
+const evalPct = e => (e.score===null||!e.max) ? null : Math.round(e.score/e.max*1000)/10;
+
+/* ===================== Rangos ===================== */
+const range = (a,b) => Array.from({length:b-a+1},(_,i)=>'T'+(a+i));
+function needDom(ids){ const B=byId(); const miss=ids.filter(i=>B[i]&&!isDom(i)); return {ok:!miss.length, miss: miss.length?['Domina '+miss.join(', ')]:[]}; }
+function gradeOf(id){ const g=(S.progress[id]||{}).grade; return (g===null||g===undefined||g==='')?null:+g; }
+const RANKS = [
+  {name:'Bronce', short:'Bronce', color:'#cd7f32', l:'I', how:'Al empezar', check:()=>({ok:true,miss:[]})},
+  {name:'Plata', short:'Plata', color:'#d6dde6', l:'II', how:'T1 a T3 dominados', check:()=>needDom(range(1,3))},
+  {name:'Oro', short:'Oro', color:'#ffcc33', l:'III', how:'Todo T1 a T11 dominado', check:()=>needDom(range(1,11))},
+  {name:'Platino', short:'Platino', color:'#6ee7d8', l:'IV', how:'T12 a T16 dominados (y todo lo anterior)', check:()=>needDom(range(1,16))},
+  {name:'Listo para Matemática para Ingenieros I', short:'Listo para MI I', color:'#8ab4ff', l:'★', how:'T17, T18 dominados y 80 % o más en el simulacro final', check:()=>{
+      const r=needDom(range(1,18)); const f=S.evals.find(e=>e.id==='final'); const p=f?evalPct(f):null;
+      if(p===null||p<80) r.miss.push('80 % o más en el simulacro final'); r.ok=!r.miss.length; return r; }},
+  {name:'Diamante', short:'Diamante', color:'#b9f2ff', l:'◆', how:'Aprobar U1 con 16 o más', check:()=>{ const g=gradeOf('U1'); return g!==null&&g>=16?{ok:true,miss:[]}:{ok:false,miss:['Aprueba U1 con 16 o más']}; }},
+  {name:'Adepto', short:'Adepto', color:'#c77dff', l:'✦', how:'Aprobar U2 con 16 o más', check:()=>{ const g=gradeOf('U2'); return g!==null&&g>=16?{ok:true,miss:[]}:{ok:false,miss:['Aprueba U2 con 16 o más']}; }}
+];
+function rankIndex(){ let r=0; RANKS.forEach((k,i)=>{ if(k.check().ok) r=i; }); return r; }
+function emblem(k, size){
+  const s=size||44, id='g'+Math.random().toString(36).slice(2,7);
+  return `<svg width="${s}" height="${s*50/44}" viewBox="0 0 44 50"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".35" stop-color="${k.color}"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient></defs>
+  <path d="M22 2 L40 9 V25 C40 37 31 44 22 48 C13 44 4 37 4 25 V9 Z" fill="${k.color}"/>
+  <path d="M22 2 L40 9 V25 C40 37 31 44 22 48 C13 44 4 37 4 25 V9 Z" fill="url(#${id})" stroke="#0008" stroke-width="1.5"/>
+  <path d="M22 7 L35 12 V25 C35 34 29 39 22 42 C15 39 9 34 9 25 V12 Z" fill="none" stroke="#fff6" stroke-width="1.2"/>
+  <text x="22" y="30" text-anchor="middle" font-size="${k.l.length>1?12:15}" font-weight="900" fill="#111" font-family="Georgia,serif">${k.l}</text></svg>`;
+}
+
+/* ===================== Plan / semana ===================== */
+function planStatus(){
+  const w = curWeek(); const plan = S.nodes.filter(n=>n.week);
+  const due = plan.filter(n=>n.week < w && !isDom(n.id)).sort((a,b)=>a.week-b.week);
+  const ahead = plan.filter(n=>n.week > w && isDom(n.id));
+  if(w>19 && !due.length) return {k:'ok', t:'Plan terminado', due, ahead};
+  if(due.length) return {k:'bad', t:'Atrasado', due, ahead};
+  if(ahead.length) return {k:'info', t:'Adelantado', due, ahead};
+  return {k:'ok', t:'Al día', due, ahead};
+}
+function weekLabel(w){
+  if(w<1) return 'El plan empieza el lunes 16 nov 2026';
+  if(w>19) return 'Plan de 19 semanas terminado';
+  const n = S.nodes.find(x=>x.week===w);
+  return 'Semana '+w+': '+(n? n.id+' · '+n.title : (REVIEW_WEEKS[w]||'—'));
+}
+
+/* ===================== Cabecera ===================== */
+function renderHeader(){
+  const ri = rankIndex(), k = RANKS[ri], nx = RANKS[ri+1];
+  document.getElementById('rankIcon').outerHTML = emblem(k,44).replace('<svg','<svg id="rankIcon"');
+  document.getElementById('hdRank').innerHTML = esc(k.short) + `<small>Rango ${ri+1}/${RANKS.length}</small>`;
+  const w = curWeek();
+  let next = '';
+  if(nx){ const c=nx.check(); next = `Siguiente: <b>${esc(nx.short)}</b> — ${esc(c.miss.join(' · ')||nx.how)}`; }
+  else next = '<b>Rango máximo alcanzado.</b>';
+  document.getElementById('hdNext').innerHTML = next + `<br>${esc(weekLabel(w))}`;
+  const d = daysBetween(today(), UNI);
+  const sk = streak();
+  document.getElementById('hdDays').innerHTML = (d>0 ? `<b>${d}</b><span>días a la U</span>` : `<b>🎓</b><span>¡En la U!</span>`) + `<span class="stk">🔥 ${sk} día${sk===1?'':'s'}</span>`;
+  const dc = dueCount()+errorsDue().length, bd=document.getElementById('dueBadge'); if(bd){ bd.hidden=!dc; bd.textContent=dc; }
+}
+
+/* ===================== Árbol: diseño ===================== */
+const W=150, H=78, GX=18, GY=58;
+let LAY = {};
+function computeLayout(){
+  const B=byId(), lvl={}, visiting=new Set();
+  function L(id){
+    if(lvl[id]!==undefined) return lvl[id];
+    if(visiting.has(id)) return 0; visiting.add(id);
+    const n=B[id]; let v=0;
+    n.reqs.forEach(r=>{ if(B[r]) v=Math.max(v, L(r)+1); });
+    if(n.row!==undefined) v=Math.max(v,n.row);
+    visiting.delete(id); return lvl[id]=v;
+  }
+  S.nodes.forEach(n=>L(n.id));
+  const SIDE=['P','R']; const main = S.nodes.filter(n=>!SIDE.includes(n.phase)), side = S.nodes.filter(n=>SIDE.includes(n.phase));
+  const rows = {}; main.forEach(n=>(rows[lvl[n.id]]=rows[lvl[n.id]]||[]).push(n));
+  const pos = {}; let half = W/2;
+  Object.keys(rows).map(Number).sort((a,b)=>a-b).forEach(l=>{
+    const r = rows[l];
+    r.forEach(n=>{ const xs=n.reqs.filter(q=>pos[q]).map(q=>pos[q].x+W/2); n._b = xs.length? xs.reduce((a,b)=>a+b,0)/xs.length : 0; });
+    r.sort((a,b)=> (a._b-b._b) || ((a.week||99)-(b.week||99)) || a.id.localeCompare(b.id,'es',{numeric:true}));
+    const tot = r.length*W + (r.length-1)*GX; half = Math.max(half, tot/2);
+    r.forEach((n,i)=>{ pos[n.id] = {x:-tot/2 + i*(W+GX), y:l*(H+GY)}; });
+  });
+  const sx = half + 70, cols = SIDE.filter(ph=>side.some(n=>n.phase===ph)), colX = {};
+  cols.forEach((ph,i)=>{ colX[ph]=sx+i*(W+40); const used={}; side.filter(n=>n.phase===ph).sort((a,b)=>lvl[a.id]-lvl[b.id]||a.id.localeCompare(b.id,'es',{numeric:true})).forEach(n=>{ let l=lvl[n.id]; while(used[l]) l++; used[l]=1; pos[n.id]={x:colX[ph], y:l*(H+GY)}; }); });
+  const maxL = Math.max(0,...Object.values(pos).map(p=>p.y));
+  LAY = {pos, half, sx, colX, hasSide:side.length>0, minX:-half, maxX: cols.length? sx+(cols.length-1)*(W+40)+W : half, maxY:maxL+H};
+}
+
+/* ===================== Árbol: dibujo ===================== */
+const svg = document.getElementById('tree'), world = document.getElementById('world');
+let selected = null, pathMode = null;
+function wrap(text, max){
+  const words = String(text).split(/\s+/), lines=[]; let cur='';
+  words.forEach(w=>{ if((cur+' '+w).trim().length>max && cur){ lines.push(cur); cur=w; } else cur=(cur+' '+w).trim(); });
+  if(cur) lines.push(cur);
+  if(lines.length>3){ lines.length=3; lines[2]=lines[2].slice(0,max-1)+'…'; }
+  return lines;
+}
+function renderTree(){
+  computeLayout();
+  const B = byId(), pos = LAY.pos, w = curWeek();
+  let lit = null, pathSet = null;
+  if(selected && B[selected]){ lit = new Set([selected, ...ancestors(selected), ...descendants(selected)]); }
+  if(pathMode && B[pathMode]){ pathSet = new Set([...ancestors(pathMode), pathMode].filter(id=>!isDom(id))); }
+  const A = selected ? ancestors(selected) : null, D = selected ? descendants(selected) : null;
+  // reparto de entradas/salidas para que las flechas no se encimen
+  const inc = {}, out = {};
+  S.nodes.forEach(n=>n.reqs.forEach(r=>{ if(B[r]){ (inc[n.id]=inc[n.id]||[]).push(r); (out[r]=out[r]||[]).push(n.id); } }));
+  const slot = (list, key, id) => { const arr=(list[key]||[]).slice().sort((a,b)=>pos[a].x-pos[b].x); const i=arr.indexOf(id), k=arr.length; return k<=1?0:(i/(k-1)-.5)*W*0.6; };
+  let h = '';
+  // etiquetas laterales
+  if(LAY.colX.P!==undefined) h += `<text class="side-lbl" x="${LAY.colX.P+W/2}" y="-14" text-anchor="middle">RAMA P · PROGRAMACIÓN</text>`;
+  if(LAY.colX.R!==undefined) h += `<text class="side-lbl" x="${LAY.colX.R+W/2}" y="-14" text-anchor="middle" style="fill:#fb7185">RAMA R · PREPARACIÓN</text>`;
+  const uNodes = S.nodes.filter(n=>n.phase==='U'&&pos[n.id]);
+  if(uNodes.length){ const y=Math.min(...uNodes.map(n=>pos[n.id].y)); h += `<line x1="${-LAY.half-20}" x2="${LAY.half+20}" y1="${y-GY/2}" y2="${y-GY/2}" stroke="#facc1555" stroke-dasharray="3 6"/><text class="lvl-lbl" x="${-LAY.half-16}" y="${y-GY/2-7}" fill="#facc15">UNIVERSIDAD · 29 MAR 2027</text>`; }
+  h += `<text class="lvl-lbl" x="${-LAY.half-16}" y="-14" fill="#9aa3b2">ANTES DE LA UNIVERSIDAD</text>`;
+  // flechas
+  S.nodes.forEach(n=>n.reqs.forEach(r=>{
+    if(!B[r]||!pos[r]||!pos[n.id]) return;
+    const a=pos[r], b=pos[n.id];
+    const x1=a.x+W/2+slot(out,r,n.id), y1=a.y+H, x2=b.x+W/2+slot(inc,n.id,r), y2=b.y-2;
+    const dy=Math.max(28,(y2-y1)*0.45);
+    let cls='edge', mk='ar';
+    if(n.dashed||B[r].dashed) cls+=' dash';
+    if(lit){ const on=(r===selected||A.has(r))&&(n.id===selected||A.has(n.id)) || (r===selected||D.has(r))&&(n.id===selected||D.has(n.id)); cls+= on?' hl':' dim'; if(on) mk='arH'; }
+    else if(pathSet){ const on=pathSet.has(n.id)&&(pathSet.has(r)); cls+= on?' path':' dim'; if(on) mk='arP'; }
+    h += `<path class="${cls}" marker-end="url(#${mk})" d="M${x1} ${y1} C${x1} ${y1+dy} ${x2} ${y2-dy} ${x2} ${y2}"/>`;
+  }));
+  // nodos
+  S.nodes.forEach(n=>{
+    const p=pos[n.id]; if(!p) return;
+    const st=nodeState(n), pr=S.progress[n.id]||{}, c=col(n);
+    let cls='node st-'+st;
+    if(lit) cls += lit.has(n.id)?' hl':' dim';
+    else if(pathSet) cls += pathSet.has(n.id)?' hl':' dim';
+    if(n.id===selected) cls+=' sel';
+    const lines = wrap(n.title, 19);
+    const ty = 46 - (lines.length-1)*6.5;
+    const wk = n.week ? 'Sem '+n.week : (n.dates.length<=14 ? n.dates : (/^ciclo/i.test(n.dates) ? n.dates.split(' ').slice(0,2).join(' ')+'+' : n.dates.split(' ')[0]));
+    let g = `<g class="${cls}" data-id="${esc(n.id)}" transform="translate(${p.x},${p.y})" style="--c:${c}">`;
+    if(n.week===w && st!=='dom') g += `<rect class="now-ring" x="-6" y="-6" width="${W+12}" height="${H+12}" rx="15"/><text class="now-tag" x="${W/2}" y="-10" text-anchor="middle">▼ ESTA SEMANA</text>`;
+    g += `<rect class="box" width="${W}" height="${H}" rx="11" style="stroke:${st==='lock'?'':c}" ${n.dashed?'stroke-dasharray="7 5"':''}/>`;
+    if(st==='prog') g += `<rect class="over" width="${W}" height="${H}" rx="11"/>`;
+    g += `<text class="nid" x="10" y="17">${esc(n.id)}${st==='dom'?' ✓':''}${reviewDue(n.id)?' 🔁':''}${st==='lock'?' 🔒':''}</text>`;
+    g += `<text class="nwk" x="${W-9}" y="17" text-anchor="end">${esc(wk)}</text>`;
+    g += `<text class="ntl" x="${W/2}" y="${ty}" text-anchor="middle">${lines.map((l,i)=>`<tspan x="${W/2}" dy="${i?14:0}">${esc(l)}</tspan>`).join('')}</text>`;
+    if(n.target>0 && !n.grade20){ const r=Math.min(1,(pr.count||0)/n.target); g += `<rect class="bar-bg" x="10" y="${H-9}" width="${W-20}" height="4" rx="2"/><rect class="bar" x="10" y="${H-9}" width="${(W-20)*r}" height="4" rx="2"/>`; }
+    else if(n.grade20 && gradeOf(n.id)!==null){ g += `<text class="nwk" x="${W/2}" y="${H-6}" text-anchor="middle">Nota ${gradeOf(n.id)}/20</text>`; }
+    g += `</g>`; h += g;
+  });
+  world.innerHTML = h;
+  document.querySelectorAll('[data-path]').forEach(b=>b.classList.toggle('on', b.dataset.path===pathMode));
+  const bn = document.getElementById('banner');
+  if(pathSet){
+    const list=[...pathSet].filter(id=>id!==pathMode).map(id=>B[id]).sort((a,b)=>(a.week||99)-(b.week||99));
+    bn.innerHTML = list.length ? `Te faltan <b>${list.length}</b> temas para llegar a <b>${esc(B[pathMode].title)}</b>: ${list.map(n=>esc(n.id)).join(', ')}` : (isDom(pathMode)?`¡Ya dominaste ${esc(B[pathMode].title)}!`:`¡Tienes todo lo necesario para <b>${esc(B[pathMode].title)}</b>!`);
+    bn.classList.add('show');
+  } else bn.classList.remove('show');
+  applyView();
+}
+
+/* ===================== Zoom y desplazamiento ===================== */
+let view = {x:0,y:0,s:1};
+const clampS = s => Math.min(2.5, Math.max(0.25, s));
+function applyView(){ world.setAttribute('transform', `translate(${view.x},${view.y}) scale(${view.s})`); }
+function fitView(){
+  const r = svg.getBoundingClientRect(); if(!r.width) return;
+  const tw = LAY.maxX - LAY.minX + 60;
+  let s = Math.min(1.1, r.width / tw);
+  if(r.width < 600) s = Math.max(s, 0.62);
+  view.s = s;
+  // en celular: centrar la columna principal; en pantalla grande: todo el ancho
+  const cx = (s*tw <= r.width) ? (LAY.minX+LAY.maxX)/2 : 0;
+  view.x = r.width/2 - cx*s; view.y = 100;
+  const cur = S.nodes.find(n=>n.week===curWeek()), cp = cur && LAY.pos[cur.id];
+  if(cp && view.y + (cp.y+H)*s > r.height - 90){ view.y = r.height*0.35 - cp.y*s; if(r.width<600) view.x = r.width/2 - (cp.x+W/2)*s; }
+  applyView();
+}
+function zoomAt(f, cx, cy){ const ns=clampS(view.s*f); const wx=(cx-view.x)/view.s, wy=(cy-view.y)/view.s; view.s=ns; view.x=cx-wx*ns; view.y=cy-wy*ns; applyView(); }
+const pts = new Map(); let gest = null;
+const local = e => { const r=svg.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; };
+svg.addEventListener('pointerdown', e=>{
+  svg.setPointerCapture(e.pointerId); pts.set(e.pointerId, local(e));
+  if(pts.size===1){ const p=local(e); gest={t:'pan', sx:p.x, sy:p.y, vx:view.x, vy:view.y, moved:false, target:e.target}; }
+  else if(pts.size===2){ const [a,b]=[...pts.values()]; const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2}; gest={t:'pinch', d0:Math.hypot(a.x-b.x,a.y-b.y)||1, s0:view.s, wx:(m.x-view.x)/view.s, wy:(m.y-view.y)/view.s, moved:true}; }
+});
+svg.addEventListener('pointermove', e=>{
+  if(!pts.has(e.pointerId)||!gest) return; pts.set(e.pointerId, local(e));
+  if(gest.t==='pan' && pts.size===1){ const p=local(e); const dx=p.x-gest.sx, dy=p.y-gest.sy; if(Math.hypot(dx,dy)>7) gest.moved=true; if(gest.moved){ view.x=gest.vx+dx; view.y=gest.vy+dy; applyView(); } }
+  else if(gest.t==='pinch' && pts.size>=2){ const [a,b]=[...pts.values()]; const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2}; const s=clampS(gest.s0*Math.hypot(a.x-b.x,a.y-b.y)/gest.d0); view.s=s; view.x=m.x-gest.wx*s; view.y=m.y-gest.wy*s; applyView(); }
+});
+function endPtr(e){
+  if(!pts.has(e.pointerId)) return; pts.delete(e.pointerId);
+  if(gest && gest.t==='pan' && !gest.moved && e.type==='pointerup'){
+    const g = gest.target && gest.target.closest && gest.target.closest('.node');
+    if(g) selectNode(g.dataset.id); else { if(selected) closePanel(); }
+  }
+  if(pts.size===1 && gest && gest.t==='pinch'){ const p=[...pts.values()][0]; gest={t:'pan',sx:p.x,sy:p.y,vx:view.x,vy:view.y,moved:true}; }
+  if(!pts.size) gest=null;
+}
+svg.addEventListener('pointerup', endPtr); svg.addEventListener('pointercancel', endPtr);
+svg.addEventListener('wheel', e=>{ e.preventDefault(); const p=local(e); zoomAt(Math.exp(-e.deltaY*0.0015), p.x, p.y); }, {passive:false});
+document.getElementById('zIn').onclick = ()=>{ const r=svg.getBoundingClientRect(); zoomAt(1.25, r.width/2, r.height/2); };
+document.getElementById('zOut').onclick = ()=>{ const r=svg.getBoundingClientRect(); zoomAt(0.8, r.width/2, r.height/2); };
+document.getElementById('zFit').onclick = fitView;
+if(innerWidth<600) document.getElementById('legend').classList.add('min');
+document.getElementById('legend').onclick = e=>e.currentTarget.classList.toggle('min');
+document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>{ pathMode = pathMode===b.dataset.path?null:b.dataset.path; if(pathMode){ selected=null; closePanel(true); } renderTree(); });
+
+/* ===================== Panel del nodo ===================== */
+const panel = document.getElementById('panel');
+const STATUS = {pendiente:'Pendiente', progreso:'En progreso', dominado:'Dominado'};
+const NEXT = {pendiente:'progreso', progreso:'dominado', dominado:'pendiente'};
+function selectNode(id){ selected=id; pathMode=null; renderTree(); openPanel(id); revealNode(id); }
+function revealNode(id){
+  const p=LAY.pos[id]; if(!p) return; const r=svg.getBoundingClientRect();
+  const wide = innerWidth>=900; const visW = wide? r.width-400 : r.width; const visH = wide? r.height : r.height*0.26 + 20;
+  const sx=view.x+(p.x+W/2)*view.s, sy=view.y+p.y*view.s;
+  const top = wide? 60 : 70;
+  if(sx<20||sx>visW-20||sy<top||sy+H*view.s>visH+(wide?0:40)){ view.x = visW/2-(p.x+W/2)*view.s; view.y = (wide? r.height/3 : top) - p.y*view.s; applyView(); }
+}
+function closePanel(keep){ panel.classList.remove('open'); if(!keep){ selected=null; renderTree(); } }
+function chipsFor(ids){ const B=byId(); return ids.length? `<div class="chips">${ids.filter(i=>B[i]).map(i=>`<button class="nchip ${isDom(i)?'done':''}" data-go="${esc(i)}" style="--c:${col(B[i])}"><b>${esc(i)}</b> ${esc(B[i].title)}</button>`).join('')}</div>` : '<div class="muted">Ninguno</div>'; }
+function openPanel(id){
+  const n = byId()[id]; if(!n) return; const p = P(id), c = col(n), C = children();
+  const st = nodeState(n), miss = missingReqs(n);
+  let h = `<div class="grab"><span class="p-id" style="background:${c}">${esc(n.id)}</span>
+    <div class="p-title"><h2>${esc(n.title)}</h2><div>${esc(PHASES[n.phase].name)}${n.week?' · Semana '+n.week:''}${n.dates?' · '+esc(n.dates):''}</div></div>
+    <button class="xbtn" id="pClose" aria-label="Cerrar">✕</button></div>`;
+  h += `<div><span class="stnow" id="pSt"></span></div>`;
+  if(st==='lock' || (miss.length && p.status!=='dominado')) h += `<div class="warn" id="pWarn">🔒 Bloqueado: te falta dominar ${miss.map(esc).join(', ')}. Es solo un aviso: igual puedes marcarlo.</div>`;
+  if(n.desc) h += `<div class="sec"><div class="muted" style="font-size:14px;color:var(--tx2)">${esc(n.desc)}</div></div>`;
+  h += `<div class="sec"><h3>Qué necesita</h3>${chipsFor(n.reqs)}</div>`;
+  h += `<div class="sec"><h3>Qué abre</h3>${chipsFor(C[id]||[])}</div>`;
+  h += `<div class="sec"><h3>Meta verificable</h3><div class="goal">${esc(n.goal||'—')}</div></div>`;
+  if(n.grade20){
+    h += `<div class="sec"><h3>Nota final del curso (sobre 20)</h3><input type="number" id="pGrade" min="0" max="20" step="0.5" inputmode="decimal" placeholder="Ej. 16" value="${p.grade??''}"><div class="muted" id="pGradeMsg" style="margin-top:5px"></div></div>`;
+  } else {
+    if(n.target>0) h += `<div class="sec"><h3>Ejercicios resueltos</h3><div class="counter">
+      <button data-inc="-1">−</button><input type="number" id="pCount" min="0" inputmode="numeric" value="${p.count||0}"><span class="of">/ ${n.target}</span>
+      <button data-inc="1">+1</button><button data-inc="5">+5</button><button data-inc="10">+10</button></div>
+      <div class="pbar" style="--c:${c}"><i id="pBar"></i></div></div>`;
+    h += `<div class="sec row"><div><label class="f" for="pTest">Nota de la prueba (sobre 10)</label><input type="number" id="pTest" min="0" max="10" step="1" inputmode="numeric" placeholder="—" value="${p.test??''}"></div>
+      <div><label class="f" for="pDate">Fecha en que lo dominé</label><input type="date" id="pDate" value="${esc(p.date||'')}"></div></div>
+      <div class="muted" id="pTestMsg" style="margin-top:5px"></div>`;
+  }
+  if(n.grade20) h += `<div class="sec"><label class="f" for="pDate">Fecha en que lo dominé</label><input type="date" id="pDate" value="${esc(p.date||'')}"></div>`;
+  h += `<div class="sec"><h3>Notas</h3><textarea id="pNotes" placeholder="Dudas, errores frecuentes, links…">${esc(p.notes||'')}</textarea></div>`;
+  { const ri=reviewInfo(id);
+    if(ri) h += `<div class="sec"><h3>Repaso espaciado</h3><div class="goal" style="font-size:13.5px">${ri.complete?'✅ Completaste los 3 repasos (7, 21 y 60 días).':`Repaso ${ri.i+1} de 3 · ${ri.days<=0?'<b style="color:#fde68a">toca '+(ri.days===0?'hoy':'desde hace '+(-ri.days)+' d')+'</b>':'en '+ri.days+' días ('+esc(fmt(ri.due,{day:'numeric',month:'short'}))+')'}`}</div>${ri.complete?'':`<button class="btn sm" id="pRev" style="margin-top:6px">Marcar repaso hecho</button>`}</div>`;
+    if(p.minutes) h += `<div class="muted" style="margin-top:8px">⏱ ${p.minutes} min registrados en este tema.</div>`;
+    if(n.links && n.links.length) h += `<div class="sec"><h3>Recursos</h3><div class="chips">${n.links.map(([l,u])=>`<a class="nchip" style="color:var(--tx);text-decoration:none" href="${esc(u)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div></div>`;
+    else if(n.phase!=='U' && n.phase!=='P' && n.phase!=='R') h += `<div class="sec"><h3>Practicar</h3><div class="chips">${GEN[id]?`<button class="nchip" id="pPrac" style="--c:${c}"><b>🧮 Generar ejercicios</b></button>`:''}${topicLinks(n).slice(0,3).map(([l,u])=>`<a class="nchip" style="color:var(--tx);text-decoration:none" href="${esc(u)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div></div>`;
+  }
+  h += `<button class="stbtn" id="pStBtn"></button>
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" id="pEdit">✎ Editar nodo</button></div>`;
+  panel.innerHTML = h; panel.scrollTop = 0; panel.classList.add('open');
+  const $ = s => panel.querySelector(s);
+  $('#pClose').onclick = ()=>closePanel();
+  panel.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>selectNode(b.dataset.go));
+  panel.querySelectorAll('[data-inc]').forEach(b=>b.onclick=()=>{ p.count=Math.max(0,(+p.count||0)+(+b.dataset.inc)); $('#pCount').value=p.count; commit(); });
+  if($('#pCount')) $('#pCount').oninput = e=>{ p.count=Math.max(0,parseInt(e.target.value)||0); commit(); };
+  if($('#pTest')) $('#pTest').oninput = e=>{ const v=e.target.value; p.test = v===''?null:Math.min(10,Math.max(0,+v)); commit(); };
+  if($('#pGrade')) $('#pGrade').oninput = e=>{ const v=e.target.value; p.grade = v===''?null:Math.min(20,Math.max(0,+v)); commit(); };
+  $('#pDate').onchange = e=>{ p.date=e.target.value; commit(); };
+  $('#pNotes').oninput = e=>{ p.notes=e.target.value; save(); };
+  $('#pStBtn').onclick = ()=>{
+    p.status = NEXT[p.status||'pendiente'];
+    if(p.status==='pendiente'){ p.date=''; $('#pDate').value=''; }
+    if(p.status==='dominado'){ if(!p.date) p.date=iso(today()); $('#pDate').value=p.date; toast('¡'+n.id+' dominado! 🎉'); }
+    commit(); const w=$('#pWarn'); if(w) w.style.display = p.status==='dominado'?'none':'';
+  };
+  $('#pEdit').onclick = ()=>openEditor(id);
+  if($('#pRev')) $('#pRev').onclick = ()=>markReview(id);
+  if($('#pPrac')) $('#pPrac').onclick = ()=>{ closePanel(); goPractice(id); };
+  refreshPanel();
+}
+function refreshPanel(){
+  if(!selected || !panel.classList.contains('open')) return;
+  const n=byId()[selected]; if(!n) return; const p=P(selected), c=col(n), $=s=>panel.querySelector(s);
+  const st = p.status||'pendiente';
+  $('#pSt').textContent = 'Estado: '+STATUS[st] + (nodeState(n)==='lock'?' · bloqueado':'') ;
+  const nx = NEXT[st];
+  const b=$('#pStBtn'); b.textContent = 'Cambiar a: '+STATUS[nx]; b.style.background = nx==='pendiente'?'#3a4252':c; b.style.color = nx==='pendiente'?'#e6e8ee':'#111';
+  if($('#pBar')) $('#pBar').style.width = Math.min(100,(p.count||0)/n.target*100)+'%';
+  if($('#pTestMsg')) $('#pTestMsg').textContent = p.test===null||p.test===undefined ? 'Dominado = 8/10 sin apuntes.' : (p.test>=8 ? '✅ Cumple el criterio de dominio (8/10).' : '⏳ Aún no llega a 8/10.');
+  if($('#pGradeMsg')){ const g=gradeOf(selected); $('#pGradeMsg').textContent = g===null?'Para el rango se necesita 16 o más.':(g>=16?'✅ Aprobado con 16 o más.':(g>=11?'Aprobado, pero el rango pide 16 o más.':'Desaprobado.')); }
+}
+function commit(){ save(); renderTree(); renderHeader(); refreshPanel(); }
+
+/* ===================== Progreso ===================== */
+function renderProgress(){
+  const nodes=S.nodes, dom=nodes.filter(n=>isDom(n.id)).length, w=curWeek(), ps=planStatus();
+  const ex = nodes.filter(n=>n.target>0&&!n.grade20); const done=ex.reduce((a,n)=>a+(+(S.progress[n.id]||{}).count||0),0), tot=ex.reduce((a,n)=>a+n.target,0);
+  const d = daysBetween(today(), UNI), ri=rankIndex();
+  let h = `<div class="card"><h2>Resumen</h2><div class="stat-grid">
+    <div class="stat"><span>Temas dominados</span><div class="big">${dom}<small style="font-size:15px;color:var(--tx2)"> / ${nodes.length}</small></div></div>
+    <div class="stat"><span>Días para el 29 mar 2027</span><div class="big">${Math.max(0,d)}</div></div>
+    <div class="stat"><span>Semana que toca</span><div class="big">${w<1?'—':w>19?'Fin':w+'<small style="font-size:15px;color:var(--tx2)"> / 19</small>'}</div></div>
+    <div class="stat"><span>Ritmo</span><div style="margin-top:6px"><span class="pill ${ps.k}">${ps.t}</span></div></div></div>
+    <div style="margin-top:10px;font-size:14px">${esc(weekLabel(w))}${w>=1&&w<=19?' <span class="muted">('+weekRange(w)+')</span>':''}</div>
+    ${ps.due.length?`<div class="warn">Te falta dominar de semanas pasadas: ${ps.due.map(n=>esc(n.id+' ('+n.title+')')).join(', ')}.</div>`:''}
+    ${ps.ahead.length&&!ps.due.length?`<div class="muted" style="margin-top:6px">Ya dominaste temas por adelantado: ${ps.ahead.map(n=>esc(n.id)).join(', ')}.</div>`:''}
+    <div class="ph-row" style="margin-top:14px"><div class="t"><b>Progreso general</b><span>${Math.round(dom/Math.max(1,nodes.length)*100)} %</span></div><div class="pbar"><i style="width:${dom/Math.max(1,nodes.length)*100}%"></i></div></div>
+    <div class="ph-row"><div class="t"><b>Ejercicios del plan</b><span>${done} / ${tot}</span></div><div class="pbar"><i style="width:${Math.min(100,done/Math.max(1,tot)*100)}%;background:#4ade80"></i></div></div>
+  </div>`;
+  h += `<div class="card"><h2>Por fase</h2>`;
+  Object.entries(PHASES).forEach(([k,ph])=>{ const ns=nodes.filter(n=>n.phase===k); if(!ns.length) return; const dd=ns.filter(n=>isDom(n.id)).length;
+    h += `<div class="ph-row"><div class="t"><b style="color:${ph.color}">${esc(ph.name)}</b><span>${dd} / ${ns.length}</span></div><div class="pbar" style="--c:${ph.color}"><i style="width:${dd/ns.length*100}%"></i></div></div>`; });
+  h += `</div>`;
+  h += `<div class="card"><h2>Rangos</h2><div class="ranks">${RANKS.map((k,i)=>`<div class="rk ${i>ri?'lock':''}">${emblem(k,30)}<div><b>${esc(k.name)}</b>${i===ri?' <span class="pill info">Actual</span>':''}<small>${esc(k.how)}</small></div></div>`).join('')}</div></div>`;
+  // línea de tiempo
+  const evByWeek = {}; S.evals.forEach(e=>{ if(!e.date) return; const wk=Math.floor(daysBetween(START,ymd(e.date))/7)+1; (evByWeek[wk]=evByWeek[wk]||[]).push(e); });
+  h += `<div class="card"><h2>Línea de tiempo (19 semanas)</h2><ul class="tl">`;
+  for(let k=1;k<=19;k++){
+    const ns = S.nodes.filter(n=>n.week===k);
+    const evs = (evByWeek[k]||[]).map(e=>`📝 ${esc(e.name)}${evalPct(e)!==null?' · '+evalPct(e)+' %':''}`).join('<br>');
+    let body = [REVIEW_WEEKS[k]?`<span class="rv">🔁 ${esc(REVIEW_WEEKS[k])}</span>`:'', ...ns.map(n=>`<b style="color:${col(n)}">${esc(n.id)}</b> ${esc(n.title)}`)].filter(Boolean).join('<br>') || '<span class="rv">Sin tema</span>';
+    const ic = ns.length ? (ns.every(n=>isDom(n.id))?'✅':ns.some(n=>(S.progress[n.id]||{}).status==='progreso')?'⏳':(k<w?'⚠️':'')) : (k<w?'✔︎':'');
+    h += `<li class="${k===w?'cur':''}"><div class="wk">S${k}</div><div>${body}<div class="d">${weekRange(k)}${k===w?' · <b style="color:#bfd0ff">esta semana</b>':''}</div>${evs?`<div class="d" style="color:var(--tx2)">${evs}</div>`:''}</div><div>${ic}</div></li>`;
+  }
+  h += `</ul><div class="muted" style="margin-top:8px">Después: 29 mar 2027 empieza la universidad (U1 y P2 en ciclos 1 y 2). P1 (CS50P) va los domingos hasta marzo.</div>${(()=>{const ex=S.nodes.filter(n=>!n.week&&!['U','P'].includes(n.phase)); return ex.length?`<div class="muted" style="margin-top:6px">Temas extra sin semana fija: ${ex.map(n=>esc(n.id+' '+n.title)).join(', ')}. Mételos en semanas con tiempo libre o en los repasos.</div>`:'';})()}</div>`;
+  document.getElementById('progWrap').innerHTML = h;
+}
+
+/* ===================== Evaluaciones ===================== */
+function weakness(n){ const p=S.progress[n.id]||{}; const t=(p.test===null||p.test===undefined)?null:+p.test; const r=n.target?(+p.count||0)/n.target:1; return (t===null?5:t)*10 + r*10 + (isDom(n.id)?50:0); }
+function evalAdvice(e,pct){
+  if(pct>=80) return '';
+  const B=byId(); const ns=(e.nodes||[]).map(i=>B[i]).filter(Boolean).sort((a,b)=>weakness(a)-weakness(b));
+  if(!ns.length) return '';
+  const lbl = n => esc(n.id+' ('+n.title+(n.week?', semana '+n.week:'')+')');
+  if(pct>=60) return `<div class="muted" style="margin-top:5px">Repasa sobre todo: ${ns.slice(0,2).map(lbl).join(' y ')}.</div>`;
+  return `<div class="warn">Semana más débil sugerida: <b>${lbl(ns[0])}</b>. Se elige por la nota de prueba más baja y menos ejercicios hechos.</div>`;
+}
+function evalMsg(pct){
+  if(pct>=80) return {k:'ok', t:'80 % o más: avanza a la semana siguiente.'};
+  if(pct>=60) return {k:'mid', t:'Entre 60 y 79 %: avanza, pero repasa los temas que fallaste.'};
+  return {k:'bad', t:'Menos de 60 %: repite la semana más débil antes de avanzar.'};
+}
+function renderEvals(){
+  const t=today(); const nextE = S.evals.find(e=>e.date && ymd(e.date)>=t && e.score===null);
+  let h = `<div class="card"><h2>Mini evaluaciones (sábados)</h2><ul class="rule" style="padding-left:18px;margin:0">
+    <li><b style="color:#86efac">80 % o más</b> → avanzar</li><li><b style="color:#fde68a">60 a 79 %</b> → avanzar y repasar los temas fallados</li><li><b style="color:#fecaca">Menos de 60 %</b> → repetir la semana más débil</li></ul></div>` + evalChart();
+  S.evals.forEach(e=>{
+    const pct=evalPct(e), m = pct!==null?evalMsg(pct):null, d=e.date?ymd(e.date):null;
+    h += `<div class="card ev ${nextE===e?'next':''}" data-ev="${esc(e.id)}">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><h2 style="margin:0">${esc(e.name)}</h2>${nextE===e?'<span class="pill info">Próxima</span>':''}</div>
+      <div class="meta">${d?esc(fmt(d,{weekday:'long',day:'numeric',month:'long',year:'numeric'})):''} · ${esc(e.topic)}</div>
+      <div class="inp"><label class="f" style="margin:0">Puntaje</label><input type="number" min="0" step="0.5" inputmode="decimal" class="evS" value="${e.score??''}" placeholder="—"><span class="muted">de</span><input type="number" min="1" step="1" inputmode="numeric" class="evM" value="${e.max}"><button class="btn pri sm evSave">Guardar</button></div>
+      ${(e.nodes||[]).length?`<div class="meta" style="margin-top:6px">Temas: ${e.nodes.map(esc).join(', ')}</div>`:''}
+      <div class="res">${m?`<span class="pill ${m.k}">${pct} %</span> ${esc(m.t)}${evalAdvice(e,pct)}`:(d&&d<t?'<span class="muted">Pendiente de registrar.</span>':'')}</div></div>`;
+  });
+  const w = document.getElementById('evalWrap'); w.innerHTML = h;
+  w.querySelectorAll('.evSave').forEach(b=>b.onclick=()=>{
+    const card=b.closest('.ev'), e=S.evals.find(x=>x.id===card.dataset.ev);
+    const sv=card.querySelector('.evS').value, mx=+card.querySelector('.evM').value;
+    if(!(mx>0)){ toast('El máximo debe ser mayor que 0'); return; }
+    if(sv!=='' && (+sv<0 || +sv>mx)){ toast('El puntaje debe estar entre 0 y '+mx); return; }
+    e.max=mx; e.score = sv===''?null:+sv; save();
+    const pct=evalPct(e); toast(pct===null?'Puntaje borrado':pct+' % · '+evalMsg(pct).t.split(': ')[1]);
+    renderEvals(); renderHeader(); renderTree();
+  });
+}
+
+/* ===================== Editor del árbol ===================== */
+function renderEditor(){
+  let h = `<div class="card"><h2>Nodos del árbol</h2><p class="muted" style="margin-top:0">Agrega los cursos reales cuando tengas la malla oficial. Los requisitos son las flechas.</p>
+    <button class="btn pri" id="addNode">+ Agregar nodo</button><div class="nlist" style="margin-top:12px">`;
+  S.nodes.forEach(n=>{ h += `<div class="nitem"><span class="dot" style="background:${col(n)}"></span><div class="tx"><b>${esc(n.id)}</b> ${esc(n.title)}<small>${n.reqs.length?'Requiere: '+esc(n.reqs.join(', ')):'Sin requisitos'}</small></div>
+    <button class="btn sm" data-ed="${esc(n.id)}">Editar</button><button class="btn sm danger" data-del="${esc(n.id)}" aria-label="Borrar">🗑</button></div>`; });
+  h += `</div></div>`;
+  h += `<div class="card"><h2>Datos</h2><p class="muted" style="margin-top:0">Todo se guarda en este navegador. Exportar, importar y reiniciar incluyen Matemática y Malla. Exporta un respaldo de vez en cuando.</p>
+    <p style="margin:0 0 8px;font-size:13.5px">Último respaldo: <b>${meta().lastBackup?esc(fmt(ymd(meta().lastBackup),{day:'numeric',month:'long',year:'numeric'})):'nunca'}</b>. Cada 7 días la app te recuerda descargar uno y guarda sola una copia interna.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="exp">⬇ Exportar JSON</button>${snapInfo()?`<button class="btn" id="snap">↺ Copia automática (${esc(fmt(ymd(snapInfo().fecha),{day:'numeric',month:'short'}))})</button>`:''}<button class="btn" id="imp">⬆ Importar JSON</button><button class="btn danger" id="rst">Reiniciar todo</button></div></div>`;
+  const w=document.getElementById('editWrap'); w.innerHTML=h;
+  w.querySelector('#addNode').onclick=()=>openEditor(null);
+  w.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>openEditor(b.dataset.ed));
+  w.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.del, C=children()[id]||[];
+    confirmBox('¿Borrar '+id+'?', (C.length?'Dejará de ser requisito de '+C.join(', ')+'. ':'')+'Se pierde su progreso.', 'Borrar', ()=>{
+      S.nodes=S.nodes.filter(n=>n.id!==id); S.nodes.forEach(n=>n.reqs=n.reqs.filter(r=>r!==id)); delete S.progress[id];
+      if(selected===id){ selected=null; closePanel(true); } if(pathMode===id) pathMode=null;
+      save(); refreshAll(); toast(id+' borrado');
+    });
+  });
+  w.querySelector('#exp').onclick=exportJSON;
+  if(w.querySelector('#snap')) w.querySelector('#snap').onclick=restoreSnap;
+  w.querySelector('#imp').onclick=()=>document.getElementById('fileIn').click();
+  w.querySelector('#rst').onclick=()=>confirmBox('¿Reiniciar todo?','Se borra todo tu progreso de Matemática y de la Malla: notas, evaluaciones y cambios a los árboles. No se puede deshacer (exporta antes si quieres un respaldo).','Sí, reiniciar',()=>{
+    S=fresh(); try{localStorage.removeItem(KEY); localStorage.removeItem(MALLA_KEY);}catch(e){} reloadMalla(); save(); selected=null; pathMode=null; closePanel(true); refreshAll(); fitView(); toast('Todo reiniciado');
+  });
+}
+const modal=document.getElementById('modal'), mbox=document.getElementById('mbox');
+function showModal(h){ mbox.innerHTML=h; modal.classList.add('show'); }
+function hideModal(){ modal.classList.remove('show'); }
+modal.addEventListener('click', e=>{ if(e.target===modal) hideModal(); });
+function confirmBox(title, msg, okTxt, fn){
+  showModal(`<h2>${esc(title)}</h2><p style="color:var(--tx2)">${esc(msg)}</p><div class="mact"><button class="btn" id="cNo">Cancelar</button><button class="btn danger" id="cOk">${esc(okTxt)}</button></div>`);
+  mbox.querySelector('#cNo').onclick=hideModal; mbox.querySelector('#cOk').onclick=()=>{ hideModal(); fn(); };
+}
+function openEditor(id){
+  const B=byId(), n = id? B[id] : {id:'',week:null,dates:'',phase:'U',title:'',target:0,goal:'',reqs:[],desc:'',dashed:false,grade20:true};
+  const bad = id? new Set([id,...descendants(id)]) : new Set();
+  const opts = Object.entries(PHASES).map(([k,p])=>`<option value="${k}" ${n.phase===k?'selected':''}>${esc(p.name)}</option>`).join('');
+  const reqs = S.nodes.map(x=>`<label class="${bad.has(x.id)?'no':''}"><input type="checkbox" value="${esc(x.id)}" ${n.reqs.includes(x.id)?'checked':''} ${bad.has(x.id)?'disabled':''}><b style="color:${col(x)}">${esc(x.id)}</b></label>`).join('');
+  showModal(`<h2>${id?'Editar '+esc(id):'Nuevo nodo'}</h2>
+   <div class="row fld"><div><label class="f">Código (id)</label><input type="text" id="fId" maxlength="12" value="${esc(n.id)}" placeholder="Ej. U4"></div>
+    <div><label class="f">Fase</label><select id="fPh">${opts}</select></div></div>
+   <div class="fld"><label class="f">Tema o curso</label><input type="text" id="fTi" value="${esc(n.title)}"></div>
+   <div class="row fld"><div><label class="f">Semana del plan (1–19, opcional)</label><input type="number" id="fWk" min="1" max="19" value="${n.week??''}"></div>
+    <div><label class="f">Fechas / ciclo</label><input type="text" id="fDt" value="${esc(n.dates)}" placeholder="Ej. Ciclo 3"></div></div>
+   <div class="fld"><label class="f">Meta verificable</label><input type="text" id="fGo" value="${esc(n.goal)}"></div>
+   <div class="fld"><label class="f">Ejercicios meta (0 = sin contador)</label><input type="number" id="fTg" min="0" value="${n.target||0}"></div>
+   <div class="fld"><label class="f">Descripción</label><textarea id="fDe" style="min-height:60px">${esc(n.desc)}</textarea></div>
+   <div class="fld"><label class="f">Requisitos (flechas que llegan a este nodo)</label><div class="reqbox" id="fRq">${reqs||'<span class="muted">No hay otros nodos</span>'}</div>${id?'<div class="muted" style="margin-top:4px">Los grises dependen de este nodo (crearían un ciclo).</div>':''}</div>
+   <div class="fld"><label class="chk"><input type="checkbox" id="fG20" ${n.grade20?'checked':''}> Curso universitario (nota final sobre 20 en vez de contador)</label></div>
+   <div class="fld"><label class="f">Enlaces (uno por línea: Nombre | https://…)</label><textarea id="fLk" style="min-height:60px" placeholder="Khan Academy | https://es.khanacademy.org">${esc((n.links||[]).map(l=>l[0]+' | '+l[1]).join('\n'))}</textarea></div>
+   <div class="fld"><label class="chk"><input type="checkbox" id="fDa" ${n.dashed?'checked':''}> Dibujar con línea punteada (por confirmar)</label></div>
+   <div class="err" id="fErr"></div>
+   <div class="mact"><button class="btn" id="fNo">Cancelar</button><button class="btn pri" id="fOk">Guardar</button></div>`);
+  const $=s=>mbox.querySelector(s);
+  $('#fNo').onclick=hideModal;
+  $('#fOk').onclick=()=>{
+    const nid=$('#fId').value.trim(), title=$('#fTi').value.trim();
+    if(!/^[A-Za-z0-9_-]{1,12}$/.test(nid)){ $('#fErr').textContent='El código debe tener de 1 a 12 letras, números, - o _.'; return; }
+    if(nid!==id && B[nid]){ $('#fErr').textContent='Ya existe un nodo '+nid+'.'; return; }
+    if(!title){ $('#fErr').textContent='Escribe el nombre del tema.'; return; }
+    const wk=$('#fWk').value;
+    const data={ id:nid, title, phase:$('#fPh').value, week: wk===''?null:Math.max(1,Math.min(19,+wk)), dates:$('#fDt').value.trim(), goal:$('#fGo').value.trim(),
+      target:Math.max(0,parseInt($('#fTg').value)||0), desc:$('#fDe').value.trim(), reqs:[...mbox.querySelectorAll('#fRq input:checked')].map(i=>i.value),
+      grade20:$('#fG20').checked, dashed:$('#fDa').checked,
+      links:$('#fLk').value.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{ const i=x.lastIndexOf('|'); const u=(i>=0?x.slice(i+1):x).trim(), l=(i>=0?x.slice(0,i):x).trim(); return [l||u,u]; }).filter(l=>/^https?:\/\//i.test(l[1])) };
+    if(id){
+      const node=B[id]; Object.assign(node,data);
+      if(nid!==id){ S.nodes.forEach(x=>x.reqs=x.reqs.map(r=>r===id?nid:r)); if(S.progress[id]){ S.progress[nid]=S.progress[id]; delete S.progress[id]; } if(selected===id) selected=nid; if(pathMode===id) pathMode=nid; }
+      if(node.phase==='P' && id==='P2' && nid!=='P2') delete node.row;
+    } else S.nodes.push(data);
+    save(); hideModal(); refreshAll(); toast('Nodo '+nid+' guardado');
+    if(selected) openPanel(selected);
+  };
+}
+function exportJSON(){
+  let malla=null; try{ malla=JSON.parse(localStorage.getItem(MALLA_KEY)||'null'); }catch(e){}
+  const blob=new Blob([JSON.stringify({app:'arbol-ali',version:2,exportado:new Date().toISOString(),matematica:S,malla},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='arbol-ali-'+iso(today())+'.json'; document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500); meta().lastBackup=iso(today()); meta().snoozeUntil=''; save(); if(curView==='vEdit') renderEditor(); toast('Respaldo descargado. Guárdalo en Drive o en tu correo.');
+}
+document.getElementById('fileIn').onchange = e=>{
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=async ()=>{ e.target.value='';
+    let raw; try{ raw=JSON.parse(r.result); }catch(err){ toast('Ese archivo no es un respaldo válido'); return; }
+    let mat=null, mal=null;
+    if(raw && (raw.matematica || raw.malla)){ mat = raw.matematica ? normalize(raw.matematica) : null; mal = raw.malla || null; }
+    else if(raw && Array.isArray(raw.nodes) && raw.nodes.some(n=>n && /^T\d+$/.test(n.id))) mat = normalize(raw);
+    else mal = raw;
+    if(mal){ const w = await ensureMalla(); try{ mal = w.normalize(mal); }catch(err){ mal=null; } }
+    if(!mat && !mal){ toast('Ese archivo no es un respaldo válido'); return; }
+    const parts = [mat?'Matemática ('+mat.nodes.length+' temas)':'', mal?'Malla':''].filter(Boolean).join(' y ');
+    confirmBox('¿Importar este archivo?','Reemplaza lo que tienes ahora en: '+parts+'.','Importar',()=>{
+      if(mat){ S=mat; save(); selected=null; pathMode=null; closePanel(true); refreshAll(); fitView(); }
+      if(mal){ try{ localStorage.setItem(MALLA_KEY, JSON.stringify(mal)); }catch(err){} reloadMalla(); }
+      toast('Progreso importado: '+parts);
+    });
+  };
+  r.readAsText(f);
+};
+
+/* ===================== Malla (segunda app, en la misma página) ===================== */
+const MALLA_KEY = 'arbolMallaAli.v1';
+const mallaFrame = document.getElementById('mallaFrame');
+let mallaReady = null;
+function mallaHtml(){ const b=atob(document.getElementById('mallaSrc').textContent.trim()); const u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return new TextDecoder().decode(u); }
+function ensureMalla(){
+  if(!mallaReady) mallaReady = new Promise(res=>{ mallaFrame.onload=()=>res(mallaFrame.contentWindow); mallaFrame.srcdoc = mallaHtml(); });
+  return mallaReady;
+}
+function reloadMalla(){ if(mallaReady){ mallaReady=null; if(document.body.classList.contains('malla')) ensureMalla(); } }
+function showApp(which){
+  document.querySelectorAll('#appSw button').forEach(b=>b.classList.toggle('on', b.dataset.app===which));
+  document.body.classList.toggle('malla', which==='malla');
+  if(which==='malla') ensureMalla(); else { renderHeader(); renderTree(); renderCurrent(); if(typeof firstFit!=='undefined' && !firstFit) requestAnimationFrame(()=>{ fitView(); firstFit=!!svg.getBoundingClientRect().width; }); }
+  try{ localStorage.setItem('arbolAli.app', which); }catch(e){}
+}
+document.querySelectorAll('#appSw button').forEach(b=>b.onclick=()=>showApp(b.dataset.app));
+window.addEventListener('storage', e=>{ if(e.key===KEY){ const d=load(); S=d; refreshAll(); } });
+
+/* ===================== Estudio: racha y minutos ===================== */
+function study(){ if(!S.study||typeof S.study!=='object') S.study={log:{}}; if(!S.study.log) S.study.log={}; return S.study; }
+function meta(){ if(!S.meta||typeof S.meta!=='object') S.meta={}; if(!S.meta.firstUse) S.meta.firstUse=iso(today()); return S.meta; }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function minutesOn(dt){ return +(study().log[iso(dt)]||0); }
+function streak(){
+  let d=today(), n=0;
+  if(!minutesOn(d)) d=addDays(d,-1);
+  while(minutesOn(d)>0){ n++; d=addDays(d,-1); }
+  return n;
+}
+function bestStreak(){
+  const days=Object.keys(study().log).filter(k=>study().log[k]>0).sort(); let best=0,cur=0,prev=null;
+  days.forEach(k=>{ const d=ymd(k); cur = prev && daysBetween(prev,d)===1 ? cur+1 : 1; best=Math.max(best,cur); prev=d; });
+  return best;
+}
+function logMinutes(min, nodeId){
+  min=Math.round(+min); if(!(min>0) || min>600){ toast('Escribe minutos entre 1 y 600'); return; }
+  const k=iso(today()); study().log[k]=(+study().log[k]||0)+min;
+  if(nodeId && byId()[nodeId]){ const p=P(nodeId); p.minutes=(+p.minutes||0)+min; }
+  save(); renderHeader(); toast('+'+min+' min · racha de '+streak()+' día'+(streak()===1?'':'s')+' 🔥');
+}
+
+/* ===================== Repaso espaciado ===================== */
+const REVIEW_DAYS=[7,21,60];
+function reviewInfo(id){
+  const p=S.progress[id]; if(!p||p.status!=='dominado'||!p.date||!/^\d{4}-\d{2}-\d{2}$/.test(p.date)) return null;
+  const done=Array.isArray(p.reviews)?p.reviews:[]; const i=done.length;
+  if(i>=REVIEW_DAYS.length) return {complete:true, done};
+  const due=addDays(ymd(p.date), REVIEW_DAYS[i]);
+  return {i, due, days:daysBetween(today(),due), done, complete:false};
+}
+const reviewDue = id => { const r=reviewInfo(id); return !!(r && !r.complete && r.days<=0); };
+function markReview(id){ const p=P(id); p.reviews=(Array.isArray(p.reviews)?p.reviews:[]).concat(iso(today())); save(); refreshAll(); if(selected===id) openPanel(id); toast('Repaso de '+id+' registrado'); }
+function dueCount(){ return S.nodes.filter(n=>reviewDue(n.id)).length; }
+
+/* ===================== Banco de ejercicios ===================== */
+function topicLinks(n){
+  if(n.links && n.links.length) return n.links;
+  const q=encodeURIComponent(n.title.replace(/\(.*?\)/g,'').trim());
+  const L=[
+    ['Khan Academy','https://es.khanacademy.org/search?page_search_query='+q],
+    ['Videos resueltos','https://www.youtube.com/results?search_query='+encodeURIComponent(n.title+' ejercicios resueltos')],
+    ['Ejercicios PDF','https://www.google.com/search?q='+encodeURIComponent(n.title+' ejercicios resueltos pdf')],
+    ['Comprobar con WolframAlpha','https://www.wolframalpha.com/']
+  ];
+  if(/^(T12|T13|T14|T16|X2|X3|X6)$/.test(n.id)) L.splice(2,0,['Graficar en GeoGebra','https://www.geogebra.org/graphing']);
+  return L;
+}
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nz=(a,b)=>{ let v; do v=rnd(a,b); while(!v); return v; };
+const gcd=(a,b)=>{ a=Math.abs(a); b=Math.abs(b); while(b) [a,b]=[b,a%b]; return a||1; };
+const lcm=(a,b)=>a*b/gcd(a,b);
+function Fr(n,d=1){ if(d<0){n=-n;d=-d;} const g=gcd(n,d); return {n:n/g,d:d/g}; }
+const fadd=(a,b)=>Fr(a.n*b.d+b.n*a.d,a.d*b.d), fsub=(a,b)=>Fr(a.n*b.d-b.n*a.d,a.d*b.d), fmul=(a,b)=>Fr(a.n*b.n,a.d*b.d), fdiv=(a,b)=>Fr(a.n*b.d,a.d*b.n);
+const fs=f=>(f.n<0?'−':'')+(f.d===1?Math.abs(f.n):Math.abs(f.n)+'/'+f.d);
+const fp=f=>f.d===1&&f.n>=0?fs(f):'('+fs(f)+')';
+const sup=e=>String(e).split('').map(d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]).join('');
+const sub=e=>String(e).split('').map(d=>'₀₁₂₃₄₅₆₇₈₉'[d]).join('');
+const num=n=>n<0?'−'+(-n):String(n);
+function terms(list){ // [[coef,'x²'],...]
+  let s=''; list.forEach(([k,v])=>{ if(!k) return; const a=Math.abs(k); const t=(a===1&&v?'':a)+v; s+= s ? (k<0?' − ':' + ')+t : (k<0?'−':'')+t; }); return s||'0';
+}
+function poly(c,v='x'){ const g=c.length-1; return terms(c.map((k,i)=>[k, g-i>0 ? v+(g-i>1?sup(g-i):'') : ''])); }
+const lin=a=>a<0?'x − '+(-a):'x + '+a;
+const GEN = {
+  T1:()=>{ const a=Fr(nz(1,9),rnd(2,9)), b=Fr(nz(1,9),rnd(2,9)), c=Fr(nz(1,9),rnd(2,9));
+    return pick([()=>({q:`${fs(a)} + ${fs(b)} × ${fs(c)}`, a:fs(fadd(a,fmul(b,c)))}), ()=>({q:`(${fs(a)} − ${fs(b)}) ÷ ${fs(c)}`, a:fs(fdiv(fsub(a,b),c))}), ()=>({q:`${fs(a)} ÷ ${fs(b)} − ${fs(c)}`, a:fs(fsub(fdiv(a,b),c))})])(); },
+  T2:()=>pick([()=>{ const m=rnd(2,7),n=rnd(2,7),k=rnd(1,m+n-1); return {q:`Simplifica: (x${sup(m)} · x${sup(n)}) ÷ x${sup(k)}`, a:'x'+(m+n-k>1?sup(m+n-k):'')}; },
+    ()=>{ const p=pick([5,10,12,15,20,25,30,40,75]), n=rnd(2,30)*20; return {q:`¿Cuánto es el ${p} % de ${n}?`, a:String(p*n/100)}; },
+    ()=>{ const a=rnd(2,5),b=rnd(1,4),c=rnd(1,3); return {q:`Calcula: 2${sup(a)} · 2${sup(b)} ÷ 2${sup(c)}`, a:String(2**(a+b-c))}; },
+    ()=>{ const n=rnd(2,4); return {q:`Calcula: (2/3)${sup(n)} y escribe el resultado como fracción`, a:`${2**n}/${3**n}`}; }])(),
+  T3:()=>{ const m=pick([2,3,5,6,7]),k=[rnd(1,5),rnd(1,5),rnd(1,5)], r=k[0]+k[1]-k[2]; return {q:`√${k[0]*k[0]*m} + √${k[1]*k[1]*m} − √${k[2]*k[2]*m}`, a: r===0?'0':(r===1?'':r===-1?'−':num(r))+'√'+m}; },
+  T4:()=>{ const a=rnd(1,5), b=nz(-9,9), ax=(a===1?'':a)+'x', bb=(b<0?' − ':' + ')+Math.abs(b);
+    return pick([()=>({q:`Desarrolla: (${ax}${bb})²`, a:poly([a*a,2*a*b,b*b])}), ()=>({q:`Desarrolla: (${ax} + ${Math.abs(b)})(${ax} − ${Math.abs(b)})`, a:poly([a*a,0,-b*b])}), ()=>({q:`Desarrolla: (${ax}${bb})³`, a:poly([a**3,3*a*a*b,3*a*b*b,b**3])})])(); },
+  T5:()=>pick([()=>{ const p=nz(-9,9),q=nz(-9,9); return {q:`Factoriza: ${poly([1,p+q,p*q])}`, a:`(${lin(p)})(${lin(q)}) · caso: trinomio x² + bx + c`}; },
+    ()=>{ const a=rnd(1,6),b=rnd(1,9); const ax=(a===1?'':a)+'x'; return {q:`Factoriza: ${poly([a*a,0,-b*b])}`, a:`(${ax} + ${b})(${ax} − ${b}) · caso: diferencia de cuadrados`}; },
+    ()=>{ const k=rnd(2,6),p=nz(-5,5); return {q:`Factoriza: ${poly([k,k*p])}`, a:`${k}(${lin(p)}) · caso: factor común`}; },
+    ()=>{ const a=rnd(1,5),b=nz(-7,7); const ax=(a===1?'':a)+'x'; return {q:`Factoriza: ${poly([a*a,2*a*b,b*b])}`, a:`(${ax}${b<0?' − ':' + '}${Math.abs(b)})² · caso: trinomio cuadrado perfecto`}; }])(),
+  T7:()=>{ let a=rnd(2,6),b=rnd(2,6); if(a===b) b=a+1; const x=nz(-5,5)*lcm(a,b); return {q:`Resuelve: x/${a} + x/${b} = ${num(x/a+x/b)}`, a:`x = ${num(x)}`}; },
+  T8:()=>pick([()=>{ const a=rnd(1,9); return {q:`Simplifica: (${poly([1,0,-a*a])}) ÷ (${poly([1,2*a,a*a])})`, a:`(${lin(-a)}) / (${lin(a)})`}; },
+    ()=>{ const p=nz(-6,6),q=nz(-6,6); return {q:`Simplifica: (${poly([1,p+q,p*q])}) ÷ (${lin(p)})`, a:lin(q)}; }])(),
+  X1:()=>{ const r=nz(-4,4), Q=[rnd(1,3),nz(-4,4),rnd(-5,5)], R=rnd(-6,6); const Pc=[Q[0],Q[1]-r*Q[0],Q[2]-r*Q[1],-r*Q[2]+R];
+    return {q:`Divide con Ruffini: (${poly(Pc)}) ÷ (${lin(-r)})`, a:`Cociente: ${poly(Q)} · Residuo: ${num(R)}`}; },
+  T9:()=>{ const r1=nz(-9,9), r2=nz(-9,9); return {q:`Resuelve: ${poly([1,-(r1+r2),r1*r2])} = 0`, a: r1===r2?`x = ${num(r1)} (raíz doble)`:`x = ${num(Math.min(r1,r2))} o x = ${num(Math.max(r1,r2))}`}; },
+  T10:()=>{ const x=rnd(-6,6),y=rnd(-6,6); let a1,b1,a2,b2; do{ a1=nz(-5,5);b1=nz(-5,5);a2=nz(-5,5);b2=nz(-5,5); }while(a1*b2-a2*b1===0);
+    return {q:`Resuelve el sistema: ${terms([[a1,'x'],[b1,'y']])} = ${num(a1*x+b1*y)} ; ${terms([[a2,'x'],[b2,'y']])} = ${num(a2*x+b2*y)}`, a:`x = ${num(x)}, y = ${num(y)}`}; },
+  T11:()=>{ const a=nz(-6,6), b=rnd(1,8); return pick([{q:`Resuelve: |${lin(-a)}| < ${b}`, a:`x ∈ (${num(a-b)}, ${num(a+b)})`}, {q:`Resuelve: |${lin(-a)}| ≥ ${b}`, a:`x ∈ (−∞, ${num(a-b)}] ∪ [${num(a+b)}, +∞)`}, (()=>{ const k=nz(-5,5), c=rnd(-9,9), x0=rnd(-6,6); return {q:`Resuelve: ${terms([[k,'x'],[c,'']])} > ${num(k*x0+c)}`, a: k>0?`x ∈ (${num(x0)}, +∞)`:`x ∈ (−∞, ${num(x0)})`}; })()]); },
+  T12:()=>pick([()=>{ const x1=rnd(-6,6),y1=rnd(-6,6); let x2=rnd(-6,6); if(x2===x1) x2=x1+rnd(1,4); const y2=rnd(-6,6); const m=Fr(y2-y1,x2-x1), b=fsub(Fr(y1),fmul(m,Fr(x1)));
+      const ms = m.n===0?'':(m.d===1&&Math.abs(m.n)===1?(m.n<0?'−':''):fs(m))+'x'; const bs = b.n===0?(ms?'':'0'):(ms?(b.n<0?' − ':' + ')+fs(Fr(Math.abs(b.n),b.d)):fs(b));
+      return {q:`Ecuación de la recta que pasa por (${num(x1)}, ${num(y1)}) y (${num(x2)}, ${num(y2)})`, a:`y = ${ms}${bs}  (pendiente ${fs(m)})`}; },
+    ()=>{ const [dx,dy,d]=pick([[3,4,5],[5,12,13],[6,8,10],[8,15,17],[4,3,5]]); const x1=rnd(-5,5),y1=rnd(-5,5),sx=pick([1,-1]),sy=pick([1,-1]);
+      return {q:`Distancia entre (${num(x1)}, ${num(y1)}) y (${num(x1+sx*dx)}, ${num(y1+sy*dy)})`, a:`d = ${d}`}; }])(),
+  T13:()=>{ const a=nz(-7,7), b=rnd(1,6); return pick([{q:`Dominio de f(x) = √(${lin(-a)})`, a:`[${num(a)}, +∞)`}, {q:`Dominio de f(x) = 1 / (${poly([1,0,-b*b])})`, a:`ℝ − {−${b}, ${b}}`}, {q:`Dominio de f(x) = √(${num(a)} − x)`, a:`(−∞, ${num(a)}]`}, {q:`Dominio y rango de f(x) = (${lin(-a)})² + ${b}`, a:`Dominio ℝ; rango [${b}, +∞)`}]); },
+  T14:()=>pick([()=>{ const h=nz(-6,6),k=nz(-6,6),r=rnd(1,7); return {q:`Centro y radio: ${terms([[1,'x²'],[1,'y²'],[-2*h,'x'],[-2*k,'y'],[h*h+k*k-r*r,'']])} = 0`, a:`Centro (${num(h)}, ${num(k)}), radio ${r}`}; },
+    ()=>{ const h=nz(-5,5),k=nz(-5,5),p=nz(-3,3); return {q:`Vértice y foco de (${lin(-h)})² = ${num(4*p)}(y ${k<0?'+ '+(-k):'− '+k})`, a:`Vértice (${num(h)}, ${num(k)}), foco (${num(h)}, ${num(k+p)})`}; }])(),
+  T15:()=>pick([()=>{ const m=[rnd(-5,5),rnd(-5,5),rnd(-5,5),rnd(-5,5)]; return {q:`Determinante de [${num(m[0])} ${num(m[1])}; ${num(m[2])} ${num(m[3])}]`, a:num(m[0]*m[3]-m[1]*m[2])}; },
+    ()=>{ const A=[rnd(-3,3),rnd(-3,3),rnd(-3,3),rnd(-3,3)], B=[rnd(-3,3),rnd(-3,3),rnd(-3,3),rnd(-3,3)];
+      return {q:`Multiplica A·B con A = [${A.map(num).slice(0,2).join(' ')}; ${A.map(num).slice(2).join(' ')}] y B = [${B.map(num).slice(0,2).join(' ')}; ${B.map(num).slice(2).join(' ')}]`, a:`[${num(A[0]*B[0]+A[1]*B[2])} ${num(A[0]*B[1]+A[1]*B[3])}; ${num(A[2]*B[0]+A[3]*B[2])} ${num(A[2]*B[1]+A[3]*B[3])}]`}; }])(),
+  T16:()=>{ const b=pick([2,3,5]), c=rnd(1,4), k=rnd(-3,3), n=rnd(2,4); return pick([{q:`Resuelve: ${b}^(${lin(k)}) = ${b**c}`, a:`x = ${num(c-k)}`}, {q:`Resuelve: log${sub(b)}(x) = ${n}`, a:`x = ${b**n}`}, {q:`Calcula: log${sub(b)}(${b**n})`, a:String(n)}, {q:`Resuelve: log(x) + log(${2**c}) = log(${2**c*5*n})`, a:`x = ${5*n}`}]); },
+  T17:()=>{ const a=nz(-5,5), s=nz(-5,5); return pick([{q:`lím x→${num(a)} (${poly([1,0,-a*a])}) / (${lin(-a)})`, a:num(2*a)}, {q:`lím x→${num(a)} (${poly([1,-(a+s),a*s])}) / (${lin(-a)})`, a:num(a-s)}, {q:`lím x→∞ (${poly([s*s,a,1])}) / (${poly([1,0,3])})`, a:num(s*s)}]); },
+  T18:()=>{ const c=[nz(-5,5),rnd(-6,6),rnd(-9,9),rnd(-9,9)]; return pick([{q:`Deriva: f(x) = ${poly(c)}`, a:`f′(x) = ${poly([3*c[0],2*c[1],c[2]])}`}, (()=>{ const a=nz(-4,4),n=rnd(2,5); return {q:`Deriva f(x) = ${terms([[a,'x'+sup(n)]])} y evalúa f′(1)`, a:`f′(x) = ${terms([[a*n,'x'+(n-1>1?sup(n-1):'')]])}; f′(1) = ${num(a*n)}`}; })()]); },
+  X2:()=>{ const T={30:['1/2','√3/2','√3/3'],45:['√2/2','√2/2','1'],60:['√3/2','1/2','√3'],90:['1','0','no existe'],120:['√3/2','−1/2','−√3'],135:['√2/2','−√2/2','−1'],150:['1/2','−√3/2','−√3/3'],180:['0','−1','0']};
+    const g=pick(Object.keys(T)), f=rnd(0,2); return {q:`Valor exacto de ${['sen','cos','tan'][f]}(${g}°)`, a:T[g][f]}; },
+  X3:()=>pick([()=>{ const [a,b,c]=pick([[5,4,3],[5,3,4],[13,12,5],[10,8,6],[10,6,8]]); return {q:`Elipse x²/${a*a} + y²/${b*b} = 1: vértices y focos`, a:`Vértices (±${a}, 0), focos (±${c}, 0)`}; },
+    ()=>{ const [a,b,c]=pick([[3,4,5],[4,3,5],[5,12,13],[12,5,13],[6,8,10]]); return {q:`Hipérbola x²/${a*a} − y²/${b*b} = 1: vértices y focos`, a:`Vértices (±${a}, 0), focos (±${c}, 0)`}; }])(),
+  X4:()=>{ const [p,q,m]=pick([[3,4,5],[6,8,10],[5,12,13],[8,6,10]]); const u=[pick([1,-1])*p,pick([1,-1])*q], v=[nz(-6,6),nz(-6,6)];
+    return {q:`u = (${num(u[0])}, ${num(u[1])}), v = (${num(v[0])}, ${num(v[1])}). Calcula u·v, |u| y u + v`, a:`u·v = ${num(u[0]*v[0]+u[1]*v[1])}; |u| = ${m}; u + v = (${num(u[0]+v[0])}, ${num(u[1]+v[1])})`}; }
+};
+let practice = {topic:null, items:[]};
+function genFor(id, k){ const g=GEN[id]; if(!g) return []; const out=[]; for(let i=0;i<k;i++){ try{ out.push(g()); }catch(e){} } return out; }
+function practiceTopics(){ return S.nodes.filter(n=>GEN[n.id]); }
+function defaultTopic(){ const w=curWeek(); const n=S.nodes.find(x=>x.week===w&&GEN[x.id]) || practiceTopics().find(x=>!isDom(x.id)) || practiceTopics()[0]; return n?n.id:null; }
+function goPractice(id){ practice={topic:id, items:genFor(id,5)}; document.querySelector('nav button[data-v="vStudy"]').click(); setTimeout(()=>{ const el=document.getElementById('practiceCard'); if(el) el.scrollIntoView({behavior:'smooth'}); },60); }
+
+function renderStudy(){
+  const B=byId(), t=today(), st=streak();
+  const curNode = S.nodes.find(n=>n.week===curWeek());
+  const opts = S.nodes.filter(n=>n.phase!=='U').map(n=>`<option value="${esc(n.id)}" ${curNode&&curNode.id===n.id?'selected':''}>${esc(n.id+' · '+n.title)}</option>`).join('');
+  // barras de 14 días
+  let bars=''; const days=[]; for(let i=13;i>=0;i--) days.push(addDays(t,-i));
+  const mx=Math.max(30,...days.map(minutesOn));
+  days.forEach((d,i)=>{ const m=minutesOn(d), h=Math.round(m/mx*60); const x=i*22+4;
+    bars += `<rect x="${x}" y="${70-h}" width="16" height="${Math.max(h,2)}" rx="3" fill="${m?'#f4a261':'#2a3242'}"><title>${esc(fmt(d,{day:'numeric',month:'short'}))}: ${m} min</title></rect><text x="${x+8}" y="84" text-anchor="middle" font-size="9" fill="#6b7383">${d.getDate()}</text>`; });
+  let wk=0; for(let i=0;i<7;i++) wk+=minutesOn(addDays(t,-i));
+  const total=Object.values(study().log).reduce((a,b)=>a+(+b||0),0);
+  let h = planCard() + `<div class="card"><h2>🔥 Racha diaria</h2>
+    <div class="stat-grid"><div class="stat"><span>Racha actual</span><div class="big">${st}<small style="font-size:15px;color:var(--tx2)"> día${st===1?'':'s'}</small></div></div>
+    <div class="stat"><span>Hoy</span><div class="big">${minutesOn(t)}<small style="font-size:15px;color:var(--tx2)"> min</small></div></div>
+    <div class="stat"><span>Últimos 7 días</span><div class="big" style="font-size:22px">${Math.floor(wk/60)} h ${wk%60} min</div></div>
+    <div class="stat"><span>Mejor racha · total</span><div class="big" style="font-size:22px">${bestStreak()} d · ${Math.round(total/60)} h</div></div></div>
+    <svg viewBox="0 0 312 90" style="width:100%;margin-top:10px">${bars}</svg>
+    <h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:10px 0 6px">Registrar minutos de hoy</h3>
+    <select id="sTopic" style="margin-bottom:8px"><option value="">Sin tema</option>${opts}</select>
+    <div class="counter"><button data-min="10">+10</button><button data-min="15">+15</button><button data-min="30">+30</button><button data-min="45">+45</button><input type="number" id="sMin" min="1" max="600" placeholder="min" inputmode="numeric"><button id="sAdd" style="padding:0 12px">Guardar</button></div>
+    <div class="muted" style="margin-top:6px">La racha cuenta los días seguidos con al menos 1 minuto registrado.</div></div>`;
+  // repasos
+  const due=S.nodes.filter(n=>reviewDue(n.id)), up=S.nodes.map(n=>[n,reviewInfo(n.id)]).filter(([n,r])=>r&&!r.complete&&r.days>0).sort((a,b)=>a[1].days-b[1].days).slice(0,6);
+  h += `<div class="card"><h2>🔁 Repaso espaciado</h2><p class="muted" style="margin-top:0">Cada tema dominado se repasa a los 7, 21 y 60 días de la fecha en que lo dominaste: resuelve unos 5 ejercicios sin apuntes.</p>`;
+  h += due.length ? due.map(n=>{ const r=reviewInfo(n.id); return `<div class="nitem" style="margin-bottom:6px"><span class="dot" style="background:${col(n)}"></span><div class="tx"><b>${esc(n.id)}</b> ${esc(n.title)}<small>Repaso ${r.i+1} de 3 (día ${REVIEW_DAYS[r.i]}) · ${r.days===0?'toca hoy':'atrasado '+(-r.days)+' d'}</small></div><button class="btn sm" data-prac="${esc(n.id)}">Practicar</button><button class="btn pri sm" data-rev="${esc(n.id)}">Hecho</button></div>`; }).join('') : '<div class="muted">No tienes repasos pendientes hoy. ✅</div>';
+  if(up.length) h += `<div class="muted" style="margin-top:8px">Próximos: ${up.map(([n,r])=>esc(n.id)+' en '+r.days+' d').join(' · ')}</div>`;
+  h += `</div>`;
+  h += examCard() + errorCard();
+  // práctica
+  if(!practice.topic || !B[practice.topic] || !GEN[practice.topic]) practice={topic:defaultTopic(), items:[]};
+  const pt = B[practice.topic];
+  h += `<div class="card" id="practiceCard"><h2>🧮 Practicar</h2>
+    <select id="pTopic">${practiceTopics().map(n=>`<option value="${esc(n.id)}" ${n.id===practice.topic?'selected':''}>${esc(n.id+' · '+n.title)}</option>`).join('')}</select>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="pGen">Generar 5 ejercicios</button></div>`;
+  if(practice.items.length){
+    h += `<ol style="padding-left:20px;margin:12px 0 0">` + practice.items.map((it,i)=>`<li style="margin-bottom:10px"><div style="font-size:15px">${esc(it.q)}</div>
+      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn sm" data-ans="${i}">Ver respuesta</button><button class="btn sm" data-ok="${i}" ${it.ok||it.bad?'disabled':''}>${it.ok?'✓ Sumado':'✓ Lo hice bien (+1)'}</button><button class="btn sm" data-bad="${i}" ${it.ok||it.bad?'disabled':''}>${it.bad?'📒 Anotado':'✗ Me equivoqué'}</button></div>
+      <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${esc(it.a)}</div></li>`).join('') + `</ol>`;
+    h += `<div class="muted">"Lo hice bien" suma 1 al contador de ejercicios de ${esc(practice.topic)}.</div>`;
+  }
+  if(pt){ h += `<h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:14px 0 6px">Más ejercicios de ${esc(pt.id)}</h3><div class="chips">${topicLinks(pt).map(([l,u])=>`<a class="nchip" style="color:var(--tx);text-decoration:none" href="${esc(u)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div>`; }
+  h += `</div>`;
+  const w=document.getElementById('studyWrap'); w.innerHTML=h;
+  const topicSel=()=>w.querySelector('#sTopic').value;
+  w.querySelectorAll('[data-min]').forEach(b=>b.onclick=()=>{ logMinutes(+b.dataset.min, topicSel()); renderStudy(); });
+  w.querySelector('#sAdd').onclick=()=>{ logMinutes(w.querySelector('#sMin').value, topicSel()); renderStudy(); };
+  w.querySelectorAll('[data-rev]').forEach(b=>b.onclick=()=>{ markReview(b.dataset.rev); });
+  w.querySelectorAll('[data-prac]').forEach(b=>b.onclick=()=>{ practice={topic:b.dataset.prac, items:genFor(b.dataset.prac,5)}; renderStudy(); w.querySelector('#practiceCard').scrollIntoView({behavior:'smooth'}); });
+  w.querySelector('#pTopic').onchange=e=>{ practice={topic:e.target.value, items:[]}; renderStudy(); };
+  w.querySelector('#pGen').onclick=()=>{ practice.items=genFor(practice.topic,5); renderStudy(); };
+  w.querySelectorAll('[data-ans]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ans]; it.show=!it.show; w.querySelector('#ans'+b.dataset.ans).style.display=it.show?'block':'none'; });
+  w.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ok]; if(it.ok||it.bad) return; it.ok=true; const p=P(practice.topic); p.count=(+p.count||0)+1; save(); renderTree(); b.disabled=true; b.textContent='✓ Sumado'; b.nextElementSibling.disabled=true; });
+  w.querySelectorAll('[data-bad]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.bad]; if(it.ok||it.bad) return; it.bad=true; addError(practice.topic, it.q, it.a); renderHeader(); b.disabled=true; b.textContent='📒 Anotado'; b.previousElementSibling.disabled=true; toast('Guardado en tu cuaderno de errores'); });
+  bindPlan(w); bindErrors(w);
+}
+
+/* ===================== Gráfico de mini evaluaciones ===================== */
+function evalChart(){
+  const ev=S.evals, n=ev.length; if(!n) return '';
+  const W2=320, H2=170, L=38, R=12, T2=12, Bt=28, iw=W2-L-R, ih=H2-T2-Bt;
+  const X=i=>L+(n===1?iw/2:i*iw/(n-1)), Y=p=>T2+ih*(1-p/100);
+  let s=`<svg viewBox="0 0 ${W2} ${H2}" style="width:100%" role="img" aria-label="Notas de las mini evaluaciones">`;
+  s+=`<rect x="${L}" y="${Y(100)}" width="${iw}" height="${Y(80)-Y(100)}" fill="#4ade80" opacity=".07"/><rect x="${L}" y="${Y(80)}" width="${iw}" height="${Y(60)-Y(80)}" fill="#facc15" opacity=".07"/><rect x="${L}" y="${Y(60)}" width="${iw}" height="${Y(0)-Y(60)}" fill="#f87171" opacity=".06"/>`;
+  [0,60,80,100].forEach(v=>{ s+=`<line x1="${L}" x2="${W2-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v===80?'#4ade80':v===60?'#facc15':'#2a3242'}" stroke-dasharray="${v===60||v===80?'4 4':''}" opacity=".7"/><text x="${L-5}" y="${Y(v)+3}" text-anchor="end" font-size="9" fill="#9aa3b2">${v}%</text>`; });
+  const pts=ev.map((e,i)=>[i,evalPct(e)]).filter(p=>p[1]!==null);
+  if(pts.length>1) s+=`<polyline fill="none" stroke="#7aa2ff" stroke-width="2" points="${pts.map(([i,p])=>X(i)+','+Y(Math.min(100,p))).join(' ')}"/>`;
+  ev.forEach((e,i)=>{ const p=evalPct(e); s+=`<text x="${X(i)}" y="${H2-10}" text-anchor="middle" font-size="9" fill="#9aa3b2">${e.id==='final'?'F':i+1}</text>`;
+    if(p!==null){ const c=p>=80?'#4ade80':p>=60?'#facc15':'#f87171'; s+=`<circle cx="${X(i)}" cy="${Y(Math.min(100,p))}" r="4.5" fill="${c}" stroke="#0d1017" stroke-width="1.5"><title>${esc(e.name)}: ${p} %</title></circle><text x="${X(i)}" y="${Y(Math.min(100,p))-8}" text-anchor="middle" font-size="9" fill="#e6e8ee">${Math.round(p)}</text>`; }
+    else s+=`<circle cx="${X(i)}" cy="${Y(0)}" r="2.5" fill="#2a3242"/>`; });
+  s+=`</svg>`;
+  const avg = pts.length ? Math.round(pts.reduce((a,p)=>a+p[1],0)/pts.length) : null;
+  return `<div class="card"><h2>📊 Tus notas en el tiempo</h2>${s}<div class="muted">${pts.length?`Promedio: <b style="color:var(--tx)">${avg} %</b> en ${pts.length} prueba${pts.length>1?'s':''}. Verde ≥ 80 %, amarillo 60–79 %, rojo &lt; 60 %.`:'Cuando guardes puntajes aparecerán aquí.'}</div></div>`;
+}
+
+/* ===================== Respaldo semanal ===================== */
+const SNAP_KEY='arbolAli.autosnap';
+function hasAnyData(){ return errs().length>0 || Object.values(S.progress).some(p=>p&&(p.status!=='pendiente'||p.count||p.notes)) || S.evals.some(e=>e.score!==null) || Object.keys(study().log).length>0; }
+function autoSnapshot(){
+  const m=meta(); if(m.lastSnap && daysBetween(ymd(m.lastSnap),today())<7) return;
+  try{ let malla=null; try{ malla=JSON.parse(localStorage.getItem(MALLA_KEY)||'null'); }catch(e){}
+    localStorage.setItem(SNAP_KEY, JSON.stringify({fecha:iso(today()), matematica:S, malla})); m.lastSnap=iso(today()); save(); }catch(e){}
+}
+function snapInfo(){ try{ const d=JSON.parse(localStorage.getItem(SNAP_KEY)||'null'); return d&&d.fecha?d:null; }catch(e){ return null; } }
+function backupCheck(){
+  const m=meta(); if(!hasAnyData()) return;
+  const ref = m.lastBackup || m.firstUse; const ago = daysBetween(ymd(ref), today());
+  if(ago<7) return; if(m.snoozeUntil && ymd(m.snoozeUntil)>today()) return;
+  showModal(`<h2>💾 Hora de tu respaldo semanal</h2><p style="color:var(--tx2)">${m.lastBackup?'Tu último respaldo fue hace '+ago+' días.':'Aún no has descargado ningún respaldo.'} Tu progreso solo vive en este navegador: si se borran los datos del navegador, se pierde. Descarga el archivo y guárdalo en Drive o en tu correo.</p>
+    <div class="mact"><button class="btn" id="bLater">Mañana</button><button class="btn pri" id="bNow">Descargar respaldo</button></div>`);
+  mbox.querySelector('#bLater').onclick=()=>{ m.snoozeUntil=iso(addDays(today(),1)); save(); hideModal(); };
+  mbox.querySelector('#bNow').onclick=()=>{ hideModal(); exportJSON(); };
+}
+function restoreSnap(){
+  const d=snapInfo(); if(!d) return;
+  confirmBox('¿Restaurar la copia automática?','Vuelve todo (Matemática y Malla) a como estaba el '+fmt(ymd(d.fecha),{day:'numeric',month:'long',year:'numeric'})+'. Lo que hiciste después se pierde.','Restaurar',()=>{
+    const mat=normalize(d.matematica); if(mat){ S=mat; save(); }
+    if(d.malla){ try{ localStorage.setItem(MALLA_KEY, JSON.stringify(d.malla)); }catch(e){} reloadMalla(); }
+    selected=null; pathMode=null; closePanel(true); refreshAll(); fitView(); toast('Copia restaurada');
+  });
+}
+
+/* ===================== Generadores de los temas nuevos ===================== */
+Object.assign(GEN, {
+  X5:()=>pick([()=>{ const U=[1,2,3,4,5,6,7,8,9]; const A=U.filter(()=>Math.random()<.45), B=U.filter(()=>Math.random()<.45); const f=s=>'{'+(s.length?s.join(', '):'')+'}';
+      const op=pick(['∪','∩','−']); const r= op==='∪'?U.filter(x=>A.includes(x)||B.includes(x)):op==='∩'?A.filter(x=>B.includes(x)):A.filter(x=>!B.includes(x));
+      return {q:`A = ${f(A)}, B = ${f(B)}. Calcula A ${op} B`, a:r.length?f(r):'∅ (conjunto vacío)'}; },
+    ()=>{ const p=pick([true,false]), q=pick([true,false]); const V=b=>b?'V':'F'; const ops=[['p ∧ q',p&&q],['p ∨ q',p||q],['p → q',!p||q],['p ↔ q',p===q],['¬p ∨ q',!p||q],['¬(p ∧ q)',!(p&&q)]]; const [e,v]=pick(ops);
+      return {q:`Si p = ${V(p)} y q = ${V(q)}, ¿cuál es el valor de ${e}?`, a:V(v)}; },
+    ()=>{ const a=rnd(10,40), b=rnd(10,40), c=rnd(2,Math.min(a,b)-2); return {q:`En un grupo, ${a} estudian Python, ${b} estudian Excel y ${c} estudian ambos. ¿Cuántos estudian al menos uno?`, a:String(a+b-c)}; }])(),
+  X6:()=>pick([()=>{ const a=nz(-4,4), b=rnd(-6,6), c=nz(-3,3), x=rnd(-3,3); const g=c*x; return {q:`f(x) = ${terms([[a,'x'],[b,'']])}, g(x) = ${terms([[c,'x']])}. Calcula (f ∘ g)(${num(x)})`, a:num(a*g+b)}; },
+    ()=>{ const a=nz(-5,5), b=rnd(-9,9); const inv = b===0 ? `x/${num(a)}` : `(x ${b<0?'+ '+(-b):'− '+b}) / ${num(a)}`; return {q:`Halla la inversa de f(x) = ${terms([[a,'x'],[b,'']])}`, a:`f⁻¹(x) = ${inv}`}; },
+    ()=>{ const k=nz(-5,5); return {q:`f(x) = x², g(x) = ${lin(k)}. Escribe (f ∘ g)(x) desarrollado`, a:poly([1,2*k,k*k])}; }])(),
+  X7:()=>pick([()=>{ const a=rnd(1,9), d=nz(-4,6), n=rnd(5,15); return {q:`Progresión aritmética: a₁ = ${a}, d = ${num(d)}. Halla a${sub(n)} y la suma de los ${n} primeros términos`, a:`a${sub(n)} = ${num(a+(n-1)*d)}; S = ${num(n*(2*a+(n-1)*d)/2)}`}; },
+    ()=>{ const n=rnd(4,10), k=rnd(1,4), c=rnd(0,5); let s=0; for(let i=1;i<=n;i++) s+=k*i+c; return {q:`Calcula Σ (de i = 1 a ${n}) de (${terms([[k,'i'],[c,'']])})`, a:String(s)}; },
+    ()=>{ const a=rnd(1,5), r=pick([2,3]), n=rnd(4,7); return {q:`Progresión geométrica: a₁ = ${a}, r = ${r}. Halla a${sub(n)}`, a:String(a*r**(n-1))}; }])(),
+  X8:()=>pick([()=>{ const n=rnd(5,10), k=rnd(2,4); let c=1; for(let i=0;i<k;i++) c=c*(n-i)/(i+1); return {q:`¿De cuántas formas puedes elegir ${k} personas de un grupo de ${n}? (el orden no importa)`, a:`C(${n}, ${k}) = ${Math.round(c)}`}; },
+    ()=>{ const n=rnd(4,8), k=rnd(2,3); let p=1; for(let i=0;i<k;i++) p*=n-i; return {q:`¿De cuántas formas se reparten ${k} premios distintos entre ${n} personas? (el orden importa)`, a:`P(${n}, ${k}) = ${p}`}; },
+    ()=>{ const r=rnd(2,8), b=rnd(2,8); const f=Fr(r,r+b); return {q:`Una bolsa tiene ${r} bolas rojas y ${b} azules. ¿Probabilidad de sacar una roja?`, a:fs(f)}; },
+    ()=>{ const s=rnd(2,12); let c=0; for(let i=1;i<=6;i++) for(let j=1;j<=6;j++) if(i+j===s) c++; return {q:`Se lanzan dos dados. ¿Probabilidad de que la suma sea ${s}?`, a:fs(Fr(c,36))}; }])()
+});
+
+/* ===================== Cuaderno de errores ===================== */
+function errs(){ if(!Array.isArray(S.errors)) S.errors=[]; return S.errors; }
+function addError(topic, q, a){ errs().push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5), topic:topic||'', q:String(q), a:String(a||''), added:iso(today()), due:iso(today()), tries:0}); save(); }
+const errorsDue = () => errs().filter(e=>!e.fixed && ymd(e.due)<=today());
+function errorRetry(id, ok){ const e=errs().find(x=>x.id===id); if(!e) return;
+  if(ok){ e.fixed=iso(today()); toast('¡Error superado! ✅'); } else { e.tries=(e.tries||0)+1; e.due=iso(addDays(today(), e.tries>1?3:2)); toast('Vuelve a salir en '+(e.tries>1?3:2)+' días'); }
+  save(); renderHeader(); renderStudy(); }
+
+/* ===================== Modo examen ===================== */
+let EX=null, exTimer=null;
+function examTopics(){ return S.nodes.filter(n=>GEN[n.id] && /^T\d+$/.test(n.id)); }
+function startExam(topic){
+  let items, total, mins;
+  if(topic==='SIM'){ const ts=examTopics(); total=15; mins=40; items=[]; const order=ts.slice().sort(()=>Math.random()-.5); for(let i=0;i<total;i++){ const t=order[i%order.length]; items.push({...GEN[t.id](), topic:t.id}); } }
+  else { total=10; mins = /T1$|T3$/.test(topic)?20: topic==='T4'?10 : 25; items=genFor(topic,total).map(x=>({...x, topic})); }
+  const custom = +(document.getElementById('exMin')||{}).value; if(custom>0) mins=custom;
+  EX={topic, items, total, mins, start:Date.now(), end:Date.now()+mins*60000, phase:'run'};
+  document.getElementById('exam').classList.add('show'); renderExam();
+  clearInterval(exTimer); exTimer=setInterval(tickExam, 1000);
+}
+function tickExam(){ if(!EX||EX.phase!=='run') return clearInterval(exTimer); const left=EX.end-Date.now(); const el=document.getElementById('exClock'); if(el){ const s=Math.max(0,Math.ceil(left/1000)); el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); el.classList.toggle('low', s<=120); }
+  if(left<=0){ toast('⏰ Se acabó el tiempo'); finishExam(); } }
+function finishExam(){ if(!EX) return; EX.phase='check'; EX.used=Math.max(1,Math.round((Date.now()-EX.start)/60000)); clearInterval(exTimer); renderExam(); }
+function renderExam(){
+  const box=document.getElementById('exam'), B=byId(); if(!EX){ box.classList.remove('show'); return; }
+  const title = EX.topic==='SIM' ? 'Simulacro final · 15 ejercicios' : `Examen de ${EX.topic} · ${esc(B[EX.topic]?.title||'')}`;
+  let h = `<div class="ex-top"><div><b>${title}</b><div class="muted">${EX.phase==='run'?'Sin apuntes y sin pistas. Resuelve en papel.':'Corrige con honestidad: marca ✓ o ✗ en cada uno.'}</div></div>`;
+  if(EX.phase==='run') h += `<div class="ex-clock" id="exClock">--:--</div></div>`;
+  else { const ok=EX.items.filter(i=>i.mark==='ok').length, marked=EX.items.filter(i=>i.mark).length; h += `<div class="ex-clock">${ok}/${EX.total}</div></div><div class="muted" style="margin:6px 0 0">Tiempo usado: ${EX.used} min · corregidos ${marked} de ${EX.total}</div>`; }
+  h += `<ol class="ex-list">` + EX.items.map((it,i)=>`<li><div class="ex-q">${esc(it.q)}${EX.topic==='SIM'?` <span class="muted">(${esc(it.topic)})</span>`:''}</div>${EX.phase==='check'?`<div class="goal" style="margin-top:6px">Respuesta: ${esc(it.a)}</div><div class="ex-mk"><button class="btn sm ${it.mark==='ok'?'pri':''}" data-mk="${i}" data-v="ok">✓ Bien</button><button class="btn sm ${it.mark==='bad'?'danger':''}" data-mk="${i}" data-v="bad">✗ Mal</button></div>`:''}</li>`).join('') + `</ol>`;
+  if(EX.phase==='run') h += `<div class="mact"><button class="btn" id="exQuit">Abandonar</button><button class="btn pri" id="exEnd">Terminé: ver respuestas</button></div>`;
+  else {
+    const ok=EX.items.filter(i=>i.mark==='ok').length, all=EX.items.every(i=>i.mark); const pct=Math.round(ok/EX.total*100);
+    if(all){ const m=evalMsg(pct); h += `<div class="card" style="margin-top:10px"><div class="big">${ok}/${EX.total} · ${pct} %</div><div style="margin-top:6px">${EX.topic==='SIM'?esc(m.t):(ok>=8?'✅ Cumples el criterio de dominio (8/10 sin apuntes).':'⏳ Aún no llegas a 8/10. Repasa los errores y vuelve a intentarlo en unos días.')}</div>
+      <div class="muted" style="margin-top:6px">Al guardar: ${EX.topic==='SIM'?'se anota en el Simulacro final':'la nota va a "Nota de la prueba" de '+esc(EX.topic)}, los ✗ pasan a tu cuaderno de errores y se registran ${EX.used} min de estudio.</div></div>`; }
+    h += `<div class="mact"><button class="btn" id="exQuit">Salir sin guardar</button><button class="btn pri" id="exSave" ${all?'':'disabled'}>Guardar resultado</button></div>`;
+  }
+  box.innerHTML = `<div class="ex-wrap">${h}</div>`;
+  const $=s=>box.querySelector(s);
+  if($('#exEnd')) $('#exEnd').onclick=finishExam;
+  $('#exQuit').onclick=()=>{ if(EX.phase==='run'){ confirmBox('¿Abandonar el examen?','No se guarda nada.','Abandonar',()=>{ clearInterval(exTimer); EX=null; renderExam(); }); } else { EX=null; renderExam(); } };
+  box.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>{ EX.items[+b.dataset.mk].mark=b.dataset.v; const y=box.scrollTop; renderExam(); box.scrollTop=y; });
+  if($('#exSave')) $('#exSave').onclick=saveExam;
+  if(EX.phase==='run') tickExam();
+}
+function saveExam(){
+  const ok=EX.items.filter(i=>i.mark==='ok').length;
+  EX.items.filter(i=>i.mark==='bad').forEach(i=>addError(i.topic, i.q, i.a));
+  const k=iso(today()); study().log[k]=(+study().log[k]||0)+EX.used;
+  let msg='';
+  if(EX.topic==='SIM'){ const f=S.evals.find(e=>e.id==='final'); if(f){ f.max=EX.total; f.score=ok; } msg='Guardado en el Simulacro final: '+ok+'/'+EX.total; }
+  else { const p=P(EX.topic); p.test=Math.round(ok/EX.total*10); p.minutes=(+p.minutes||0)+EX.used; msg='Nota de '+EX.topic+': '+p.test+'/10'; }
+  const topic=EX.topic, pass = topic!=='SIM' && ok/EX.total>=0.8 && !isDom(topic);
+  save(); EX=null; renderExam(); refreshAll();
+  if(pass) confirmBox('¡Llegaste a 8/10!','¿Marcamos '+topic+' como dominado con fecha de hoy?','Sí, dominado',()=>{ const p=P(topic); p.status='dominado'; if(!p.date) p.date=iso(today()); save(); refreshAll(); toast('¡'+topic+' dominado! 🎉'); });
+  else toast(msg);
+}
+
+/* ===================== Plan del día y pomodoro ===================== */
+let pomo=null, pomoTimer=null;
+function dayTasks(){
+  const t=today(), w=curWeek(), dow=t.getDay(), B=byId(), tasks=[];
+  const node=S.nodes.find(n=>n.week===w && /^T|^X/.test(n.id));
+  const ev=S.evals.find(e=>e.date===iso(t));
+  if(w<1) tasks.push({k:'pre', t:'El plan empieza el lunes 16 nov 2026. Hoy: arma tu horario de estudio.'});
+  else if(w>19) tasks.push({k:'uni', t:'¡Plan terminado! Repasa tus temas débiles antes de la universidad.'});
+  if(ev) tasks.push({k:'ev', t:`📝 Hoy toca ${ev.name}: ${ev.topic}. Hazla sin apuntes y guarda tu puntaje.`, go:'vEval'});
+  if(dow===0){ const p1=B.P1; tasks.push({k:'p1', t:'🐍 Domingo de programación: avanza CS50P (P1).', link:(p1&&p1.links&&p1.links[0])?p1.links[0][1]:'https://cs50.harvard.edu/python/'}); }
+  if(w>=1 && w<=19){
+    if(REVIEW_WEEKS[w] && dow!==0) tasks.push({k:'rv', t:`🔁 Semana de repaso: ${REVIEW_WEEKS[w]}.`});
+    if(node && dow!==0 && !ev){
+      const p=S.progress[node.id]||{};
+      if(isDom(node.id)) tasks.push({k:'adv', t:`✅ ${node.id} ya está dominado. Adelanta el siguiente tema o practica un tema extra.`});
+      else if(dow===6) tasks.push({k:'exam', t:`⏱ Sábado: haz un examen de práctica de ${node.id} (10 ejercicios, meta 8/10).`, exam:node.id});
+      else { const rem=Math.max(0,node.target-(+p.count||0)); const daysLeft=Math.max(1, 6-dow); const n=Math.max(5, Math.ceil(rem/daysLeft));
+        tasks.push({k:'main', t: rem? `📘 ${node.id} · ${node.title}: resuelve unos ${n} ejercicios (llevas ${+p.count||0} de ${node.target}).` : `📘 ${node.id}: ya hiciste los ${node.target} ejercicios. Prueba el modo examen.`, prac:node.id}); }
+    }
+  }
+  const rv=S.nodes.filter(n=>reviewDue(n.id)); if(rv.length) tasks.push({k:'srs', t:`🔁 Repasa: ${rv.map(n=>n.id).join(', ')} (5 ejercicios cada uno, sin apuntes).`});
+  const er=errorsDue().length; if(er) tasks.push({k:'err', t:`📒 Reintenta ${Math.min(er,5)} error${er===1?'':'es'} de tu cuaderno.`});
+  tasks.push({k:'min', t:'⏱ Registra tus minutos de hoy para mantener la racha.'});
+  return tasks;
+}
+function dayDone(){ if(!S.dayDone||typeof S.dayDone!=='object') S.dayDone={}; const k=iso(today()); if(!S.dayDone[k]) S.dayDone[k]={}; return S.dayDone[k]; }
+function startPomo(){ const sel=document.getElementById('sTopic'); pomo={end:Date.now()+25*60000, topic: sel?sel.value:''}; clearInterval(pomoTimer); pomoTimer=setInterval(tickPomo,1000); tickPomo(); }
+function tickPomo(){ const el=document.getElementById('pomoClock'); if(!pomo){ clearInterval(pomoTimer); return; } const s=Math.max(0,Math.ceil((pomo.end-Date.now())/1000));
+  if(el) el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  if(s<=0){ const tp=pomo.topic; pomo=null; clearInterval(pomoTimer); logMinutes(25,tp); toast('🍅 ¡Pomodoro terminado! +25 min. Descansa 5 minutos.'); if(curView==='vStudy') renderStudy(); } }
+function planCard(){
+  const t=today(), done=dayDone(), tasks=dayTasks();
+  let h=`<div class="card"><h2>📅 Plan de hoy</h2><div class="muted" style="margin-top:-4px;margin-bottom:8px">${esc(fmt(t,{weekday:'long',day:'numeric',month:'long'}))} · ${esc(weekLabel(curWeek()))}</div><div class="nlist">`;
+  tasks.forEach(k=>{ h+=`<label class="nitem" style="align-items:flex-start;cursor:pointer"><input type="checkbox" data-day="${k.k}" ${done[k.k]?'checked':''} style="width:20px;height:20px;min-height:0;margin-top:2px"><div class="tx" style="${done[k.k]?'text-decoration:line-through;opacity:.6':''}">${esc(k.t)}${k.prac?` <a href="#" data-prac2="${esc(k.prac)}">Practicar</a>`:''}${k.exam?` <a href="#" data-exam2="${esc(k.exam)}">Empezar examen</a>`:''}${k.go?` <a href="#" data-go2="${k.go}">Abrir</a>`:''}${k.link?` <a href="${esc(k.link)}" target="_blank" rel="noopener">Abrir ↗</a>`:''}</div></label>`; });
+  h+=`</div><div class="pomo"><div><b>🍅 Pomodoro</b><div class="muted">25 min de foco y 5 de descanso. Al terminar se suman 25 min a tu racha.</div></div>${pomo?`<div class="ex-clock" id="pomoClock">25:00</div><button class="btn sm" id="pomoStop">Parar</button>`:`<button class="btn pri sm" id="pomoGo">Iniciar 25 min</button>`}</div>`;
+  h+=`<details class="tips"><summary>💡 Tips para estudiar mejor</summary><ul>
+    <li><b>Intenta antes de mirar la solución.</b> Aunque te equivoques, el esfuerzo de recordar es lo que fija el tema.</li>
+    <li><b>Explícalo en voz alta</b>, como si le enseñaras a alguien. Si te trabas, ahí está lo que no entiendes.</li>
+    <li><b>Pomodoro de 25 min</b> con el celular lejos; 5 min de descanso; cada 4 pomodoros, uno largo.</li>
+    <li><b>Mezcla tipos de ejercicios</b> en vez de repetir el mismo; así aprendes a elegir el método.</li>
+    <li><b>Anota cada error</b> en el cuaderno de errores y vuelve a intentarlo días después.</li>
+    <li><b>Duerme bien</b> la noche antes de una evaluación: el sueño consolida lo estudiado.</li></ul></details></div>`;
+  return h;
+}
+function bindPlan(w){
+  w.querySelectorAll('[data-day]').forEach(c=>c.onchange=()=>{ dayDone()[c.dataset.day]=c.checked; save(); const tx=c.nextElementSibling; tx.style.textDecoration=c.checked?'line-through':''; tx.style.opacity=c.checked?.6:1; });
+  w.querySelectorAll('[data-prac2]').forEach(a=>a.onclick=e=>{ e.preventDefault(); goPractice(a.dataset.prac2); });
+  w.querySelectorAll('[data-exam2]').forEach(a=>a.onclick=e=>{ e.preventDefault(); startExam(a.dataset.exam2); });
+  w.querySelectorAll('[data-go2]').forEach(a=>a.onclick=e=>{ e.preventDefault(); document.querySelector(`nav button[data-v="${a.dataset.go2}"]`).click(); });
+  if(w.querySelector('#pomoGo')) w.querySelector('#pomoGo').onclick=()=>{ startPomo(); renderStudy(); };
+  if(w.querySelector('#pomoStop')) w.querySelector('#pomoStop').onclick=()=>{ pomo=null; clearInterval(pomoTimer); renderStudy(); };
+  if(pomo) tickPomo();
+}
+function examCard(){
+  const opts = examTopics().map(n=>`<option value="${esc(n.id)}" ${n.week===curWeek()?'selected':''}>${esc(n.id+' · '+n.title)}${isDom(n.id)?' ✓':''}</option>`).join('');
+  return `<div class="card"><h2>⏱ Modo examen</h2><p class="muted" style="margin-top:0">10 ejercicios con tiempo y sin pistas, como el criterio de dominio (8/10 sin apuntes). El simulacro mezcla 15 ejercicios de todo el plan.</p>
+    <select id="exTopic">${opts}<option value="SIM">Simulacro final · 15 ejercicios de todo</option></select>
+    <div class="row" style="margin-top:8px;align-items:center"><label class="f" style="margin:0;flex:0 0 auto">Minutos (opcional)</label><input type="number" id="exMin" min="1" max="180" placeholder="auto" inputmode="numeric"></div>
+    <button class="btn pri" id="exGo" style="margin-top:10px;width:100%">Empezar examen</button></div>`;
+}
+function errorCard(){
+  const due=errorsDue(), pend=errs().filter(e=>!e.fixed), fixed=errs().filter(e=>e.fixed).length, B=byId();
+  let h=`<div class="card"><h2>📒 Cuaderno de errores</h2><p class="muted" style="margin-top:0">Los ejercicios que fallas vuelven a aparecer hasta que los resuelvas bien. ${pend.length} pendiente${pend.length===1?'':'s'} · ${fixed} superado${fixed===1?'':'s'}.</p>`;
+  if(due.length) h += due.slice(0,5).map(e=>`<div class="nitem" style="flex-direction:column;align-items:stretch;margin-bottom:8px"><div><b style="color:${B[e.topic]?col(B[e.topic]):'var(--tx2)'}">${esc(e.topic||'—')}</b> ${esc(e.q)}</div>
+     <div class="goal" id="ea-${e.id}" style="display:none;margin-top:6px">${esc(e.a||'(sin respuesta guardada)')}</div>
+     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn sm" data-eshow="${e.id}">Ver respuesta</button><button class="btn sm pri" data-eok="${e.id}">✓ Ya me sale</button><button class="btn sm" data-ebad="${e.id}">✗ Aún no</button></div></div>`).join('') + (due.length>5?`<div class="muted">y ${due.length-5} más…</div>`:'');
+  else h += `<div class="muted">${pend.length?'Nada que reintentar hoy. Los próximos vuelven en unos días.':'Aún no hay errores guardados. En Practicar y en Modo examen, marca ✗ cuando falles.'}</div>`;
+  h += `<details style="margin-top:10px"><summary class="muted">+ Anotar un error a mano</summary><div style="margin-top:8px"><select id="eTopic">${S.nodes.filter(n=>n.phase!=='U').map(n=>`<option value="${esc(n.id)}">${esc(n.id+' · '+n.title)}</option>`).join('')}</select>
+    <input type="text" id="eQ" placeholder="Ejercicio o duda" style="margin-top:6px"><input type="text" id="eA" placeholder="Respuesta correcta (opcional)" style="margin-top:6px"><button class="btn sm pri" id="eAdd" style="margin-top:6px">Guardar en el cuaderno</button></div></details></div>`;
+  return h;
+}
+function bindErrors(w){
+  w.querySelectorAll('[data-eshow]').forEach(b=>b.onclick=()=>{ const el=w.querySelector('#ea-'+b.dataset.eshow); el.style.display=el.style.display==='none'?'block':'none'; });
+  w.querySelectorAll('[data-eok]').forEach(b=>b.onclick=()=>errorRetry(b.dataset.eok,true));
+  w.querySelectorAll('[data-ebad]').forEach(b=>b.onclick=()=>errorRetry(b.dataset.ebad,false));
+  const add=w.querySelector('#eAdd'); if(add) add.onclick=()=>{ const q=w.querySelector('#eQ').value.trim(); if(!q){ toast('Escribe el ejercicio'); return; } addError(w.querySelector('#eTopic').value, q, w.querySelector('#eA').value.trim()); toast('Guardado en el cuaderno'); renderStudy(); };
+  const go=w.querySelector('#exGo'); if(go) go.onclick=()=>startExam(w.querySelector('#exTopic').value);
+}
+
+/* ===================== General ===================== */
+let toastT; function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+let curView='vTree';
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  curView=b.dataset.v; document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===curView));
+  renderCurrent();
+});
+function renderCurrent(){ if(curView==='vStudy') renderStudy(); else if(curView==='vProg') renderProgress(); else if(curView==='vEval') renderEvals(); else if(curView==='vEdit') renderEditor(); }
+function refreshAll(){ renderHeader(); renderTree(); renderCurrent(); }
+let firstFit=false;
+window.addEventListener('resize', ()=>{ if(!firstFit){ fitView(); } });
+meta(); save(); autoSnapshot();
+renderHeader(); renderTree(); try{ if(localStorage.getItem('arbolAli.app')==='malla') showApp('malla'); }catch(e){}
+setTimeout(backupCheck, 1200);
+requestAnimationFrame(()=>{ fitView(); firstFit = !!svg.getBoundingClientRect().width; });
+</script>
+</body>
+</html>
