@@ -209,6 +209,70 @@ label.sub input{width:18px;height:18px;margin-top:1px;flex:0 0 auto}
 label.sub input:checked+span{text-decoration:line-through;opacity:.6}
 .tl details{margin-top:4px}.tl summary{font-size:12px;color:var(--tx2);cursor:pointer}
 #updBar{position:fixed;left:10px;right:10px;top:calc(52px + env(safe-area-inset-top));z-index:25;background:#172443;border:1px solid #7aa2ff;color:#dbe4ff;border-radius:12px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;box-shadow:0 6px 20px #0008}
+
+/* ---------- Fórmulas ---------- */
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.92em;line-height:1.15;margin:0 2px}
+.fr>span{padding:0 3px;white-space:nowrap}
+.fr>span:first-child{border-bottom:1.4px solid currentColor;padding-bottom:1px}
+.fr>span:last-child{padding-top:1px}
+.rad{white-space:nowrap}.rad .rc{border-top:1.4px solid currentColor;padding:0 1px;margin-left:1px}
+.mat{display:inline-grid;gap:2px 12px;vertical-align:middle;padding:3px 8px;margin:2px 3px;border-left:1.6px solid currentColor;border-right:1.6px solid currentColor;border-radius:5px;text-align:center;font-variant-numeric:tabular-nums}
+sup{font-size:.72em;line-height:0}
+/* ---------- Animaciones ---------- */
+:root{--ez:cubic-bezier(.22,1,.36,1)}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes nodeIn{from{opacity:0}to{opacity:1}}
+@keyframes draw{from{stroke-dashoffset:3000}to{stroke-dashoffset:0}}
+@keyframes dimIn{from{opacity:1}to{opacity:.18}}
+@keyframes edgeDim{from{opacity:1}to{opacity:.12}}
+@keyframes undim{from{opacity:.3}to{opacity:1}}
+@keyframes march{to{stroke-dashoffset:-28}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes okPulse{0%{box-shadow:0 0 0 0 #4ade8099}100%{box-shadow:0 0 0 12px #4ade8000}}
+@keyframes flick{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.12) rotate(-4deg)}}
+@keyframes fall{0%{transform:translate(0,-10vh) rotate(0);opacity:1}100%{transform:translate(var(--dx),105vh) rotate(var(--r));opacity:.9}}
+@keyframes ruIn{0%{transform:scale(.4) rotate(-12deg);opacity:0}60%{transform:scale(1.08) rotate(3deg);opacity:1}100%{transform:none}}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 6px var(--g))}50%{filter:drop-shadow(0 0 22px var(--g))}}
+@keyframes lowPulse{50%{transform:scale(1.06)}}
+.view.enter{animation:viewIn .32s var(--ez) both}
+#vTree.view.enter{animation:fadeIn .25s both}
+.view.enter .wrap>.card{animation:cardIn .45s var(--ez) both}
+.view.enter .wrap>.card:nth-child(2){animation-delay:.04s}.view.enter .wrap>.card:nth-child(3){animation-delay:.08s}.view.enter .wrap>.card:nth-child(4){animation-delay:.12s}.view.enter .wrap>.card:nth-child(5){animation-delay:.16s}.view.enter .wrap>.card:nth-child(n+6){animation-delay:.2s}
+.view.enter .pbar>i{transform-origin:left;animation:grow .9s var(--ez) .1s both}
+#panel{transition:transform .38s var(--ez),box-shadow .3s}
+#panel.open .sec,#panel.open .stbtn{animation:cardIn .4s var(--ez) both}
+#panel.open .sec:nth-of-type(2){animation-delay:.03s}#panel.open .sec:nth-of-type(3){animation-delay:.06s}#panel.open .sec:nth-of-type(n+4){animation-delay:.09s}
+.modal.show{animation:fadeIn .2s both}.modal.show .mbox{animation:cardIn .35s var(--ez) both}
+#toast{transition:opacity .25s,transform .35s var(--ez)}
+button,.btn,.chip,.nchip,.zbtn{transition:transform .12s,background-color .2s,border-color .2s,opacity .2s}
+button:active:not(:disabled),.btn:active,.nchip:active,.zbtn:active{transform:scale(.95)}
+nav button .ic{transition:transform .25s var(--ez),filter .25s}
+nav button.active .ic{transform:translateY(-2px) scale(1.12)}
+.intro .node{animation:nodeIn .5s ease-out both}
+.intro .edge:not(.dash){stroke-dasharray:3000;animation:draw .9s var(--ez) .15s both}
+.anim-in .node.dim{animation:dimIn .3s both}.anim-in .edge.dim{animation:edgeDim .3s both}
+.anim-in .edge.hl:not(.dash){stroke-dasharray:3000;animation:draw .55s var(--ez) both}
+.anim-out .node,.anim-out .edge{animation:undim .3s both}
+.edge.path{stroke-dasharray:9 5;animation:march 1s linear infinite}
+.hd-days .stk.on{display:inline-block;animation:flick 1.8s ease-in-out infinite}
+#rankIcon{transition:transform .3s var(--ez)}
+.ex-clock.low{animation:lowPulse 1s ease-in-out infinite}
+.th-ok{animation:pop .35s var(--ez),okPulse .8s ease-out}.th-bad{animation:shake .4s}
+.goal.reveal{animation:cardIn .35s var(--ez) both}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden}
+.confetti i{position:absolute;top:0;width:8px;height:12px;border-radius:2px;animation:fall 1.3s cubic-bezier(.25,.6,.5,1) forwards}
+.rankup{position:fixed;inset:0;z-index:35;background:radial-gradient(circle at 50% 45%,#1a2340ee,#05070bf2);display:flex;align-items:center;justify-content:center;animation:fadeIn .25s both}
+.rankup.out{opacity:0;transition:opacity .25s}
+.ru-box{text-align:center;animation:ruIn .7s var(--ez) both}
+.ru-box svg{--g:#facc15;animation:glow 2s ease-in-out infinite}
+.ru-t{margin-top:14px;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx2)}
+.ru-n{font-size:28px;font-weight:900;margin:4px 0 12px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important}}
+
 #toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);background:#e6e8ee;color:#111;padding:9px 14px;border-radius:10px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%)}
 @media (min-width:900px){
@@ -423,7 +487,7 @@ function migrateV5(st){
   ev('e5',['X1']); ev('final',['X1','X10','X9']);
 }
 function pruneDays(st){ const lim=iso(addDays(today(),-60)); Object.keys(st.dayDone||{}).forEach(k=>{ if(k<lim) delete st.dayDone[k]; }); }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('No se pudo guardar en este navegador'); } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('No se pudo guardar en este navegador'); } try{ celebrateCheck(); }catch(e){} }
 function P(id){ return S.progress[id] || (S.progress[id] = {status:'pendiente',count:0,test:null,date:'',notes:'',grade:null}); }
 const byId = () => Object.fromEntries(S.nodes.map(n=>[n.id,n]));
 const isDom = id => (S.progress[id]||{}).status === 'dominado';
@@ -496,7 +560,7 @@ function renderHeader(){
   document.getElementById('hdNext').innerHTML = next + `<br>${esc(weekLabel(w))}`;
   const d = daysBetween(today(), UNI);
   const sk = streak();
-  document.getElementById('hdDays').innerHTML = (d>0 ? `<b>${d}</b><span>días a la U</span>` : `<b>🎓</b><span>¡En la U!</span>`) + `<span class="stk">🔥 ${sk} día${sk===1?'':'s'}</span>`;
+  document.getElementById('hdDays').innerHTML = (d>0 ? `<b>${d}</b><span>días a la U</span>` : `<b>🎓</b><span>¡En la U!</span>`) + `<span class="stk ${sk?'on':''}">🔥 ${sk} día${sk===1?'':'s'}</span>`;
   const dc = dueCount()+errorsDue().length, bd=document.getElementById('dueBadge'); if(bd){ bd.hidden=!dc; bd.textContent=dc; }
 }
 
@@ -644,18 +708,18 @@ function endPtr(e){
 }
 svg.addEventListener('pointerup', endPtr); svg.addEventListener('pointercancel', endPtr);
 svg.addEventListener('wheel', e=>{ e.preventDefault(); const p=local(e); zoomAt(Math.exp(-e.deltaY*0.0015), p.x, p.y); }, {passive:false});
-document.getElementById('zIn').onclick = ()=>{ const r=svg.getBoundingClientRect(); zoomAt(1.25, r.width/2, r.height/2); };
-document.getElementById('zOut').onclick = ()=>{ const r=svg.getBoundingClientRect(); zoomAt(0.8, r.width/2, r.height/2); };
-document.getElementById('zFit').onclick = fitView;
+document.getElementById('zIn').onclick = ()=>{ const r=svg.getBoundingClientRect(); smooth(()=>zoomAt(1.3, r.width/2, r.height/2)); };
+document.getElementById('zOut').onclick = ()=>{ const r=svg.getBoundingClientRect(); smooth(()=>zoomAt(0.77, r.width/2, r.height/2)); };
+document.getElementById('zFit').onclick = ()=>smooth(fitView);
 if(innerWidth<600) document.getElementById('legend').classList.add('min');
 document.getElementById('legend').onclick = e=>e.currentTarget.classList.toggle('min');
-document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>{ pathMode = pathMode===b.dataset.path?null:b.dataset.path; if(pathMode){ selected=null; closePanel(true); } renderTree(); });
+document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>{ pathMode = pathMode===b.dataset.path?null:b.dataset.path; if(pathMode){ selected=null; closePanel(true); } pulseWorld(pathMode?'anim-in':'anim-out'); renderTree(); });
 
 /* ===================== Panel del nodo ===================== */
 const panel = document.getElementById('panel');
 const STATUS = {pendiente:'Pendiente', progreso:'En progreso', dominado:'Dominado'};
 const NEXT = {pendiente:'progreso', progreso:'dominado', dominado:'pendiente'};
-function selectNode(id){ selected=id; pathMode=null; renderTree(); openPanel(id); revealNode(id); }
+function selectNode(id){ selected=id; pathMode=null; pulseWorld('anim-in'); renderTree(); openPanel(id); smooth(()=>revealNode(id)); }
 function revealNode(id){
   const p=LAY.pos[id]; if(!p) return; const r=svg.getBoundingClientRect();
   const wide = innerWidth>=900; const visW = wide? r.width-400 : r.width; const visH = wide? r.height : r.height*0.26 + 20;
@@ -663,7 +727,7 @@ function revealNode(id){
   const top = wide? 60 : 70;
   if(sx<20||sx>visW-20||sy<top||sy+H*view.s>visH+(wide?0:40)){ view.x = visW/2-(p.x+W/2)*view.s; view.y = (wide? r.height/3 : top) - p.y*view.s; applyView(); }
 }
-function closePanel(keep){ panel.classList.remove('open'); if(!keep){ selected=null; renderTree(); } }
+function closePanel(keep){ panel.classList.remove('open'); if(!keep){ if(selected) pulseWorld('anim-out'); selected=null; renderTree(); } }
 function chipsFor(ids){ const B=byId(); return ids.length? `<div class="chips">${ids.filter(i=>B[i]).map(i=>`<button class="nchip ${isDom(i)?'done':''}" data-go="${esc(i)}" style="--c:${col(B[i])}"><b>${esc(i)}</b> ${esc(B[i].title)}</button>`).join('')}</div>` : '<div class="muted">Ninguno</div>'; }
 function openPanel(id){
   const n = byId()[id]; if(!n) return; const p = P(id), c = col(n), C = children();
@@ -751,7 +815,7 @@ function renderProgress(){
     <div class="ph-row" style="margin-top:14px"><div class="t"><b>Progreso general</b><span>${Math.round(dom/Math.max(1,nodes.length)*100)} %</span></div><div class="pbar"><i style="width:${dom/Math.max(1,nodes.length)*100}%"></i></div></div>
     <div class="ph-row"><div class="t"><b>Ejercicios del plan</b><span>${done} / ${tot}</span></div><div class="pbar"><i style="width:${Math.min(100,done/Math.max(1,tot)*100)}%;background:#4ade80"></i></div></div>
   </div>`;
-  h += weeklyChart();
+  h += weeklyChart() + errorStatsCard();
   h += `<div class="card"><h2>Por fase</h2>`;
   Object.entries(PHASES).forEach(([k,ph])=>{ const ns=nodes.filter(n=>n.phase===k); if(!ns.length) return; const dd=ns.filter(n=>isDom(n.id)).length;
     h += `<div class="ph-row"><div class="t"><b style="color:${ph.color}">${esc(ph.name)}</b><span>${dd} / ${ns.length}</span></div><div class="pbar" style="--c:${ph.color}"><i style="width:${dd/ns.length*100}%"></i></div></div>`; });
@@ -768,7 +832,7 @@ function renderProgress(){
     h += `<li class="${k===w?'cur':''}"><div class="wk">S${k}</div><div>${body}<div class="d">${weekRange(k)}${k===w?' · <b style="color:#bfd0ff">esta semana</b>':''}</div>${evs?`<div class="d" style="color:var(--tx2)">${evs}</div>`:''}</div><div>${ic}</div></li>`;
   }
   h += `</ul><div class="muted" style="margin-top:8px">Después: 29 mar 2027 empieza la universidad (U1 y P2 en ciclos 1 y 2). P1 (CS50P) va los domingos hasta marzo.</div>${(()=>{const ex=S.nodes.filter(n=>!n.week&&!['U','P'].includes(n.phase)); return ex.length?`<div class="muted" style="margin-top:6px">Temas extra sin semana fija: ${ex.map(n=>esc(n.id+' '+n.title)).join(', ')}. Mételos en semanas con tiempo libre o en los repasos.</div>`:'';})()}</div>`;
-  const pw=document.getElementById('progWrap'); pw.innerHTML = h;
+  const pw=document.getElementById('progWrap'); pw.innerHTML = h; bindErrorStats(pw);
   bindSubs(pw, id=>{ pw.querySelectorAll(`[data-sub^="${id}:"]`).forEach(c=>{ const sm=c.closest('details').querySelector('summary'); sm.textContent='Subtemas ('+subsDone(id).length+'/'+subsOf(id).length+')'; }); });
 }
 
@@ -1089,9 +1153,9 @@ function renderStudy(){
   if(practice.items.length){
     const okN=practice.items.filter(x=>x.ok).length, badN=practice.items.filter(x=>x.bad).length;
     if(practice.single) h += `<div class="muted" style="margin-top:10px">Ejercicio ${practice.items.length} · ✓ ${okN} · ✗ ${badN}</div>`;
-    h += `<ol style="padding-left:20px;margin:12px 0 0" ${practice.single?`start="${practice.items.length}"`:''}>` + practice.items.map((it,i)=>(practice.single&&i<practice.items.length-1)?'':`<li style="margin-bottom:10px"><div style="font-size:15px">${esc(it.q)}</div>
+    h += `<ol style="padding-left:20px;margin:12px 0 0" ${practice.single?`start="${practice.items.length}"`:''}>` + practice.items.map((it,i)=>(practice.single&&i<practice.items.length-1)?'':`<li style="margin-bottom:10px"><div style="font-size:15px">${mth(it.q)}</div>
       <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn sm" data-ans="${i}">Ver respuesta</button><button class="btn sm" data-ok="${i}" ${it.ok||it.bad?'disabled':''}>${it.ok?'✓ Sumado':'✓ Lo hice bien (+1)'}</button><button class="btn sm" data-bad="${i}" ${it.ok||it.bad?'disabled':''}>${it.bad?'📒 Anotado':'✗ Me equivoqué'}</button></div>
-      <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${esc(it.a)}</div></li>`).join('') + `</ol>`;
+      <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${mth(it.a)}</div></li>`).join('') + `</ol>`;
     if(practice.single) h += `<button class="btn pri" id="pNext" style="width:100%">Siguiente ejercicio ›</button>`;
     h += `<div class="muted">"Lo hice bien" suma 1 al contador de ejercicios de ${esc(practice.topic)}.</div>`;
   }
@@ -1107,7 +1171,7 @@ function renderStudy(){
   w.querySelector('#pGen').onclick=()=>{ practice.items=genFor(practice.topic,5); practice.single=false; renderStudy(); };
   const oneMore=()=>{ if(!practice.single){ practice.single=true; practice.items=[]; } practice.items.push(...genFor(practice.topic,1)); renderStudy(); const c=w.querySelector('#practiceCard'); if(c) c.scrollIntoView({block:'start'}); };
   w.querySelector('#pOne').onclick=oneMore; if(w.querySelector('#pNext')) w.querySelector('#pNext').onclick=oneMore;
-  w.querySelectorAll('[data-ans]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ans]; it.show=!it.show; w.querySelector('#ans'+b.dataset.ans).style.display=it.show?'block':'none'; });
+  w.querySelectorAll('[data-ans]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ans]; it.show=!it.show; const el=w.querySelector('#ans'+b.dataset.ans); el.style.display=it.show?'block':'none'; el.classList.toggle('reveal',it.show); });
   w.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ok]; if(it.ok||it.bad) return; it.ok=true; const p=P(practice.topic); p.count=(+p.count||0)+1; save(); renderTree(); b.disabled=true; b.textContent='✓ Sumado'; b.nextElementSibling.disabled=true; });
   w.querySelectorAll('[data-bad]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.bad]; if(it.ok||it.bad) return; it.bad=true; addError(practice.topic, it.q, it.a); renderHeader(); b.disabled=true; b.textContent='📒 Anotado'; b.previousElementSibling.disabled=true; toast('Guardado en tu cuaderno de errores'); });
   bindPlan(w); bindErrors(w); bindTheory(w); remindLinks(w);
@@ -1224,7 +1288,7 @@ function renderExam(){
   let h = `<div class="ex-top"><div><b>${title}</b><div class="muted">${EX.phase==='run'?'Sin apuntes y sin pistas. Resuelve en papel.':'Corrige con honestidad: marca ✓ o ✗ en cada uno.'}</div></div>`;
   if(EX.phase==='run') h += `<div class="ex-clock" id="exClock">--:--</div></div>`;
   else { const ok=EX.items.filter(i=>i.mark==='ok').length, marked=EX.items.filter(i=>i.mark).length; h += `<div class="ex-clock">${ok}/${EX.total}</div></div><div class="muted" style="margin:6px 0 0">Tiempo usado: ${EX.used} min · corregidos ${marked} de ${EX.total}</div>`; }
-  h += `<ol class="ex-list">` + EX.items.map((it,i)=>`<li><div class="ex-q">${esc(it.q)}${EX.topic==='SIM'?` <span class="muted">(${esc(it.topic)})</span>`:''}</div>${EX.phase==='check'?`<div class="goal" style="margin-top:6px">Respuesta: ${esc(it.a)}</div><div class="ex-mk"><button class="btn sm ${it.mark==='ok'?'pri':''}" data-mk="${i}" data-v="ok">✓ Bien</button><button class="btn sm ${it.mark==='bad'?'danger':''}" data-mk="${i}" data-v="bad">✗ Mal</button></div>`:''}</li>`).join('') + `</ol>`;
+  h += `<ol class="ex-list">` + EX.items.map((it,i)=>`<li><div class="ex-q">${mth(it.q)}${EX.topic==='SIM'?` <span class="muted">(${esc(it.topic)})</span>`:''}</div>${EX.phase==='check'?`<div class="goal" style="margin-top:6px">Respuesta: ${mth(it.a)}</div><div class="ex-mk"><button class="btn sm ${it.mark==='ok'?'pri':''}" data-mk="${i}" data-v="ok">✓ Bien</button><button class="btn sm ${it.mark==='bad'?'danger':''}" data-mk="${i}" data-v="bad">✗ Mal</button></div>`:''}</li>`).join('') + `</ol>`;
   if(EX.phase==='run') h += `<div class="mact"><button class="btn" id="exQuit">Abandonar</button><button class="btn pri" id="exEnd">Terminé: ver respuestas</button></div>`;
   else {
     const ok=EX.items.filter(i=>i.mark==='ok').length, all=EX.items.every(i=>i.mark); const pct=Math.round(ok/EX.total*100);
@@ -1316,8 +1380,8 @@ function examCard(){
 function errorCard(){
   const due=errorsDue(), pend=errs().filter(e=>!e.fixed), fixed=errs().filter(e=>e.fixed).length, B=byId();
   let h=`<div class="card"><h2>📒 Cuaderno de errores</h2><p class="muted" style="margin-top:0">Los ejercicios que fallas vuelven a aparecer hasta que los resuelvas bien. ${pend.length} pendiente${pend.length===1?'':'s'} · ${fixed} superado${fixed===1?'':'s'}.</p>`;
-  if(due.length) h += due.slice(0,5).map(e=>`<div class="nitem" style="flex-direction:column;align-items:stretch;margin-bottom:8px"><div><b style="color:${B[e.topic]?col(B[e.topic]):'var(--tx2)'}">${esc(e.topic||'—')}</b> ${esc(e.q)}</div>
-     <div class="goal" id="ea-${e.id}" style="display:none;margin-top:6px">${esc(e.a||'(sin respuesta guardada)')}</div>
+  if(due.length) h += due.slice(0,5).map(e=>`<div class="nitem" style="flex-direction:column;align-items:stretch;margin-bottom:8px"><div><b style="color:${B[e.topic]?col(B[e.topic]):'var(--tx2)'}">${esc(e.topic||'—')}</b> ${mth(e.q)}</div>
+     <div class="goal" id="ea-${e.id}" style="display:none;margin-top:6px">${e.a?mth(e.a):'(sin respuesta guardada)'}</div>
      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn sm" data-eshow="${e.id}">Ver respuesta</button><button class="btn sm pri" data-eok="${e.id}">✓ Ya me sale</button><button class="btn sm" data-ebad="${e.id}">✗ Aún no</button></div></div>`).join('') + (due.length>5?`<div class="muted">y ${due.length-5} más…</div>`:'');
   else h += `<div class="muted">${pend.length?'Nada que reintentar hoy. Los próximos vuelven en unos días.':'Aún no hay errores guardados. En Practicar y en Modo examen, marca ✗ cuando falles.'}</div>`;
   h += `<details style="margin-top:10px"><summary class="muted">+ Anotar un error a mano</summary><div style="margin-top:8px"><select id="eTopic">${S.nodes.filter(n=>n.phase!=='U').map(n=>`<option value="${esc(n.id)}">${esc(n.id+' · '+n.title)}</option>`).join('')}</select>
@@ -1555,11 +1619,11 @@ function theoryCard(){
   } else {
     const q=TH.qs[TH.i], a=TH.ans;
     h+=`<div class="muted" style="margin-top:-4px">${esc(q.topic)} · pregunta ${TH.i+1} de ${TH.qs.length} · ${TH.ok} bien</div>
-      <div style="font-size:16px;margin:8px 0 10px">${esc(q.q)}</div><div class="nlist">`;
+      <div style="font-size:16px;margin:8px 0 10px">${mth(q.q)}</div><div class="nlist">`;
     q.opts.forEach((o,i)=>{ const st = a===null ? '' : i===q.c ? 'background:#14361f;border-color:#4ade80' : i===a ? 'background:#3a1518;border-color:#f87171' : 'opacity:.55';
-      h+=`<button class="btn" data-tha="${i}" style="text-align:left;${st}" ${a!==null?'disabled':''}>${a!==null&&i===q.c?'✓ ':a===i?'✗ ':''}${esc(o)}</button>`; });
+      h+=`<button class="btn ${a!==null&&i===q.c?'th-ok':a===i?'th-bad':''}" data-tha="${i}" style="text-align:left;${st}" ${a!==null?'disabled':''}>${a!==null&&i===q.c?'✓ ':a===i?'✗ ':''}${mth(o)}</button>`; });
     h+=`</div>`;
-    if(a!==null) h+=`<div class="goal" style="margin-top:10px">${a===q.c?'✅ Correcto. ':'❌ La respuesta es: <b>'+esc(q.opts[q.c])+'</b>. '}${esc(q.e)}</div>
+    if(a!==null) h+=`<div class="goal reveal" style="margin-top:10px">${a===q.c?'✅ Correcto. ':'❌ La respuesta es: <b>'+mth(q.opts[q.c])+'</b>. '}${mth(q.e)}</div>
       <div class="mact"><button class="btn" id="thExit">Salir</button><button class="btn pri" id="thNext">${TH.i+1<TH.qs.length?'Siguiente ›':'Ver resultado'}</button></div>`;
     else h+=`<div class="mact"><button class="btn" id="thExit">Salir</button></div>`;
   }
@@ -1633,12 +1697,79 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{}); });
 }
 
+/* ===================== Fórmulas con formato ===================== */
+const unpar = s => /^\(.*\)$/.test(s) ? s.slice(1,-1) : s;
+const MOP = '(\\([^()<>&]+\\)|[−-]?√?[0-9A-Za-zθπ.,²³⁴⁵⁶⁷⁸⁹⁰¹ⁿᵐ₀-₉]+)';
+const FRAC_RE = new RegExp(MOP+'\\s?/\\s?'+MOP,'g');
+function fmtMath(h){ // recibe texto ya escapado
+  h = h.replace(/\[([^\[\]<>&]+;[^\[\]<>&]+)\]/g,(m,b)=>{ const rows=b.split(';').map(r=>r.trim().split(/\s+/)); const c=Math.max(...rows.map(r=>r.length)); return `<span class="mat" style="grid-template-columns:repeat(${c},auto)">${rows.flat().map(x=>`<span>${x}</span>`).join('')}</span>`; });
+  h = h.replace(/\^\(([^()<>]+)\)/g,'<sup>$1</sup>');
+  h = h.replace(/\(([^()<>&]+)\) ÷ \(([^()<>&]+)\)/g,'($1)/($2)');
+  h = h.replace(FRAC_RE,(m,a,b)=>`<span class="fr"><span>${unpar(a)}</span><span>${unpar(b)}</span></span>`);
+  h = h.replace(/√\(([^()<>]+)\)/g,'<span class="rad">√<span class="rc">$1</span></span>').replace(/√([0-9A-Za-zθ]+)/g,'<span class="rad">√<span class="rc">$1</span></span>');
+  return h;
+}
+const mth = s => fmtMath(esc(s));
+
+/* ===================== Estadísticas de errores ===================== */
+function errorStats(){
+  const B=byId(), m={}, get=k=>m[k]=m[k]||{id:k,tot:0,pend:0,th:0,ex:0};
+  errs().forEach(e=>{ const o=get(e.topic||'—'); o.tot++; if(!e.fixed) o.pend++; if(/^🧠/.test(e.q)) o.th++; else o.ex++; });
+  Object.entries(S.progress).forEach(([id,p])=>{ if(!B[id]||!p) return;
+    if(p.test!==null && p.test!==undefined && p.test<8) get(id).test=+p.test;
+    if(p.theory && p.theory.n && p.theory.last/p.theory.n<0.8) get(id).theo=p.theory; });
+  return Object.values(m).map(o=>({...o, score:o.pend*2+o.tot+(o.test!==undefined?8-o.test:0)+(o.theo?o.theo.n-o.theo.last:0)})).filter(o=>o.score>0).sort((a,b)=>b.score-a.score);
+}
+function errorStatsCard(){
+  const L=errorStats(), B=byId(), all=errs(), fx=all.filter(e=>e.fixed).length;
+  let h=`<div class="card"><h2>📉 Dónde fallas más</h2>`;
+  if(!L.length) return h+`<div class="muted">Aún no hay datos. Se llenan con tu cuaderno de errores, el modo teoría y las notas de los exámenes.</div></div>`;
+  const mxs=L[0].score;
+  h+=`<div class="stat-grid" style="margin-bottom:10px"><div class="stat"><span>Errores anotados</span><div class="big">${all.length}</div></div><div class="stat"><span>Superados</span><div class="big">${all.length?Math.round(fx/all.length*100):0}<small style="font-size:15px;color:var(--tx2)"> %</small></div></div></div>`;
+  h+=L.slice(0,8).map((o,i)=>{ const n=B[o.id], c=n?col(n):'#9aa3b2'; const det=[o.tot?`${o.tot} error${o.tot===1?'':'es'}${o.pend?` (${o.pend} pendiente${o.pend===1?'':'s'})`:''}`:'', o.th?`${o.th} de teoría`:'', o.test!==undefined?`examen ${o.test}/10`:'', o.theo?`teoría ${o.theo.last}/${o.theo.n}`:''].filter(Boolean).join(' · ');
+    return `<div class="ph-row"><div class="t"><b style="color:${c}">${esc(o.id)}${n?' <span style="color:var(--tx);font-weight:500">'+esc(n.title)+'</span>':''}</b></div><div class="pbar" style="--c:${c}"><i style="width:${Math.max(6,o.score/mxs*100)}%"></i></div><div class="muted" style="font-size:12px;margin-top:3px">${esc(det)}</div>${i<3&&n?`<div style="display:flex;gap:6px;margin-top:5px">${GEN[o.id]?`<button class="btn sm" data-sprac="${esc(o.id)}">🧮 Practicar</button>`:''}${THEORY[o.id]?`<button class="btn sm" data-stheo="${esc(o.id)}">🧠 Teoría</button>`:''}</div>`:''}</div>`; }).join('');
+  return h+`<div class="muted" style="margin-top:6px">Ordenado por errores pendientes, errores totales y notas bajo 8/10.</div></div>`;
+}
+function bindErrorStats(w){
+  w.querySelectorAll('[data-sprac]').forEach(b=>b.onclick=()=>goPractice(b.dataset.sprac));
+  w.querySelectorAll('[data-stheo]').forEach(b=>b.onclick=()=>goTheory(b.dataset.stheo));
+}
+
+/* ===================== Animaciones ===================== */
+const RM = () => { try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
+let viewAnim=null;
+function animateView(to, ms){
+  if(RM()){ view={...to}; applyView(); return; }
+  cancelAnimationFrame(viewAnim); const from={...view}, t0=performance.now(), d=ms||340, ease=t=>1-Math.pow(1-t,3);
+  const step=now=>{ const t=Math.min(1,(now-t0)/d), k=ease(t); view={x:from.x+(to.x-from.x)*k, y:from.y+(to.y-from.y)*k, s:from.s+(to.s-from.s)*k}; applyView(); if(t<1) viewAnim=requestAnimationFrame(step); };
+  viewAnim=requestAnimationFrame(step);
+}
+function smooth(fn){ const from={...view}; fn(); const to={...view}; view=from; applyView(); animateView(to); }
+function pulseWorld(cls){ if(RM()) return; world.classList.remove("anim-in","anim-out"); world.classList.add(cls); clearTimeout(pulseWorld.t); pulseWorld.t=setTimeout(()=>world.classList.remove(cls),600); }
+function confetti(n){
+  if(RM()) return; const box=document.createElement('div'); box.className='confetti'; const cs=['#f4a261','#4cc9f0','#a78bfa','#f472b6','#facc15','#4ade80','#7aa2ff'];
+  for(let i=0;i<(n||36);i++){ const s=document.createElement('i'); s.style.cssText=`left:${10+Math.random()*80}%;background:${cs[i%cs.length]};--dx:${(Math.random()*2-1)*140}px;--r:${Math.random()*720-360}deg;animation-delay:${Math.random()*.15}s;animation-duration:${1+Math.random()*.6}s`; box.appendChild(s); }
+  document.body.appendChild(box); setTimeout(()=>box.remove(),2000);
+}
+let celebS=null, celebDom=0, celebRank=0;
+function celebrateCheck(){
+  const d=S.nodes.filter(n=>isDom(n.id)).length, r=rankIndex();
+  if(celebS===S){ if(r>celebRank) rankUp(RANKS[r]); else if(d>celebDom) confetti(); }
+  celebS=S; celebDom=d; celebRank=r;
+}
+function rankUp(k){
+  confetti(60);
+  const o=document.createElement('div'); o.className='rankup'; o.innerHTML=`<div class="ru-box">${emblem(k,96)}<div class="ru-t">¡Nuevo rango!</div><div class="ru-n" style="color:${k.color}">${esc(k.name)}</div><div class="muted">Toca para continuar</div></div>`;
+  o.onclick=()=>{ o.classList.add('out'); setTimeout(()=>o.remove(),250); }; document.body.appendChild(o); setTimeout(()=>{ if(o.isConnected) o.onclick(); },4500);
+}
+
 /* ===================== General ===================== */
 let toastT; function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
 let curView='vTree';
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   curView=b.dataset.v; document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));
-  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===curView));
+  document.querySelectorAll('.view').forEach(v=>{ v.classList.toggle('active',v.id===curView); v.classList.remove('enter'); });
+  const cv=document.getElementById(curView); void cv.offsetWidth; cv.classList.add('enter'); clearTimeout(cv._et); cv._et=setTimeout(()=>cv.classList.remove('enter'),900);
   renderCurrent();
 });
 function renderCurrent(){ if(curView==='vStudy') renderStudy(); else if(curView==='vProg') renderProgress(); else if(curView==='vEval') renderEvals(); else if(curView==='vEdit') renderEditor(); }
@@ -1652,6 +1783,7 @@ setTimeout(backupCheck, 1200);
 let lastDay=iso(today());
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState!=='visible') return; const d=iso(today()); if(d===lastDay) return; lastDay=d; autoSnapshot(); refreshAll(); setTimeout(backupCheck, 800); });
 requestAnimationFrame(()=>{ fitView(); firstFit = !!svg.getBoundingClientRect().width; });
+if(!RM()){ world.classList.add('intro'); setTimeout(()=>world.classList.remove('intro'),1400); }
 </script>
 </body>
 </html>
