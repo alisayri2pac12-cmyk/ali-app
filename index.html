@@ -128,6 +128,7 @@ nav button.active .ic{filter:drop-shadow(0 0 6px var(--acc))}
 .counter .of{color:var(--tx2);font-size:15px}
 input[type=number],input[type=text],input[type=date],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;min-height:40px}
 input[type=date]{color-scheme:dark}
+@media (max-width:600px){input[type=number],input[type=text],input[type=date],select,textarea{font-size:16px}}
 textarea{min-height:80px;resize:vertical}
 .row{display:flex;gap:10px}
 .row>*{flex:1;min-width:0}
@@ -342,7 +343,7 @@ function defaultEvals(){ return withNodes([
   {id:'final',name:'Simulacro final',date:'2027-03-27',topic:'Simulacro de todo (15 ejercicios)',max:15,score:null}
 ]);}
 function withNodes(a){ a.forEach(e=>e.nodes=(EVAL_NODES[e.id]||[]).slice()); return a; }
-const EVAL_NODES = {e1:['T1','T2'], e2:['T3','T4'], e3:['T1','T2','T3','T4','T5'], e4:['T7','T8'], e5:['T4','T5','T7','T8','T9','T10'], e6:['T11','T12'], e7:['T13','T14','X10'], e8:['T15','T16','X9'], e9:['T17','T18','X11'], final:['T1','T2','T3','T4','T5','T7','T8','T9','T10','T11','T12','T13','T14','T15','T16','T17','T18']};
+const EVAL_NODES = {e1:['T1','T2'], e2:['T3','T4'], e3:['T1','T2','T3','T4','T5'], e4:['T7','T8'], e5:['T4','T5','X1','T7','T8','T9','T10'], e6:['T11','T12'], e7:['T13','T14','X10'], e8:['T15','T16','X9'], e9:['T17','T18','X11'], final:['T1','T2','T3','T4','T5','X1','T7','T8','T9','T10','T11','T12','T13','X10','T14','T15','X9','T16','T17','T18']};
 const REVIEW_WEEKS = {6:'Repaso de las semanas 1 a 5, división de polinomios y Ruffini', 19:'Repaso general y simulacro final'};
 
 /* ===================== Fechas ===================== */
@@ -362,9 +363,12 @@ function weekRange(w){ const a=new Date(START); a.setDate(a.getDate()+(w-1)*7); 
 
 /* ===================== Estado ===================== */
 let S = load();
-function fresh(){ return {version:4, errors:[], dayDone:{}, nodes:defaultNodes(), progress:{}, evals:defaultEvals(), study:{log:{}}, meta:{firstUse:iso(today())}}; }
+function fresh(){ return {version:5, errors:[], dayDone:{}, nodes:defaultNodes(), progress:{}, evals:defaultEvals(), study:{log:{}}, meta:{firstUse:iso(today())}}; }
 function load(){
-  try{ const raw = localStorage.getItem(KEY); if(raw){ const d = normalize(JSON.parse(raw)); if(d) return d; } }catch(e){}
+  let raw=null;
+  try{ raw = localStorage.getItem(KEY); if(raw){ const d = normalize(JSON.parse(raw)); if(d) return d; } }catch(e){}
+  // Si había datos que no se pudieron leer, se guardan aparte antes de empezar de cero.
+  if(raw){ try{ localStorage.setItem(KEY+'.noLeido.'+Date.now(), raw); }catch(e){} }
   return fresh();
 }
 function normalize(d){
@@ -375,12 +379,14 @@ function normalize(d){
     target: Math.max(0, +n.target||0), goal:String(n.goal||''), reqs: Array.isArray(n.reqs)?n.reqs.map(String):[],
     desc:String(n.desc||''), dashed:!!n.dashed, grade20:!!n.grade20, links:Array.isArray(n.links)?n.links.filter(l=>Array.isArray(l)&&/^https?:\/\//i.test(String(l[1]))).map(l=>[String(l[0]||l[1]),String(l[1])]):[], row: Number.isFinite(+n.row)&&n.row!==null&&n.row!==''?+n.row:undefined
   }));
-  const evals = Array.isArray(d.evals) && d.evals.length ? d.evals.map(e=>({id:String(e.id),name:String(e.name||''),date:String(e.date||''),topic:String(e.topic||''),max:+e.max||10,nodes:Array.isArray(e.nodes)?e.nodes.map(String):(EVAL_NODES[e.id]||[]),score:(e.score===null||e.score===undefined||e.score==='')?null:+e.score})) : defaultEvals();
+  const evals = Array.isArray(d.evals) && d.evals.some(e=>e&&e.id) ? d.evals.filter(e=>e&&e.id).map(e=>({id:String(e.id),name:String(e.name||''),date:String(e.date||''),topic:String(e.topic||''),max:+e.max||10,nodes:Array.isArray(e.nodes)?e.nodes.map(String):(EVAL_NODES[e.id]||[]),score:(e.score===null||e.score===undefined||e.score==='')?null:+e.score})) : defaultEvals();
   const progress = (d.progress && typeof d.progress==='object') ? d.progress : {};
-  const out = {version:4, errors:Array.isArray(d.errors)?d.errors.filter(e=>e&&e.q).map(e=>({id:String(e.id||Math.random().toString(36).slice(2)),topic:String(e.topic||''),q:String(e.q),a:String(e.a||''),added:String(e.added||iso(today())),due:/^\d{4}-\d{2}-\d{2}$/.test(e.due)?e.due:iso(today()),tries:+e.tries||0,fixed:e.fixed||''})):[], dayDone:(d.dayDone&&typeof d.dayDone==='object')?d.dayDone:{}, nodes, progress, evals, study:(d.study&&typeof d.study==='object'&&d.study.log&&typeof d.study.log==='object')?{log:d.study.log}:{log:{}}, meta:(d.meta&&typeof d.meta==='object')?d.meta:{}};
+  const out = {version:5, errors:Array.isArray(d.errors)?d.errors.filter(e=>e&&e.q).map(e=>({id:String(e.id||Math.random().toString(36).slice(2)),topic:String(e.topic||''),q:String(e.q),a:String(e.a||''),added:String(e.added||iso(today())),due:/^\d{4}-\d{2}-\d{2}$/.test(e.due)?e.due:iso(today()),tries:+e.tries||0,fixed:e.fixed||''})):[], dayDone:(d.dayDone&&typeof d.dayDone==='object')?d.dayDone:{}, nodes, progress, evals, study:(d.study&&typeof d.study==='object'&&d.study.log&&typeof d.study.log==='object')?{log:d.study.log}:{log:{}}, meta:(d.meta&&typeof d.meta==='object')?d.meta:{}};
   if(!(d.version>=2)) migrateV2(out);
   if(!(d.version>=3)) migrateV3(out);
   if(!(d.version>=4)) migrateV4(out);
+  if(!(d.version>=5)) migrateV5(out);
+  pruneDays(out);
   return out;
 }
 function migrateV2(st){
@@ -405,6 +411,12 @@ function migrateV4(st){
   const ev = (id, ns) => { const e=st.evals.find(x=>x.id===id); if(e) ns.forEach(k=>{ if(has(k) && !e.nodes.includes(k)) e.nodes.push(k); }); };
   ev('e7',['X10']); ev('e8',['X9']); ev('e9',['X11']);
 }
+function migrateV5(st){
+  const has = id => st.nodes.some(n=>n.id===id);
+  const ev = (id, ns) => { const e=st.evals.find(x=>x.id===id); if(e) ns.forEach(k=>{ if(has(k) && !e.nodes.includes(k)) e.nodes.push(k); }); };
+  ev('e5',['X1']); ev('final',['X1','X10','X9']);
+}
+function pruneDays(st){ const lim=iso(addDays(today(),-60)); Object.keys(st.dayDone||{}).forEach(k=>{ if(k<lim) delete st.dayDone[k]; }); }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('No se pudo guardar en este navegador'); } }
 function P(id){ return S.progress[id] || (S.progress[id] = {status:'pendiente',count:0,test:null,date:'',notes:'',grade:null}); }
 const byId = () => Object.fromEntries(S.nodes.map(n=>[n.id,n]));
@@ -692,7 +704,7 @@ function openPanel(id){
   $('#pNotes').oninput = e=>{ p.notes=e.target.value; save(); };
   $('#pStBtn').onclick = ()=>{
     p.status = NEXT[p.status||'pendiente'];
-    if(p.status==='pendiente'){ p.date=''; $('#pDate').value=''; }
+    if(p.status==='pendiente'){ p.date=''; $('#pDate').value=''; delete p.reviews; }
     if(p.status==='dominado'){ if(!p.date) p.date=iso(today()); $('#pDate').value=p.date; toast('¡'+n.id+' dominado! 🎉'); }
     commit(); const w=$('#pWarn'); if(w) w.style.display = p.status==='dominado'?'none':'';
   };
@@ -805,7 +817,7 @@ function renderEditor(){
   w.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
     const id=b.dataset.del, C=children()[id]||[];
     confirmBox('¿Borrar '+id+'?', (C.length?'Dejará de ser requisito de '+C.join(', ')+'. ':'')+'Se pierde su progreso.', 'Borrar', ()=>{
-      S.nodes=S.nodes.filter(n=>n.id!==id); S.nodes.forEach(n=>n.reqs=n.reqs.filter(r=>r!==id)); delete S.progress[id];
+      S.nodes=S.nodes.filter(n=>n.id!==id); S.nodes.forEach(n=>n.reqs=n.reqs.filter(r=>r!==id)); delete S.progress[id]; S.evals.forEach(e=>e.nodes=(e.nodes||[]).filter(r=>r!==id));
       if(selected===id){ selected=null; closePanel(true); } if(pathMode===id) pathMode=null;
       save(); refreshAll(); toast(id+' borrado');
     });
@@ -859,7 +871,7 @@ function openEditor(id){
       links:$('#fLk').value.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{ const i=x.lastIndexOf('|'); const u=(i>=0?x.slice(i+1):x).trim(), l=(i>=0?x.slice(0,i):x).trim(); return [l||u,u]; }).filter(l=>/^https?:\/\//i.test(l[1])) };
     if(id){
       const node=B[id]; Object.assign(node,data);
-      if(nid!==id){ S.nodes.forEach(x=>x.reqs=x.reqs.map(r=>r===id?nid:r)); if(S.progress[id]){ S.progress[nid]=S.progress[id]; delete S.progress[id]; } if(selected===id) selected=nid; if(pathMode===id) pathMode=nid; }
+      if(nid!==id){ S.nodes.forEach(x=>x.reqs=x.reqs.map(r=>r===id?nid:r)); S.evals.forEach(e=>e.nodes=(e.nodes||[]).map(r=>r===id?nid:r)); errs().forEach(e=>{ if(e.topic===id) e.topic=nid; }); if(S.progress[id]){ S.progress[nid]=S.progress[id]; delete S.progress[id]; } if(selected===id) selected=nid; if(pathMode===id) pathMode=nid; }
       if(node.phase==='P' && id==='P2' && nid!=='P2') delete node.row;
     } else S.nodes.push(data);
     save(); hideModal(); refreshAll(); toast('Nodo '+nid+' guardado');
@@ -976,9 +988,9 @@ function terms(list){ // [[coef,'x²'],...]
   let s=''; list.forEach(([k,v])=>{ if(!k) return; const a=Math.abs(k); const t=(a===1&&v?'':a)+v; s+= s ? (k<0?' − ':' + ')+t : (k<0?'−':'')+t; }); return s||'0';
 }
 function poly(c,v='x'){ const g=c.length-1; return terms(c.map((k,i)=>[k, g-i>0 ? v+(g-i>1?sup(g-i):'') : ''])); }
-const lin=a=>a<0?'x − '+(-a):'x + '+a;
+const lin=a=>!a?'x':a<0?'x − '+(-a):'x + '+a;
 const GEN = {
-  T1:()=>{ const a=Fr(nz(1,9),rnd(2,9)), b=Fr(nz(1,9),rnd(2,9)), c=Fr(nz(1,9),rnd(2,9));
+  T1:()=>{ const pf=()=>{ let f; do f=Fr(nz(1,9),rnd(2,9)); while(f.d===1); return f; }; const a=pf(), b=pf(), c=pf();
     return pick([()=>({q:`${fs(a)} + ${fs(b)} × ${fs(c)}`, a:fs(fadd(a,fmul(b,c)))}), ()=>({q:`(${fs(a)} − ${fs(b)}) ÷ ${fs(c)}`, a:fs(fdiv(fsub(a,b),c))}), ()=>({q:`${fs(a)} ÷ ${fs(b)} − ${fs(c)}`, a:fs(fsub(fdiv(a,b),c))})])(); },
   T2:()=>pick([()=>{ const m=rnd(2,7),n=rnd(2,7),k=rnd(1,m+n-1); return {q:`Simplifica: (x${sup(m)} · x${sup(n)}) ÷ x${sup(k)}`, a:'x'+(m+n-k>1?sup(m+n-k):'')}; },
     ()=>{ const p=pick([5,10,12,15,20,25,30,40,75]), n=rnd(2,30)*20; return {q:`¿Cuánto es el ${p} % de ${n}?`, a:String(p*n/100)}; },
@@ -1001,7 +1013,7 @@ const GEN = {
     return {q:`Resuelve el sistema: ${terms([[a1,'x'],[b1,'y']])} = ${num(a1*x+b1*y)} ; ${terms([[a2,'x'],[b2,'y']])} = ${num(a2*x+b2*y)}`, a:`x = ${num(x)}, y = ${num(y)}`}; },
   T11:()=>{ const a=nz(-6,6), b=rnd(1,8); return pick([{q:`Resuelve: |${lin(-a)}| < ${b}`, a:`x ∈ (${num(a-b)}, ${num(a+b)})`}, {q:`Resuelve: |${lin(-a)}| ≥ ${b}`, a:`x ∈ (−∞, ${num(a-b)}] ∪ [${num(a+b)}, +∞)`}, (()=>{ const k=nz(-5,5), c=rnd(-9,9), x0=rnd(-6,6); return {q:`Resuelve: ${terms([[k,'x'],[c,'']])} > ${num(k*x0+c)}`, a: k>0?`x ∈ (${num(x0)}, +∞)`:`x ∈ (−∞, ${num(x0)})`}; })()]); },
   T12:()=>pick([()=>{ const x1=rnd(-6,6),y1=rnd(-6,6); let x2=rnd(-6,6); if(x2===x1) x2=x1+rnd(1,4); const y2=rnd(-6,6); const m=Fr(y2-y1,x2-x1), b=fsub(Fr(y1),fmul(m,Fr(x1)));
-      const ms = m.n===0?'':(m.d===1&&Math.abs(m.n)===1?(m.n<0?'−':''):fs(m))+'x'; const bs = b.n===0?(ms?'':'0'):(ms?(b.n<0?' − ':' + ')+fs(Fr(Math.abs(b.n),b.d)):fs(b));
+      const ms = m.n===0?'':(m.d===1?(Math.abs(m.n)===1?(m.n<0?'−':''):fs(m)):(m.n<0?'−':'')+'('+fs(Fr(Math.abs(m.n),m.d))+')')+'x'; const bs = b.n===0?(ms?'':'0'):(ms?(b.n<0?' − ':' + ')+fs(Fr(Math.abs(b.n),b.d)):fs(b));
       return {q:`Ecuación de la recta que pasa por (${num(x1)}, ${num(y1)}) y (${num(x2)}, ${num(y2)})`, a:`y = ${ms}${bs}  (pendiente ${fs(m)})`}; },
     ()=>{ const [dx,dy,d]=pick([[3,4,5],[5,12,13],[6,8,10],[8,15,17],[4,3,5]]); const x1=rnd(-5,5),y1=rnd(-5,5),sx=pick([1,-1]),sy=pick([1,-1]);
       return {q:`Distancia entre (${num(x1)}, ${num(y1)}) y (${num(x1+sx*dx)}, ${num(y1+sy*dy)})`, a:`d = ${d}`}; }])(),
@@ -1011,7 +1023,7 @@ const GEN = {
   T15:()=>pick([()=>{ const m=[rnd(-5,5),rnd(-5,5),rnd(-5,5),rnd(-5,5)]; return {q:`Determinante de [${num(m[0])} ${num(m[1])}; ${num(m[2])} ${num(m[3])}]`, a:num(m[0]*m[3]-m[1]*m[2])}; },
     ()=>{ const A=[rnd(-3,3),rnd(-3,3),rnd(-3,3),rnd(-3,3)], B=[rnd(-3,3),rnd(-3,3),rnd(-3,3),rnd(-3,3)];
       return {q:`Multiplica A·B con A = [${A.map(num).slice(0,2).join(' ')}; ${A.map(num).slice(2).join(' ')}] y B = [${B.map(num).slice(0,2).join(' ')}; ${B.map(num).slice(2).join(' ')}]`, a:`[${num(A[0]*B[0]+A[1]*B[2])} ${num(A[0]*B[1]+A[1]*B[3])}; ${num(A[2]*B[0]+A[3]*B[2])} ${num(A[2]*B[1]+A[3]*B[3])}]`}; }])(),
-  T16:()=>{ const b=pick([2,3,5]), c=rnd(1,4), k=rnd(-3,3), n=rnd(2,4); return pick([{q:`Resuelve: ${b}^(${lin(k)}) = ${b**c}`, a:`x = ${num(c-k)}`}, {q:`Resuelve: log${sub(b)}(x) = ${n}`, a:`x = ${b**n}`}, {q:`Calcula: log${sub(b)}(${b**n})`, a:String(n)}, {q:`Resuelve: log(x) + log(${2**c}) = log(${2**c*5*n})`, a:`x = ${5*n}`}]); },
+  T16:()=>{ const b=pick([2,3,5]), c=rnd(1,4), k=rnd(-3,3), n=rnd(2,4); return pick([{q:`Resuelve: ${b}^${k?'('+lin(k)+')':'x'} = ${b**c}`, a:`x = ${num(c-k)}`}, {q:`Resuelve: log${sub(b)}(x) = ${n}`, a:`x = ${b**n}`}, {q:`Calcula: log${sub(b)}(${b**n})`, a:String(n)}, {q:`Resuelve: log(x) + log(${2**c}) = log(${2**c*5*n})`, a:`x = ${5*n}`}]); },
   T17:()=>{ const a=nz(-5,5), s=nz(-5,5); return pick([{q:`lím x→${num(a)} (${poly([1,0,-a*a])}) / (${lin(-a)})`, a:num(2*a)}, {q:`lím x→${num(a)} (${poly([1,-(a+s),a*s])}) / (${lin(-a)})`, a:num(a-s)}, {q:`lím x→∞ (${poly([s*s,a,1])}) / (${poly([1,0,3])})`, a:num(s*s)}]); },
   T18:()=>{ const c=[nz(-5,5),rnd(-6,6),rnd(-9,9),rnd(-9,9)]; return pick([{q:`Deriva: f(x) = ${poly(c)}`, a:`f′(x) = ${poly([3*c[0],2*c[1],c[2]])}`}, (()=>{ const a=nz(-4,4),n=rnd(2,5); return {q:`Deriva f(x) = ${terms([[a,'x'+sup(n)]])} y evalúa f′(1)`, a:`f′(x) = ${terms([[a*n,'x'+(n-1>1?sup(n-1):'')]])}; f′(1) = ${num(a*n)}`}; })()]); },
   X2:()=>{ const T={30:['1/2','√3/2','√3/3'],45:['√2/2','√2/2','1'],60:['√3/2','1/2','√3'],90:['1','0','no existe'],120:['√3/2','−1/2','−√3'],135:['√2/2','−√2/2','−1'],150:['1/2','−√3/2','−√3/3'],180:['0','−1','0']};
@@ -1153,7 +1165,7 @@ Object.assign(GEN, {
       return {q:`Si p = ${V(p)} y q = ${V(q)}, ¿cuál es el valor de ${e}?`, a:V(v)}; },
     ()=>{ const a=rnd(10,40), b=rnd(10,40), c=rnd(2,Math.min(a,b)-2); return {q:`En un grupo, ${a} estudian Python, ${b} estudian Excel y ${c} estudian ambos. ¿Cuántos estudian al menos uno?`, a:String(a+b-c)}; }])(),
   X6:()=>pick([()=>{ const a=nz(-4,4), b=rnd(-6,6), c=nz(-3,3), x=rnd(-3,3); const g=c*x; return {q:`f(x) = ${terms([[a,'x'],[b,'']])}, g(x) = ${terms([[c,'x']])}. Calcula (f ∘ g)(${num(x)})`, a:num(a*g+b)}; },
-    ()=>{ const a=nz(-5,5), b=rnd(-9,9); const inv = b===0 ? `x/${num(a)}` : `(x ${b<0?'+ '+(-b):'− '+b}) / ${num(a)}`; return {q:`Halla la inversa de f(x) = ${terms([[a,'x'],[b,'']])}`, a:`f⁻¹(x) = ${inv}`}; },
+    ()=>{ const a=nz(-5,5), b=rnd(-9,9); const top = b===0 ? 'x' : `(x ${b<0?'+ '+(-b):'− '+b})`; const inv = a===1 ? (b===0?'x':top.slice(1,-1)) : a===-1 ? (b===0?'−x':'−'+top) : `${top} / ${a<0?'('+num(a)+')':a}`; return {q:`Halla la inversa de f(x) = ${terms([[a,'x'],[b,'']])}`, a:`f⁻¹(x) = ${inv}`}; },
     ()=>{ const k=nz(-5,5); return {q:`f(x) = x², g(x) = ${lin(k)}. Escribe (f ∘ g)(x) desarrollado`, a:poly([1,2*k,k*k])}; }])(),
   X7:()=>pick([()=>{ const a=rnd(1,9), d=nz(-4,6), n=rnd(5,15); return {q:`Progresión aritmética: a₁ = ${a}, d = ${num(d)}. Halla a${sub(n)} y la suma de los ${n} primeros términos`, a:`a${sub(n)} = ${num(a+(n-1)*d)}; S = ${num(n*(2*a+(n-1)*d)/2)}`}; },
     ()=>{ const n=rnd(4,10), k=rnd(1,4), c=rnd(0,5); let s=0; for(let i=1;i<=n;i++) s+=k*i+c; return {q:`Calcula Σ (de i = 1 a ${n}) de (${terms([[k,'i'],[c,'']])})`, a:String(s)}; },
@@ -1174,11 +1186,12 @@ function errorRetry(id, ok){ const e=errs().find(x=>x.id===id); if(!e) return;
 
 /* ===================== Modo examen ===================== */
 let EX=null, exTimer=null;
-function examTopics(){ return S.nodes.filter(n=>GEN[n.id] && /^T\d+$/.test(n.id)); }
+function examTopics(){ return S.nodes.filter(n=>GEN[n.id]); }
+function simTopics(){ const t=S.nodes.filter(n=>GEN[n.id] && n.week); return t.length?t:examTopics(); }
 function startExam(topic){
   let items, total, mins;
-  if(topic==='SIM'){ const ts=examTopics(); total=15; mins=40; items=[]; const order=ts.slice().sort(()=>Math.random()-.5); for(let i=0;i<total;i++){ const t=order[i%order.length]; items.push({...GEN[t.id](), topic:t.id}); } }
-  else { total=10; mins = /T1$|T3$/.test(topic)?20: topic==='T4'?10 : 25; items=genFor(topic,total).map(x=>({...x, topic})); }
+  if(topic==='SIM'){ const ts=simTopics(); total=15; mins=40; items=[]; const order=ts.slice().sort(()=>Math.random()-.5); for(let i=0;i<total;i++){ const t=order[i%order.length]; items.push({...GEN[t.id](), topic:t.id}); } }
+  else { total=10; mins = (topic==='T1'||topic==='T3')?20: topic==='T4'?10 : 25; items=genFor(topic,total).map(x=>({...x, topic})); }
   const custom = +(document.getElementById('exMin')||{}).value; if(custom>0) mins=custom;
   EX={topic, items, total, mins, start:Date.now(), end:Date.now()+mins*60000, phase:'run'};
   document.getElementById('exam').classList.add('show'); renderExam();
@@ -1316,6 +1329,9 @@ window.addEventListener('resize', ()=>{ if(!firstFit){ fitView(); } });
 meta(); save(); autoSnapshot();
 renderHeader(); renderTree(); try{ if(localStorage.getItem('arbolAli.app')==='malla') showApp('malla'); }catch(e){}
 setTimeout(backupCheck, 1200);
+// Si la app queda abierta y cambia el día, actualiza racha, plan y semana al volver.
+let lastDay=iso(today());
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState!=='visible') return; const d=iso(today()); if(d===lastDay) return; lastDay=d; autoSnapshot(); refreshAll(); setTimeout(backupCheck, 800); });
 requestAnimationFrame(()=>{ fitView(); firstFit = !!svg.getBoundingClientRect().width; });
 </script>
 </body>
