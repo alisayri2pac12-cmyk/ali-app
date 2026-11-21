@@ -494,6 +494,27 @@ nav button.active .ic{animation:navPop .4s var(--ez)}
 .hic{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:color-mix(in srgb,var(--acc) 15%,var(--bg3));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 26%,transparent);font-size:15px;margin-right:10px;vertical-align:middle;position:relative;top:-1px}
 .ed-back{margin-bottom:12px}
 #toast{background:color-mix(in srgb,var(--bg3) 94%,transparent);color:var(--tx);border:1px solid var(--line2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:14px;box-shadow:0 14px 34px -12px #000;padding:10px 16px}
+/* Resumen del tema */
+.sumry{border:1px solid color-mix(in srgb,var(--c,var(--acc)) 40%,var(--line));border-radius:14px;background:linear-gradient(160deg,color-mix(in srgb,var(--c,var(--acc)) 12%,var(--bg3)),var(--bg2) 75%);overflow:hidden}
+.sumry>summary{list-style:none;display:flex;align-items:center;gap:11px;padding:11px 12px;cursor:pointer}
+.sumry>summary::-webkit-details-marker{display:none}
+.sm-ic{flex:0 0 auto;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c,var(--acc)) 22%,transparent);font-size:17px}
+.sm-tt{flex:1;min-width:0}.sm-tt b{display:block;font-size:14.5px}.sm-tt small{display:block;font-size:12px;color:var(--tx2)}
+.sm-chev{font-size:22px;color:var(--tx3);transition:transform .3s var(--ez)}
+.sumry[open] .sm-chev{transform:rotate(90deg)}
+.sm-body{padding:2px 12px 14px}
+.sumry[open] .sm-body{animation:cardIn .35s var(--ez) both}
+.sm-q{margin:0 0 12px;font-size:14.5px;line-height:1.55}
+.sm-f{padding:10px 12px;border-radius:12px;background:var(--bg3);border-left:3px solid var(--c,var(--acc));margin-bottom:8px}
+.sumry[open] .sm-f,#lesson .sm-f{animation:cardIn .4s var(--ez) both;animation-delay:calc(var(--i)*.05s + .05s)}
+.sm-fx{font-size:16px;font-weight:650;overflow-x:auto;padding-bottom:1px}
+.sm-ex{font-size:13.5px;color:var(--tx2);margin-top:5px;line-height:1.45}
+.sm-ej{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--c,var(--acc)) 55%,var(--line));font-size:15px}
+.sm-ej>span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--c,var(--acc));font-weight:800;margin-bottom:4px}
+.sm-arrow{color:var(--tx2);margin-top:4px}.sm-arrow::before{content:"→ ";color:var(--c,var(--acc));font-weight:800}
+.sm-uso{margin-top:10px;font-size:13px;color:var(--tx2)}.sm-uso b{color:var(--tx)}
+#panel .sumry{margin-top:12px}
+#lesson .sumry{margin-bottom:12px}
 </style>
 </head>
 <body class="home">
@@ -955,6 +976,7 @@ function openPanel(id){
   h += `<div><span class="stnow" id="pSt"></span></div>`;
   if(st==='lock' || (miss.length && p.status!=='dominado')) h += `<div class="warn" id="pWarn">🔒 Bloqueado: te falta dominar ${miss.map(esc).join(', ')}. Es solo un aviso: igual puedes marcarlo.</div>`;
   if(n.desc) h += `<div class="sec"><div class="muted" style="font-size:14px;color:var(--tx2)">${esc(n.desc)}</div></div>`;
+  if(SUMMARY[id]) h += `<div style="--c:${c}">${summaryDetails(id,false)}</div>`;
   h += `<div class="sec"><h3>Qué necesita</h3>${chipsFor(n.reqs)}</div>`;
   h += `<div class="sec"><h3>Qué abre</h3>${chipsFor(C[id]||[])}</div>`;
   h += `<div class="sec"><h3>Meta verificable</h3><div class="goal">${esc(n.goal||'—')}</div></div>`;
@@ -1358,7 +1380,7 @@ function renderStudy(){
   h += due.length ? due.map(n=>{ const r=reviewInfo(n.id); return `<div class="nitem" style="margin-bottom:6px"><span class="dot" style="background:${col(n)}"></span><div class="tx"><b>${esc(n.id)}</b> ${esc(n.title)}<small>Repaso ${r.i+1} de 3 (día ${REVIEW_DAYS[r.i]}) · ${r.days===0?'toca hoy':'atrasado '+(-r.days)+' d'}</small></div><button class="btn sm" data-prac="${esc(n.id)}">Practicar</button><button class="btn pri sm" data-rev="${esc(n.id)}">Hecho</button></div>`; }).join('') : '<div class="muted">No tienes repasos pendientes hoy. ✅</div>';
   if(up.length) h += `<div class="muted" style="margin-top:8px">Próximos: ${up.map(([n,r])=>esc(n.id)+' en '+r.days+' d').join(' · ')}</div>`;
   h += `</div>`;
-  h += lessonCard() + theoryCard() + graphCard() + examCard() + errorCard();
+  h += lessonCard() + summaryCard() + theoryCard() + graphCard() + examCard() + errorCard();
   // práctica
   if(!practice.topic || !B[practice.topic] || !GEN[practice.topic]) practice={topic:defaultTopic(), items:[]};
   const pt = B[practice.topic];
@@ -1390,7 +1412,7 @@ function renderStudy(){
   w.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ok]; if(it.ok||it.bad) return; it.ok=true; addAcc(true); buzz(12); const p=P(practice.topic); p.count=(+p.count||0)+1; save(); renderTree(); b.disabled=true; b.textContent='✓ Sumado'; b.nextElementSibling.disabled=true; });
   w.querySelectorAll('[data-bad]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.bad]; if(it.ok||it.bad) return; it.bad=true; addAcc(false); buzz([30,40,30]); addError(practice.topic, it.q, it.a); renderHeader(); b.disabled=true; b.textContent='📒 Anotado'; b.previousElementSibling.disabled=true; toast('Guardado en tu cuaderno de errores'); });
   bindPlan(w); bindErrors(w); bindTheory(w); remindLinks(w); bindGraphs(w);
-  { const c=w.querySelector('.ls-chip.cur'); if(c){ const g=c.parentNode; g.scrollLeft+=c.getBoundingClientRect().left-g.getBoundingClientRect().left-16; } }
+  w.querySelectorAll('.ls-chip.cur').forEach(c=>{ const g=c.parentNode; g.scrollLeft+=c.getBoundingClientRect().left-g.getBoundingClientRect().left-16; });
 }
 
 /* ===================== Gráfico de mini evaluaciones ===================== */
@@ -2351,7 +2373,7 @@ function lessonAfter(){
 function renderLesson(){
   const box=lessonBox(), L=LESSONS[LS.id], n=byId()[LS.id], c=col(n), ns=L.ex.s.length;
   box.innerHTML=`<div class="ls-wrap" style="--c:${c}"><div class="ls-top"><span class="p-id" style="background:${c};margin-top:0">${esc(n.id)}</span><div class="ls-tt"><div class="ls-k">Lección${n.week?' · semana '+n.week:''}</div><h2>${esc(n.title)}</h2></div><button class="xbtn" id="lsX" aria-label="Cerrar" style="margin-top:0">✕</button></div>
-    <div class="ls-prog"><i id="lsBar" style="width:${Math.round(LS.step/ns*100)}%"></i></div>
+    <div class="ls-prog"><i id="lsBar" style="width:${Math.round(LS.step/ns*100)}%"></i></div>${summaryDetails(n.id,false)}
     <section class="ls-sec"><h3>💡 La idea</h3><p class="ls-idea">${mth(L.idea)}</p></section>
     <section class="ls-sec"><h3>📐 Fórmulas clave</h3>${L.f.map((f,i)=>`<div class="fx" style="--i:${i}">${mth(f)}</div>`).join('')}</section>
     <section class="ls-sec"><h3>✏️ Ejemplo resuelto</h3><div class="ls-q">${mth(L.ex.q)}</div><ol class="ls-steps" id="lsSteps">${L.ex.s.slice(0,LS.step).map((s,i)=>lessonStep(s,i,false)).join('')}</ol><div id="lsTail">${lessonTail()}</div></section><div id="lsAfter">${lessonAfter()}</div></div>`;
@@ -2380,6 +2402,240 @@ function lessonCard(){
   return `<div class="card" id="lessonCard"><h2>📖 Lecciones</h2><p class="muted" style="margin-top:0">La idea, las fórmulas clave y un ejemplo resuelto paso a paso. <b style="color:var(--tx)">${done}/${ids.length}</b> completadas.</p>
     <div class="ls-grid">${ids.map(id=>{ const n=B[id], d=(S.progress[id]||{}).lesson; return `<button class="ls-chip ${d?'done':''} ${n.week===cw?'cur':''}" data-lesson="${esc(id)}" style="--c:${col(n)}"><span class="lc-top"><b>${esc(id)}</b>${d?'<i>✓</i>':n.week===cw?'<em>Esta semana</em>':''}</span><span class="lc-t">${esc(n.title)}</span></button>`; }).join('')}</div></div>`;
 }
+
+/* ---------- Resumen de cada tema: teoría y fórmulas explicadas ---------- */
+const SUMMARY = {
+  T1:{q:'Reglas para operar números con signo y fracciones sin equivocarte en el orden. La jerarquía dice qué operación va primero; la ley de signos, qué signo tiene el resultado.',
+    f:[['P → E → (M y D) → (S y R)','Orden de operaciones: Paréntesis, Exponentes (potencias y raíces), Multiplicación y División (de izquierda a derecha), y al final Suma y Resta (de izquierda a derecha).'],
+      ['(−)·(−) = + ;  (−)·(+) = −','Ley de signos: signos iguales dan positivo y signos distintos dan negativo. Vale para multiplicar y para dividir.'],
+      ['a/b + c/d = (ad + bc)/(bd)','a y c son los numeradores (las partes que tomas); b y d, los denominadores (en cuántas partes se divide la unidad). Para sumar hace falta un denominador común; aquí se usa b·d (también sirve el MCM).'],
+      ['a/b × c/d = (ac)/(bd)','Multiplicar: numerador por numerador y denominador por denominador. Al final simplifica dividiendo arriba y abajo por el mismo número.'],
+      ['a/b ÷ c/d = (ad)/(bc)','Dividir es multiplicar por el inverso: se da vuelta la segunda fracción.']],
+    ej:['−3 + 2·(−4)','Primero 2·(−4) = −8; luego −3 − 8 = −11'], uso:'Lo usas en todos los temas: casi cualquier error de álgebra empieza en un signo o una fracción.'},
+  T2:{q:'Una potencia aⁿ es multiplicar la base a por sí misma n veces. Los decimales y porcentajes son otras formas de escribir fracciones.',
+    f:[['aⁿ = a·a·…·a (n veces)','a es la base (el número que se repite) y n el exponente (cuántas veces se repite). Ej.: 2³ = 2·2·2 = 8.'],
+      ['aᵐ · aⁿ = a^(m+n)','Misma base multiplicando: se deja la base y se suman los exponentes.'],
+      ['aᵐ ÷ aⁿ = a^(m−n)','Misma base dividiendo: se restan los exponentes.'],
+      ['(aᵐ)ⁿ = a^(m·n)','Potencia de una potencia: se multiplican los exponentes.'],
+      ['a⁰ = 1 ;  a^(−n) = 1/aⁿ','Todo número distinto de 0 elevado a la cero es 1. Un exponente negativo significa “dar vuelta”: la potencia pasa al denominador.'],
+      ['p % de N = p/100 · N','p es el porcentaje y N la cantidad total. Ej.: 20 % de 50 = 0,2 · 50 = 10.']],
+    ej:['2^(−3) · 2⁵','2^(−3+5) = 2² = 4'], uso:'Base para radicales, polinomios, notación científica y logaritmos.'},
+  T3:{q:'La raíz ⁿ√a es el número que, elevado a n, da a. Si no se escribe el índice, es raíz cuadrada (n = 2).',
+    f:[['ⁿ√a = b  ⇔  bⁿ = a','n es el índice, a el radicando (lo que está adentro) y b el resultado. √49 = 7 porque 7² = 49.'],
+      ['ⁿ√a = a^(1/n)','Una raíz es una potencia con exponente fraccionario; así se le aplican las leyes de exponentes.'],
+      ['√(a·b) = √a · √b','La raíz de un producto se separa. Sirve para simplificar: √50 = √25 · √2 = 5√2.'],
+      ['k√a + m√a = (k + m)√a','Solo se suman radicales semejantes (mismo índice y mismo radicando), como términos semejantes.'],
+      ['a/√b = a√b/b','Racionalizar: multiplicar arriba y abajo por √b para que no quede raíz en el denominador.']],
+    ej:['√12 + √27','2√3 + 3√3 = 5√3'], uso:'Aparece en la fórmula cuadrática, en distancias y en límites que se racionalizan.'},
+  T4:{q:'Un polinomio es una suma de términos con variables elevadas a exponentes naturales, como 3x² − 5x + 2. Los productos notables son multiplicaciones que conviene saber de memoria.',
+    f:[['3x²: coeficiente 3, variable x, grado 2','El coeficiente es el número que multiplica a la variable. El grado de un polinomio es su exponente más alto.'],
+      ['(a + b)² = a² + 2ab + b²','Binomio al cuadrado: cuadrado del primero, más el doble del primero por el segundo, más el cuadrado del segundo.'],
+      ['(a − b)² = a² − 2ab + b²','Igual que el anterior, pero el doble producto va con signo menos.'],
+      ['(a + b)(a − b) = a² − b²','Suma por diferencia: los términos del medio se cancelan y queda una diferencia de cuadrados.'],
+      ['(a + b)³ = a³ + 3a²b + 3ab² + b³','Binomio al cubo. Con (a − b)³ los signos van alternando: +, −, +, −.']],
+    ej:['(x + 5)(x − 5)','x² − 25'], uso:'Ahorran tiempo al desarrollar y son la base para factorizar.'},
+  T5:{q:'Factorizar es escribir un polinomio como una multiplicación de factores más simples. Es el camino inverso de los productos notables.',
+    f:[['ax + ay = a(x + y)','Factor común: a está en todos los términos y sale multiplicando. Siempre se busca primero.'],
+      ['a² − b² = (a + b)(a − b)','Diferencia de cuadrados: dos términos que se restan y tienen raíz exacta.'],
+      ['x² + bx + c = (x + p)(x + q)','Trinomio simple: p y q son dos números con p·q = c y p + q = b.'],
+      ['a² ± 2ab + b² = (a ± b)²','Trinomio cuadrado perfecto: los extremos tienen raíz exacta y el término del medio es el doble producto de esas raíces.'],
+      ['ax² + bx + c, con a ≠ 1','Usa el método del aspa, o halla las raíces r₁ y r₂ con la fórmula general: queda a(x − r₁)(x − r₂).']],
+    ej:['3x² − 12','3(x² − 4) = 3(x + 2)(x − 2)'], uso:'Se usa para simplificar fracciones algebraicas, resolver ecuaciones y calcular límites 0/0.'},
+  X1:{q:'Ruffini divide un polinomio P(x) entre (x − r) usando solo los coeficientes. Sirve para factorizar polinomios de grado 3 o más.',
+    f:[['P(x) = (x − r)·Q(x) + R','P es el dividendo, Q el cociente (tiene un grado menos) y R el residuo (un número).'],
+      ['R = P(r)','Teorema del resto: reemplazar x = r en P da el residuo sin hacer la división.'],
+      ['P(r) = 0  ⇔  (x − r) es factor','Si el residuo es 0, r es una raíz y (x − r) divide exacto a P.'],
+      ['r candidatos: divisores del término independiente','Para probar valores de r, usa ±1, ±2, ±3… que dividan al número que no tiene x.']],
+    ej:['x³ − 6x² + 11x − 6, prueba r = 1','P(1) = 0 → (x − 1)(x² − 5x + 6) = (x − 1)(x − 2)(x − 3)'], uso:'Factorizar cúbicas y resolver ecuaciones de grado 3.'},
+  T7:{q:'Una ecuación lineal tiene la incógnita con exponente 1, como 3x + 5 = 20. Resolverla es hallar el valor de x que hace verdadera la igualdad.',
+    f:[['ax + b = c  →  x = (c − b)/a','a es el coeficiente de x; b y c son números. Se despeja haciendo la misma operación a los dos lados.'],
+      ['Si A = B, entonces A + k = B + k  y  A·k = B·k','Propiedad de la igualdad: lo que haces a un lado lo haces al otro (al multiplicar, k ≠ 0).'],
+      ['Con fracciones: multiplica todo por el MCM','El MCM de los denominadores los elimina de una sola vez.'],
+      ['0x = 0 → infinitas ;  0x = 5 → ninguna','Casos especiales: identidad (cualquier x sirve) o contradicción (no hay solución).']],
+    ej:['(x − 1)/3 = (x + 3)/5','5(x − 1) = 3(x + 3) → 5x − 5 = 3x + 9 → x = 7'], uso:'Es el paso final de casi cualquier problema: plantear y despejar.'},
+  T8:{q:'Son fracciones con polinomios arriba y abajo, como (x + 1)/(x² − 1). Se operan igual que las fracciones numéricas, pero factorizando primero.',
+    f:[['(a·c)/(b·c) = a/b','Simplificar: se cancela un factor c que multiplica arriba y abajo (con c ≠ 0).'],
+      ['P/Q + R/S = (PS + QR)/(QS)','Sumar: se busca común denominador (mejor el MCM de los denominadores ya factorizados).'],
+      ['P/Q ÷ R/S = (PS)/(QR)','Dividir: se multiplica por el inverso de la segunda.'],
+      ['Q(x) ≠ 0','Restricción: los valores que hacen 0 un denominador no están permitidos; en ecuaciones se descartan.']],
+    ej:['1/x + 1/(x + 1)','(2x + 1)/(x² + x)'], uso:'Clave para ecuaciones racionales y límites.'},
+  T9:{q:'Una ecuación de segundo grado es ax² + bx + c = 0, con a ≠ 0. Tiene hasta dos soluciones, llamadas raíces.',
+    f:[['ax² + bx + c = 0','a acompaña a x², b acompaña a x y c es el término independiente. a no puede ser 0.'],
+      ['Δ = b² − 4ac','Discriminante: dice cuántas raíces reales hay. Δ > 0 dos, Δ = 0 una doble, Δ < 0 ninguna real.'],
+      ['x = (−b ± √Δ)/(2a)','Fórmula general: el ± da las dos raíces, una sumando y otra restando.'],
+      ['x₁ + x₂ = −b/a ;  x₁·x₂ = c/a','Relaciones entre raíces y coeficientes: sirven para comprobar o armar la ecuación.'],
+      ['x² = k  →  x = ±√k','Si falta el término con x, despeja directo. Si falta c, saca x como factor común.']],
+    ej:['x² − 6x + 5 = 0','Δ = 36 − 20 = 16 → x = (6 ± 4)/2 → x = 5 o x = 1'], uso:'Aparece en parábolas, inecuaciones, cónicas y problemas de optimización.'},
+  T10:{q:'Dos (o más) ecuaciones con dos incógnitas que deben cumplirse a la vez. La solución es el punto donde se cruzan las rectas.',
+    f:[['a₁x + b₁y = c₁ ;  a₂x + b₂y = c₂','Forma general 2×2: los a y b son coeficientes; los c, términos independientes.'],
+      ['Reducción','Multiplica una o ambas ecuaciones para que, al sumarlas, una incógnita desaparezca.'],
+      ['Sustitución','Despeja una incógnita en una ecuación y reemplázala en la otra.'],
+      ['Igualación','Despeja la misma incógnita en las dos ecuaciones e iguala las expresiones.'],
+      ['Una, ninguna o infinitas soluciones','Rectas que se cortan (una), paralelas (ninguna) o la misma recta (infinitas).']],
+    ej:['x + y = 10 ;  x − y = 4','Sumando: 2x = 14 → x = 7 y y = 3'], uso:'Modela problemas con dos cantidades desconocidas; lleva a las matrices.'},
+  T11:{q:'Una inecuación usa <, >, ≤ o ≥ en vez de =. Su solución es un conjunto de valores (un intervalo). El valor absoluto |x| es la distancia de x al 0.',
+    f:[['|x| = x si x ≥ 0 ;  |x| = −x si x < 0','El valor absoluto nunca es negativo: |−5| = 5.'],
+      ['a < b y k < 0  →  ka > kb','Al multiplicar o dividir por un negativo, la desigualdad se invierte.'],
+      ['|x − a| < b  ⇔  a − b < x < a + b','La distancia de x a a es menor que b: x queda “entre” dos valores.'],
+      ['|x − a| > b  ⇔  x < a − b  o  x > a + b','La distancia es mayor que b: x queda “afuera”.'],
+      ['(a, b) abierto ;  [a, b] cerrado','Paréntesis: el extremo no se incluye (< o >). Corchete: sí se incluye (≤ o ≥). Con ∞ siempre va paréntesis.'],
+      ['(x − r₁)(x − r₂) > 0','Inecuación cuadrática: halla las raíces y revisa el signo en cada intervalo.']],
+    ej:['3 − 2x ≥ 7','−2x ≥ 4 → x ≤ −2 → x ∈ (−∞, −2]'], uso:'Se usa para hallar dominios de funciones y en límites.'},
+  T12:{q:'En el plano cartesiano cada punto es un par (x, y). Una recta tiene pendiente constante; la distancia mide cuánto separa a dos puntos.',
+    f:[['m = (y₂ − y₁)/(x₂ − x₁)','Pendiente: cuánto sube y por cada unidad que avanza x. m > 0 sube, m < 0 baja, m = 0 es horizontal.'],
+      ['y = mx + b','Forma pendiente-intercepto: b es el punto donde la recta corta al eje y.'],
+      ['y − y₁ = m(x − x₁)','Punto-pendiente: la recta de pendiente m que pasa por (x₁, y₁).'],
+      ['d = √((x₂ − x₁)² + (y₂ − y₁)²)','Distancia entre dos puntos: es el teorema de Pitágoras con los catetos Δx y Δy.'],
+      ['M = ((x₁ + x₂)/2, (y₁ + y₂)/2)','Punto medio: el promedio de las coordenadas.'],
+      ['m₁ = m₂ paralelas ;  m₁·m₂ = −1 perpendiculares','Comparando pendientes sabes cómo se ubican dos rectas.']],
+    ej:['Distancia entre (1, 2) y (4, 6)','√(3² + 4²) = √25 = 5'], uso:'Base de la geometría analítica y de la idea de derivada (pendiente).'},
+  T13:{q:'Una función f relaciona cada x del dominio con un único valor y = f(x). Se estudian su dominio, su rango y su gráfica.',
+    f:[['y = f(x)','x es la variable independiente (entrada) e y la dependiente (salida).'],
+      ['Dom f','Valores de x permitidos: se excluyen los que hacen 0 un denominador o negativo el radicando de una raíz par.'],
+      ['Ran f','Valores que toma y. En la gráfica, es la sombra de la curva sobre el eje y.'],
+      ['Vértice: x = −b/(2a)','En f(x) = ax² + bx + c: si a > 0 la parábola abre hacia arriba (mínimo); si a < 0, hacia abajo (máximo).'],
+      ['Prueba de la recta vertical','Una gráfica es función si ninguna recta vertical la corta en más de un punto.']],
+    ej:['f(x) = 1/(x − 2)','Dom f = ℝ − {2}'], uso:'Todo el cálculo (límites, derivadas, integrales) trabaja con funciones.'},
+  X10:{q:'Una función a trozos usa una regla distinta en cada intervalo. Las transformaciones mueven, voltean o estiran una gráfica conocida sin calcular punto por punto.',
+    f:[['f(x) = g(x) si x < a ;  h(x) si x ≥ a','Función a trozos: mira la condición para saber qué regla usar con cada x.'],
+      ['y = f(x − h) + k','Traslación: h unidades a la derecha (si h > 0) y k hacia arriba (si k > 0).'],
+      ['y = −f(x) ;  y = f(−x)','Reflejo sobre el eje x (se voltea de arriba a abajo) y sobre el eje y (de izquierda a derecha).'],
+      ['y = a·f(x)','Estira verticalmente si |a| > 1 y comprime si 0 < |a| < 1.'],
+      ['|x| = x si x ≥ 0 ;  −x si x < 0','El valor absoluto es la función a trozos más usada.']],
+    ej:['y = |x − 3| + 1','La V de |x| se mueve 3 a la derecha y 1 arriba: vértice (3, 1)'], uso:'En continuidad (límites laterales) y para graficar rápido.'},
+  T14:{q:'La circunferencia y la parábola son cónicas: curvas que se describen con ecuaciones de segundo grado en x e y.',
+    f:[['(x − h)² + (y − k)² = r²','Circunferencia de centro (h, k) y radio r: todos los puntos que están a distancia r del centro.'],
+      ['x² + y² + Dx + Ey + F = 0','Forma general. Se pasa a la forma de arriba completando cuadrados; el centro es (−D/2, −E/2).'],
+      ['(x − h)² = 4p(y − k)','Parábola vertical con vértice (h, k): abre hacia arriba si p > 0. Foco (h, k + p) y directriz y = k − p.'],
+      ['(y − k)² = 4p(x − h)','Parábola horizontal: abre a la derecha si p > 0. Foco (h + p, k).'],
+      ['x² + bx = (x + b/2)² − (b/2)²','Completar cuadrados: se suma y se resta la mitad del coeficiente de x, al cuadrado.']],
+    ej:['x² + y² = 25','Centro (0, 0) y radio 5'], uso:'Geometría analítica de Matemática para Ingenieros I.'},
+  T15:{q:'Una matriz es un arreglo de números en filas y columnas. Una matriz m×n tiene m filas y n columnas.',
+    f:[['A = [a b; c d]','Matriz 2×2. El elemento aᵢⱼ es el que está en la fila i y la columna j.'],
+      ['A + B','Se suman elemento a elemento; solo si tienen el mismo tamaño.'],
+      ['k·A','Multiplicar por un número: se multiplica cada elemento.'],
+      ['(AB)ᵢⱼ = fila i de A · columna j de B','Producto: se puede si las columnas de A son tantas como las filas de B. En general AB ≠ BA.'],
+      ['I = [1 0; 0 1]','Matriz identidad: AI = IA = A, como el 1 en los números.'],
+      ['Aᵀ','Transpuesta: las filas pasan a ser columnas.'],
+      ['Matriz aumentada y Gauss','Un sistema se escribe como matriz y se reduce con operaciones de fila hasta despejar.']],
+    ej:['2·[1 −2; 0 3]','[2 −4; 0 6]'], uso:'Sistemas grandes, gráficos por computadora e inteligencia artificial.'},
+  X9:{q:'El determinante es un número asociado a una matriz cuadrada. Dice si la matriz tiene inversa y si un sistema tiene solución única.',
+    f:[['det [a b; c d] = ad − bc','Producto de la diagonal principal menos el de la diagonal secundaria.'],
+      ['Regla de Sarrus (3×3)','Suma los productos de las 3 diagonales hacia la derecha y resta los de las 3 diagonales hacia la izquierda.'],
+      ['A⁻¹ = (1/det A)·[d −b; −c a]','Inversa 2×2: intercambia a y d, cambia el signo de b y c, y divide entre el determinante.'],
+      ['det A = 0  →  no hay inversa','La matriz es singular y el sistema no tiene solución única.'],
+      ['A·A⁻¹ = I','La inversa “deshace” lo que hace A.']],
+    ej:['det [3 2; 1 4]','3·4 − 2·1 = 10'], uso:'Resolver sistemas (regla de Cramer) y saber si tienen solución.'},
+  T16:{q:'La exponencial f(x) = bˣ crece (o decrece) multiplicando por b. El logaritmo es su inversa: responde a qué exponente hay que elevar la base.',
+    f:[['log_b(x) = y  ⇔  bʸ = x','b es la base (b > 0 y b ≠ 1), x el argumento (x > 0) e y el exponente buscado.'],
+      ['log(a·b) = log a + log b','El logaritmo de un producto es la suma de logaritmos.'],
+      ['log(a/b) = log a − log b','El de un cociente es la resta.'],
+      ['log(aⁿ) = n·log a','El exponente baja multiplicando: así se despeja una x que está en el exponente.'],
+      ['log_b(x) = (ln x)/(ln b)','Cambio de base: para calcular con la calculadora.'],
+      ['ln x = log_e(x) ;  e ≈ 2,718','Logaritmo natural: tiene base e.']],
+    ej:['3ˣ = 81','81 = 3⁴ → x = 4'], uso:'Crecimiento de poblaciones, interés compuesto y algoritmos.'},
+  T17:{q:'El límite describe a qué valor se acerca f(x) cuando x se acerca a un número, aunque nunca llegue a él.',
+    f:[['lím x→a f(x) = L','Cuando x se acerca a a (sin llegar), f(x) se acerca a L.'],
+      ['Límites laterales','El límite existe si por la izquierda (x → a⁻) y por la derecha (x → a⁺) se obtiene lo mismo.'],
+      ['0/0','Indeterminación: factoriza y simplifica, o racionaliza con el conjugado.'],
+      ['lím x→∞ P(x)/Q(x)','Compara los grados: mayor arriba → ∞; iguales → cociente de coeficientes principales; mayor abajo → 0.'],
+      ['Continua en a: lím x→a f(x) = f(a)','La gráfica no tiene saltos ni huecos en a.'],
+      ['lím x→0 (sen x)/x = 1','Límite trigonométrico notable.']],
+    ej:['lím x→2 (x² − 4)/(x − 2)','(x + 2)(x − 2) ÷ (x − 2) = x + 2 → 4'], uso:'Es la base de la derivada y la integral.'},
+  T18:{q:'La derivada mide la rapidez de cambio de una función: es la pendiente de la recta tangente en cada punto.',
+    f:[['f′(x) = lím h→0 [f(x + h) − f(x)] ÷ h','Definición: pendiente entre dos puntos muy cercanos.'],
+      ['(xⁿ)′ = n·x^(n−1)','Regla de la potencia: baja el exponente y réstale 1.'],
+      ['(c)′ = 0 ;  (k·f)′ = k·f′','La derivada de una constante es 0; un número que multiplica se queda.'],
+      ['(f·g)′ = f′g + fg′','Regla del producto.'],
+      ['(f/g)′ = (f′g − fg′)/g²','Regla del cociente.'],
+      ['[f(g(x))]′ = f′(g(x))·g′(x)','Regla de la cadena: deriva la función de afuera y multiplica por la derivada de la de adentro.'],
+      ['(eˣ)′ = eˣ ;  (ln x)′ = 1/x ;  (sen x)′ = cos x','Derivadas básicas que conviene saber.']],
+    ej:['f(x) = (2x + 1)³','f′(x) = 3(2x + 1)²·2 = 6(2x + 1)²'], uso:'Máximos y mínimos, velocidad y optimización en ingeniería.'},
+  X2:{q:'La trigonometría relaciona los ángulos de un triángulo con sus lados. Seno, coseno y tangente son razones entre lados.',
+    f:[['sen θ = op/hip ;  cos θ = ady/hip ;  tan θ = op/ady','op: cateto opuesto al ángulo θ; ady: cateto adyacente (pegado a θ); hip: hipotenusa (frente al ángulo recto).'],
+      ['a² + b² = c²','Pitágoras: c es la hipotenusa y a, b los catetos.'],
+      ['π rad = 180°','Para pasar de grados a radianes multiplica por π/180.'],
+      ['sen²θ + cos²θ = 1','Identidad fundamental.'],
+      ['sen 30° = 1/2 ;  sen 45° = √2/2 ;  sen 60° = √3/2','Valores notables. El coseno va al revés: cos 30° = √3/2, cos 60° = 1/2.'],
+      ['a/(sen A) = b/(sen B)','Ley de senos, para triángulos que no son rectángulos. Ley de cosenos: c² = a² + b² − 2ab·cos C.']],
+    ej:['sen 30° + cos 60°','1/2 + 1/2 = 1'], uso:'Necesaria para derivar funciones trigonométricas, vectores y física.'},
+  X3:{q:'La elipse y la hipérbola completan las cónicas. La elipse es un “círculo estirado”; la hipérbola tiene dos ramas que se abren.',
+    f:[['x²/a² + y²/b² = 1','Elipse con centro en el origen; a es el semieje mayor (a > b), sobre el eje x.'],
+      ['c² = a² − b²','En la elipse, c es la distancia del centro a cada foco: (±c, 0).'],
+      ['x²/a² − y²/b² = 1','Hipérbola que abre hacia los lados; vértices (±a, 0).'],
+      ['c² = a² + b²','En la hipérbola los focos están más lejos: (±c, 0).'],
+      ['y = ±(b/a)x','Asíntotas de la hipérbola: rectas a las que se acercan las ramas.'],
+      ['e = c/a','Excentricidad: e < 1 en la elipse y e > 1 en la hipérbola.']],
+    ej:['x²/25 + y²/9 = 1','a = 5, b = 3, c = 4 → focos (±4, 0)'], uso:'Órbitas, antenas y geometría analítica.'},
+  X4:{q:'Un vector tiene magnitud (largo) y dirección. En el plano se escribe con dos componentes.',
+    f:[['u = (u₁, u₂)','Componentes: cuánto avanza el vector en x y en y.'],
+      ['u + v = (u₁ + v₁, u₂ + v₂)','Suma componente a componente (regla del paralelogramo).'],
+      ['|u| = √(u₁² + u₂²)','Norma o magnitud: el largo del vector, por Pitágoras.'],
+      ['u·v = u₁v₁ + u₂v₂','Producto escalar: da un número, no un vector.'],
+      ['cos θ = (u·v)/(|u||v|)','Ángulo entre dos vectores. Si u·v = 0, son perpendiculares.'],
+      ['k·u = (ku₁, ku₂)','Multiplicar por un número estira o encoge el vector; si k < 0, invierte el sentido.']],
+    ej:['u = (3, 4), v = (4, −3)','u·v = 12 − 12 = 0 → perpendiculares; |u| = 5'], uso:'Física, gráficos y el álgebra lineal de la IA.'},
+  X5:{q:'La lógica estudia cuándo una proposición es verdadera (V) o falsa (F). Los conjuntos agrupan elementos y se combinan con operaciones.',
+    f:[['p ∧ q','Conjunción (“y”): es verdadera solo si las dos son verdaderas.'],
+      ['p ∨ q','Disyunción (“o”): es verdadera si al menos una es verdadera.'],
+      ['p → q','Condicional (“si p, entonces q”): solo es falsa cuando p es V y q es F.'],
+      ['¬p','Negación: cambia V por F y F por V.'],
+      ['A ∪ B ;  A ∩ B ;  A − B','Unión (todo lo de ambos), intersección (lo que tienen en común) y diferencia (lo de A que no está en B).'],
+      ['n(A ∪ B) = n(A) + n(B) − n(A ∩ B)','Para contar sin repetir los elementos que están en los dos conjuntos.']],
+    ej:['A = {1, 2, 3}, B = {2, 3, 4}','A ∩ B = {2, 3} ; A ∪ B = {1, 2, 3, 4}'], uso:'Las condiciones if de la programación y la probabilidad.'},
+  X6:{q:'Componer funciones es aplicar una después de otra. La inversa de f es la función que deshace lo que hace f.',
+    f:[['(f ∘ g)(x) = f(g(x))','Primero se aplica g y al resultado se le aplica f.'],
+      ['f ∘ g ≠ g ∘ f','El orden importa: en general dan resultados distintos.'],
+      ['f⁻¹(f(x)) = x','La inversa devuelve el valor original.'],
+      ['Cómo hallar f⁻¹','Escribe y = f(x), despeja x y luego intercambia x e y.'],
+      ['Solo si f es inyectiva','Cada y debe venir de un solo x (prueba de la recta horizontal).'],
+      ['Gráfica de f⁻¹','Es el reflejo de la gráfica de f sobre la recta y = x.']],
+    ej:['f(x) = 2x + 3','y = 2x + 3 → x = (y − 3)/2 → f⁻¹(x) = (x − 3)/2'], uso:'El logaritmo es la inversa de la exponencial, y la regla de la cadena deriva funciones compuestas.'},
+  X7:{q:'Una sucesión es una lista ordenada de números a₁, a₂, a₃… Una sumatoria (Σ) suma muchos términos con una sola notación.',
+    f:[['Σ (i = 1 a n) aᵢ = a₁ + a₂ + … + aₙ','Σ (sigma) significa “sumar”: i es el índice y va de 1 a n.'],
+      ['aₙ = a₁ + (n − 1)d','Progresión aritmética: cada término le suma la diferencia d al anterior.'],
+      ['Sₙ = n(a₁ + aₙ)/2','Suma de los n primeros términos de una progresión aritmética.'],
+      ['aₙ = a₁·r^(n−1)','Progresión geométrica: cada término se multiplica por la razón r.'],
+      ['Sₙ = a₁(rⁿ − 1)/(r − 1)','Suma de una progresión geométrica (con r ≠ 1).'],
+      ['1 + 2 + … + n = n(n + 1)/2','Suma de los n primeros números naturales.']],
+    ej:['1 + 2 + … + 100','100·101/2 = 5050'], uso:'Las integrales se definen como sumas y los algoritmos se analizan con ellas.'},
+  X8:{q:'El conteo calcula de cuántas formas puede pasar algo; la probabilidad mide qué tan posible es un evento, de 0 (imposible) a 1 (seguro).',
+    f:[['n! = n·(n − 1)·…·2·1','Factorial: formas de ordenar n objetos. Por definición, 0! = 1.'],
+      ['P(n, k) = n!/(n − k)!','Permutaciones: elegir k de n cuando el orden importa.'],
+      ['C(n, k) = n! ÷ [k!(n − k)!]','Combinaciones: elegir k de n cuando el orden no importa.'],
+      ['P(A) = (casos favorables)/(casos posibles)','Regla de Laplace, cuando todos los casos son igual de probables.'],
+      ['P(no A) = 1 − P(A)','Probabilidad del complemento.'],
+      ['P(A y B) = P(A)·P(B)','Si A y B son independientes (uno no afecta al otro).']],
+    ej:['Dos monedas: P(dos caras)','1/2 · 1/2 = 1/4'], uso:'Base de Estadística y de Machine Learning.'},
+  X11:{q:'Las identidades trigonométricas son igualdades que se cumplen para todo ángulo. Sirven para simplificar y transformar expresiones.',
+    f:[['sen²x + cos²x = 1','Identidad fundamental. De ella salen 1 + tan²x = sec²x y 1 + cot²x = csc²x.'],
+      ['tan x = (sen x)/(cos x)','La tangente es seno entre coseno.'],
+      ['sen 2x = 2 sen x cos x','Ángulo doble del seno.'],
+      ['cos 2x = cos²x − sen²x','Ángulo doble del coseno. También se escribe 1 − 2sen²x o 2cos²x − 1.'],
+      ['sen(a ± b) = sen a cos b ± cos a sen b','Seno de una suma o resta de ángulos.'],
+      ['cos(a ± b) = cos a cos b ∓ sen a sen b','Coseno de una suma o resta: ojo, el signo se invierte.']],
+    ej:['Simplifica (1 − cos²x) ÷ sen x','1 − cos²x = sen²x → sen²x ÷ sen x = sen x'], uso:'Para derivar e integrar funciones trigonométricas.'}
+};
+function summaryBody(id){
+  const sm=SUMMARY[id]; if(!sm) return '';
+  return `<p class="sm-q">${mth(sm.q)}</p><div class="sm-list">${sm.f.map(([f,e],i)=>`<div class="sm-f" style="--i:${i}"><div class="sm-fx">${mth(f)}</div><div class="sm-ex">${mth(e)}</div></div>`).join('')}</div>
+    <div class="sm-ej"><span>Ejemplo</span><div>${mth(sm.ej[0])}</div><div class="sm-arrow">${mth(sm.ej[1])}</div></div>${sm.uso?`<div class="sm-uso">🎯 <b>Para qué sirve:</b> ${esc(sm.uso)}</div>`:''}`;
+}
+function summaryDetails(id, open){ return SUMMARY[id]?`<details class="sumry" ${open?'open':''}><summary><span class="sm-ic">📚</span><span class="sm-tt"><b>Resumen del tema</b><small>Teoría y fórmulas explicadas</small></span><span class="sm-chev">›</span></summary><div class="sm-body">${summaryBody(id)}</div></details>`:''; }
+function openSummary(id){
+  const n=byId()[id]; if(!SUMMARY[id]||!n) return; LS=null; const box=lessonBox(), c=col(n);
+  box.innerHTML=`<div class="ls-wrap" style="--c:${c}"><div class="ls-top"><span class="p-id" style="background:${c};margin-top:0">${esc(n.id)}</span><div class="ls-tt"><div class="ls-k">Resumen${n.week?' · semana '+n.week:''}</div><h2>${esc(n.title)}</h2></div><button class="xbtn" id="smX" aria-label="Cerrar" style="margin-top:0">✕</button></div>
+    <section class="ls-sec">${summaryBody(id)}</section><div class="ls-act">${LESSONS[id]?`<button class="btn" data-lesson="${esc(id)}">📖 Lección</button>`:''}${GEN[id]?`<button class="btn" id="smPrac">🧮 Practicar</button>`:''}</div></div>`;
+  box.scrollTop=0; box.classList.add('show'); buzz(8);
+  box.querySelector('#smX').onclick=()=>{ box.classList.remove('show'); };
+  const pr=box.querySelector('#smPrac'); if(pr) pr.onclick=()=>{ box.classList.remove('show'); goPractice(id); };
+}
+function summaryCard(){
+  const B=byId(), ids=Object.keys(SUMMARY).filter(id=>B[id]).sort((a,b)=>((B[a].week||30)-(B[b].week||30))||a.localeCompare(b,'es',{numeric:true})), cw=curWeek();
+  return `<div class="card" id="summaryCard"><h2>📚 Resúmenes</h2><p class="muted" style="margin-top:0">Lo esencial de cada tema para leer: qué es, sus fórmulas y qué significa cada parte.</p>
+    <div class="ls-grid">${ids.map(id=>{ const n=B[id]; return `<button class="ls-chip ${n.week===cw?'cur':''}" data-sum="${esc(id)}" style="--c:${col(n)}"><span class="lc-top"><b>${esc(id)}</b>${n.week===cw?'<em>Esta semana</em>':''}</span><span class="lc-t">${esc(n.title)}</span></button>`; }).join('')}</div></div>`;
+}
+document.addEventListener('click', e=>{ const b=e.target.closest('[data-sum]'); if(b) openSummary(b.dataset.sum); });
 
 /* ---------- Inicio ---------- */
 const TIPS=['Intenta cada ejercicio antes de mirar la solución: el esfuerzo de recordar es lo que fija el tema.','Explica en voz alta lo que haces. Si te trabas, ahí está lo que falta entender.','Mezcla tipos de ejercicios: así aprendes a elegir el método, como en el examen.','Estudia en bloques de 25 minutos con el celular lejos, y descansa 5.','Un error corregido vale más que diez ejercicios fáciles: revisa tu cuaderno de errores.','Dormir bien consolida lo que estudiaste hoy.','Antes de empezar, escribe de memoria las fórmulas del tema y luego compáralas.','Comprueba tus respuestas reemplazando: en las ecuaciones casi siempre se puede.','Si un tema se resiste, vuelve al requisito anterior en el árbol.','Poco cada día gana a mucho un solo día: cuida la racha.','Lee el enunciado dos veces y subraya lo que te piden antes de calcular.','Cuando aciertes, pregúntate por qué funciona. Eso es entender, no solo memorizar.'];
@@ -2410,7 +2666,7 @@ function renderHome(anim){
     h+=`<div class="card mission" style="--c:${c}"><div class="ms-head"><span class="ms-k">Misión de hoy</span><span class="pill info">${w>=1&&w<=19?'Semana '+w+' de 19':esc(weekLabel(w))}</span></div>
       <div class="ms-t"><span class="p-id" style="background:${c};margin-top:0">${esc(mn.id)}</span><div style="min-width:0"><b>${esc(mn.title)}</b><div class="muted">${esc(mn.goal)}</div></div></div>
       <div class="ms-meta"><div><b>${+p.count||0}<small>/${mn.target||0}</small></b>ejercicios<i class="mm" style="--p:${mn.target?Math.min(100,(+p.count||0)/mn.target*100):0}%"></i></div><div><b>${sd}<small>/${sb.length}</small></b>subtemas<i class="mm" style="--p:${sb.length?sd/sb.length*100:0}%"></i></div><div><b>${th?th.best+'<small>/'+th.n+'</small>':'—'}</b>teoría<i class="mm" style="--p:${th&&th.n?th.best/th.n*100:0}%"></i></div></div>
-      <div class="qa-row">${LESSONS[mn.id]?`<button class="qa ${p.lesson?'':'pri'}" data-q="lesson"><i>📖</i>Lección</button>`:''}${GEN[mn.id]?`<button class="qa ${LESSONS[mn.id]&&!p.lesson?'':'pri'}" data-q="prac"><i>🧮</i>Practicar</button>`:''}${THEORY[mn.id]?`<button class="qa" data-q="theo"><i>🧠</i>Teoría</button>`:''}${GEN[mn.id]?`<button class="qa" data-q="exam"><i>⏱️</i>Examen</button>`:''}</div>
+      <div class="qa-row">${SUMMARY[mn.id]?`<button class="qa" data-q="sum"><i>📚</i>Resumen</button>`:''}${LESSONS[mn.id]?`<button class="qa ${p.lesson?'':'pri'}" data-q="lesson"><i>📖</i>Lección</button>`:''}${GEN[mn.id]?`<button class="qa ${LESSONS[mn.id]&&!p.lesson?'':'pri'}" data-q="prac"><i>🧮</i>Practicar</button>`:''}${GEN[mn.id]?`<button class="qa" data-q="exam"><i>⏱️</i>Examen</button>`:''}</div>
       <button class="hm-row" data-go="vStudy"><span class="hr-ic">📅</span><span class="hr-tx"><b>Plan de hoy</b><small>${tdone} de ${tasks.length} tareas hechas</small></span><span class="hr-bar"><i style="width:${Math.round(tdone/Math.max(1,tasks.length)*100)}%"></i></span><span class="hr-go">›</span></button></div>`;
   }
   // semana
@@ -2442,7 +2698,7 @@ function renderHome(anim){
   $('#hmGear').onclick=()=>goView('vEdit');
   $('#hmRank').onclick=()=>goView('vTree');
   wrap.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ goView(b.dataset.go); if(b.dataset.badges) setTimeout(()=>{ const c=document.getElementById('badgesCard'); if(c) c.scrollIntoView({behavior:'smooth'}); },120); });
-  if(mn) wrap.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ const q=b.dataset.q; if(q==='lesson') openLesson(mn.id); else if(q==='prac') goPractice(mn.id); else if(q==='theo') goTheory(mn.id); else if(q==='exam') startExam(mn.id); });
+  if(mn) wrap.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ const q=b.dataset.q; if(q==='sum') openSummary(mn.id); else if(q==='lesson') openLesson(mn.id); else if(q==='prac') goPractice(mn.id); else if(q==='theo') goTheory(mn.id); else if(q==='exam') startExam(mn.id); });
   if($('#hmSim')) $('#hmSim').onclick=()=>{ if(ne.id==='final') return startExam('SIM'); const ns=(ne.nodes||[]).filter(id=>GEN[id]); const tg=ns.find(id=>!isDom(id))||ns[0]; startExam(tg||'SIM'); };
   if(anim) countUp(wrap);
 }
