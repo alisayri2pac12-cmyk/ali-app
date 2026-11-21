@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0d1017">
 <title>Árbol de Matemática</title>
 <script>
+try{ const t=localStorage.getItem('arbolAli.theme'); if(t==='noche'||t==='verde') document.documentElement.dataset.theme=t; }catch(e){}
 if(/^https?:$/.test(location.protocol)){
   document.write('<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">');
   if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -18,14 +19,17 @@ if(/^https?:$/.test(location.protocol)){
 <style>
 :root{
   --bg:#0d1017; --bg2:#151a23; --bg3:#1d2330; --line:#2a3242; --tx:#e6e8ee; --tx2:#9aa3b2; --tx3:#6b7383;
-  --ok:#4ade80; --mid:#facc15; --bad:#f87171; --acc:#7aa2ff;
+  --ok:#4ade80; --mid:#facc15; --bad:#f87171; --acc:#7aa2ff; --glass:#151a23e6; --bg0:#090c12;
 }
+:root[data-theme="noche"]{--bg:#0a1020;--bg2:#101a33;--bg3:#18254a;--line:#24345f;--tx:#e8edff;--tx2:#a3b0d6;--tx3:#6f7ca3;--acc:#8fb4ff;--glass:#101a33e6;--bg0:#070c19}
+:root[data-theme="verde"]{--bg:#0a120f;--bg2:#101c17;--bg3:#172a22;--line:#23402f;--tx:#e6f2ec;--tx2:#9db8aa;--tx3:#6a8577;--acc:#5eead4;--glass:#101c17e6;--bg0:#07100c}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,"Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;font-feature-settings:"tnum" 0}
+h1,h2,h3,.big{letter-spacing:-.01em}.big{font-variant-numeric:tabular-nums}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 #app{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto;height:calc(100vh - 44px);height:calc(100dvh - 44px - env(safe-area-inset-top))}
-#appSw{display:flex;gap:6px;padding:6px 10px;padding-top:max(6px,env(safe-area-inset-top));background:#090c12;border-bottom:1px solid var(--line);height:calc(44px + env(safe-area-inset-top))}
+#appSw{display:flex;gap:6px;padding:6px 10px;padding-top:max(6px,env(safe-area-inset-top));background:var(--bg0);border-bottom:1px solid var(--line);height:calc(44px + env(safe-area-inset-top))}
 #appSw button{flex:1;border:1px solid var(--line);background:var(--bg2);color:var(--tx2);border-radius:10px;font-size:14px;font-weight:700}
 #appSw button.on{background:var(--acc);border-color:var(--acc);color:#0b1020}
 #mallaFrame{display:none;width:100%;border:0;height:calc(100vh - 44px);height:calc(100dvh - 44px - env(safe-area-inset-top));background:var(--bg)}
@@ -92,11 +96,11 @@ nav button.active .ic{filter:drop-shadow(0 0 6px var(--acc))}
 .tb{position:absolute;display:flex;gap:6px;flex-wrap:wrap}
 .tb-top{top:10px;left:10px;right:10px}
 @media (max-width:600px){.tb-top .chip{flex:1 1 0;line-height:1.2;font-size:12px;padding:6px 8px}}
-.chip{border:1px solid var(--line);background:#151a23e6;backdrop-filter:blur(4px);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--tx)}
+.chip{border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(4px);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--tx)}
 .chip.on{background:#facc15;color:#111;border-color:#facc15;font-weight:700}
 .tb-zoom{right:10px;bottom:12px;flex-direction:column}
-.zbtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:#151a23e6;font-size:20px;color:var(--tx)}
-.legend{position:absolute;left:10px;bottom:12px;background:#151a23e6;border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:11px;color:var(--tx2);display:grid;grid-template-columns:auto auto;gap:3px 10px}
+.zbtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--glass);font-size:20px;color:var(--tx)}
+.legend{position:absolute;left:10px;bottom:12px;background:var(--glass);border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:11px;color:var(--tx2);display:grid;grid-template-columns:auto auto;gap:3px 10px}
 .legend.min{grid-template-columns:auto}.legend.min div{display:none}.legend.min::before{content:'Leyenda ▸'}
 @media (max-width:600px){.legend{font-size:10px}}
 .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:2px solid #7aa2ff}
@@ -273,6 +277,41 @@ nav button.active .ic{transform:translateY(-2px) scale(1.12)}
 .ru-n{font-size:28px;font-weight:900;margin:4px 0 12px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important}}
 
+/* ---------- Ronda 7 ---------- */
+#hdRing{flex:0 0 auto;position:relative;width:44px;height:44px}
+#hdRing .rt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800}
+.ring-v{transition:stroke-dashoffset .9s var(--ez)}
+@keyframes ringIn{from{stroke-dashoffset:var(--c0)}to{stroke-dashoffset:var(--c1)}}
+.ring.anim .ring-v,.view.enter .ring-v{animation:ringIn 1.2s var(--ez) .1s both}
+.flame{display:inline-block;line-height:1;transform-origin:50% 90%;vertical-align:-.1em}
+.fl0{filter:grayscale(1);opacity:.45}
+.fl1{animation:flick 2.4s ease-in-out infinite}.fl2{animation:flick 1.8s ease-in-out infinite}
+.fl3{animation:flick 1.3s ease-in-out infinite;filter:drop-shadow(0 0 6px #f97316aa)}
+.fl4{animation:flick 1s ease-in-out infinite;filter:hue-rotate(190deg) drop-shadow(0 0 10px #60a5fa)}
+.hd-days .stk.on{animation:none}
+.hscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+.heat{display:block}
+.view.enter .heat rect{animation:fadeIn .5s both}
+.legend-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:12.5px;align-items:center}
+.legend-row i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 1px;vertical-align:-1px}
+.legend-row i.ln{width:18px;height:0;border-radius:0;vertical-align:3px;margin-right:4px}
+@keyframes radarIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.radar-v{transform-box:view-box;transform-origin:160px 118px}
+.view.enter .radar-v{animation:radarIn .9s var(--ez) .15s both}
+.view.enter path.draw,.view.enter polyline.draw{stroke-dasharray:3000;animation:draw 1.4s var(--ez) .15s both}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.theme-b{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--bg3);border:2px solid var(--line);border-radius:12px;padding:10px 6px;font-size:13px;font-weight:600}
+.theme-b.on{border-color:var(--acc)}
+.theme-b .sw{width:100%;height:30px;border-radius:8px}
+.sw-oscuro{background:linear-gradient(135deg,#0d1017 50%,#7aa2ff 50%)}.sw-noche{background:linear-gradient(135deg,#0a1020 50%,#8fb4ff 50%)}.sw-verde{background:linear-gradient(135deg,#0a120f 50%,#5eead4 50%)}
+.gw{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}
+.gw-eq{font-size:16px;font-weight:700;margin-bottom:6px;text-align:center}
+.gsvg{width:100%;max-width:340px;display:block;margin:0 auto;background:var(--bg2);border-radius:10px}
+.gw-step{font-size:14px;margin-top:8px;min-height:2.6em}
+.gw-dots{display:flex;gap:5px;justify-content:center;margin-top:6px}.gw-dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .3s,transform .3s}.gw-dots i.on{background:var(--acc)}
+@keyframes ptIn{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+.g-new{animation:fadeIn .4s both}.g-pt.g-new circle{transform-box:fill-box;transform-origin:center;animation:ptIn .45s var(--ez) both}
+.g-curve{stroke-dasharray:3000;animation:draw 1.6s ease-in-out both}
 #toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);background:#e6e8ee;color:#111;padding:9px 14px;border-radius:10px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%)}
 @media (min-width:900px){
@@ -294,6 +333,7 @@ nav button.active .ic{transform:translateY(-2px) scale(1.12)}
       <div class="hd-rank" id="hdRank"></div>
       <div class="hd-next" id="hdNext"></div>
     </div>
+    <div id="hdRing" title="Avance del plan"></div>
     <div class="hd-days" id="hdDays"></div>
   </header>
   <main>
@@ -560,7 +600,8 @@ function renderHeader(){
   document.getElementById('hdNext').innerHTML = next + `<br>${esc(weekLabel(w))}`;
   const d = daysBetween(today(), UNI);
   const sk = streak();
-  document.getElementById('hdDays').innerHTML = (d>0 ? `<b>${d}</b><span>días a la U</span>` : `<b>🎓</b><span>¡En la U!</span>`) + `<span class="stk ${sk?'on':''}">🔥 ${sk} día${sk===1?'':'s'}</span>`;
+  document.getElementById('hdDays').innerHTML = (d>0 ? `<b>${d}</b><span>días a la U</span>` : `<b>🎓</b><span>¡En la U!</span>`) + `<span class="stk ${sk?'on':''}">${flame(sk,11)} ${sk} día${sk===1?'':'s'}</span>`;
+  const pp=planPct(), hr=document.getElementById('hdRing'); if(hr){ const first=!hr.innerHTML; hr.innerHTML=ringSVG(pp,44,5)+`<span class="rt">${pp}%</span>`; if(first&&!RM()) hr.querySelector('.ring').classList.add('anim'); }
   const dc = dueCount()+errorsDue().length, bd=document.getElementById('dueBadge'); if(bd){ bd.hidden=!dc; bd.textContent=dc; }
 }
 
@@ -804,7 +845,8 @@ function renderProgress(){
   const nodes=S.nodes, dom=nodes.filter(n=>isDom(n.id)).length, w=curWeek(), ps=planStatus();
   const ex = nodes.filter(n=>n.target>0&&!n.grade20); const done=ex.reduce((a,n)=>a+(+(S.progress[n.id]||{}).count||0),0), tot=ex.reduce((a,n)=>a+n.target,0);
   const d = daysBetween(today(), UNI), ri=rankIndex();
-  let h = `<div class="card"><h2>Resumen</h2><div class="stat-grid">
+  const ppc=planPct();
+  let h = `<div class="card"><h2>Resumen</h2><div style="display:flex;align-items:center;gap:14px;margin-bottom:12px"><div style="position:relative;width:96px;height:96px;flex:0 0 auto">${ringSVG(ppc,96,10)}<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><b style="font-size:22px">${ppc}%</b><span class="muted" style="font-size:10.5px">del plan</span></div></div><div style="font-size:14px">${S.nodes.filter(n=>n.week&&isDom(n.id)).length} de ${S.nodes.filter(n=>n.week).length} temas del plan de 19 semanas dominados.<div class="muted" style="margin-top:4px">${esc(weekLabel(w))}</div></div></div><div class="stat-grid">
     <div class="stat"><span>Temas dominados</span><div class="big">${dom}<small style="font-size:15px;color:var(--tx2)"> / ${nodes.length}</small></div></div>
     <div class="stat"><span>Días para el 29 mar 2027</span><div class="big">${Math.max(0,d)}</div></div>
     <div class="stat"><span>Semana que toca</span><div class="big">${w<1?'—':w>19?'Fin':w+'<small style="font-size:15px;color:var(--tx2)"> / 19</small>'}</div></div>
@@ -815,7 +857,7 @@ function renderProgress(){
     <div class="ph-row" style="margin-top:14px"><div class="t"><b>Progreso general</b><span>${Math.round(dom/Math.max(1,nodes.length)*100)} %</span></div><div class="pbar"><i style="width:${dom/Math.max(1,nodes.length)*100}%"></i></div></div>
     <div class="ph-row"><div class="t"><b>Ejercicios del plan</b><span>${done} / ${tot}</span></div><div class="pbar"><i style="width:${Math.min(100,done/Math.max(1,tot)*100)}%;background:#4ade80"></i></div></div>
   </div>`;
-  h += weeklyChart() + errorStatsCard();
+  h += realVsPlan() + heatmap() + radar() + forgetCard() + weeklyChart() + errorStatsCard();
   h += `<div class="card"><h2>Por fase</h2>`;
   Object.entries(PHASES).forEach(([k,ph])=>{ const ns=nodes.filter(n=>n.phase===k); if(!ns.length) return; const dd=ns.filter(n=>isDom(n.id)).length;
     h += `<div class="ph-row"><div class="t"><b style="color:${ph.color}">${esc(ph.name)}</b><span>${dd} / ${ns.length}</span></div><div class="pbar" style="--c:${ph.color}"><i style="width:${dd/ns.length*100}%"></i></div></div>`; });
@@ -878,7 +920,7 @@ function renderEvals(){
 
 /* ===================== Editor del árbol ===================== */
 function renderEditor(){
-  let h = `<div class="card"><h2>Nodos del árbol</h2><p class="muted" style="margin-top:0">Agrega los cursos reales cuando tengas la malla oficial. Los requisitos son las flechas.</p>
+  let h = themeCard() + `<div class="card"><h2>Nodos del árbol</h2><p class="muted" style="margin-top:0">Agrega los cursos reales cuando tengas la malla oficial. Los requisitos son las flechas.</p>
     <button class="btn pri" id="addNode">+ Agregar nodo</button><div class="nlist" style="margin-top:12px">`;
   S.nodes.forEach(n=>{ h += `<div class="nitem"><span class="dot" style="background:${col(n)}"></span><div class="tx"><b>${esc(n.id)}</b> ${esc(n.title)}<small>${n.reqs.length?'Requiere: '+esc(n.reqs.join(', ')):'Sin requisitos'}</small></div>
     <button class="btn sm" data-ed="${esc(n.id)}">Editar</button><button class="btn sm danger" data-del="${esc(n.id)}" aria-label="Borrar">🗑</button></div>`; });
@@ -887,7 +929,7 @@ function renderEditor(){
     <p style="margin:0 0 8px;font-size:13.5px">Último respaldo: <b>${meta().lastBackup?esc(fmt(ymd(meta().lastBackup),{day:'numeric',month:'long',year:'numeric'})):'nunca'}</b>. Cada 7 días la app te recuerda descargar uno y guarda sola una copia interna.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="exp">⬇ Exportar JSON</button>${snapInfo()?`<button class="btn" id="snap">↺ Copia automática (${esc(fmt(ymd(snapInfo().fecha),{day:'numeric',month:'short'}))})</button>`:''}<button class="btn" id="imp">⬆ Importar JSON</button><button class="btn danger" id="rst">Reiniciar todo</button></div></div>`;
   const w=document.getElementById('editWrap'); w.innerHTML=h;
-  w.querySelector('#addNode').onclick=()=>openEditor(null);
+  w.querySelector('#addNode').onclick=()=>openEditor(null); bindTheme(w);
   w.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>openEditor(b.dataset.ed));
   w.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
     const id=b.dataset.del, C=children()[id]||[];
@@ -1128,7 +1170,7 @@ function renderStudy(){
   let wk=0; for(let i=0;i<7;i++) wk+=minutesOn(addDays(t,-i));
   const total=Object.values(study().log).reduce((a,b)=>a+(+b||0),0);
   let h = planCard() + `<div class="card"><h2>🔥 Racha diaria</h2>
-    <div class="stat-grid"><div class="stat"><span>Racha actual</span><div class="big">${st}<small style="font-size:15px;color:var(--tx2)"> día${st===1?'':'s'}</small></div></div>
+    <div class="stat-grid"><div class="stat"><span>Racha actual</span><div class="big">${flame(st,24)} ${st}<small style="font-size:15px;color:var(--tx2)"> día${st===1?'':'s'}</small></div></div>
     <div class="stat"><span>Hoy</span><div class="big">${minutesOn(t)}<small style="font-size:15px;color:var(--tx2)"> min</small></div></div>
     <div class="stat"><span>Últimos 7 días</span><div class="big" style="font-size:22px">${Math.floor(wk/60)} h ${wk%60} min</div></div>
     <div class="stat"><span>Mejor racha · total</span><div class="big" style="font-size:22px">${bestStreak()} d · ${Math.round(total/60)} h</div></div></div>
@@ -1143,7 +1185,7 @@ function renderStudy(){
   h += due.length ? due.map(n=>{ const r=reviewInfo(n.id); return `<div class="nitem" style="margin-bottom:6px"><span class="dot" style="background:${col(n)}"></span><div class="tx"><b>${esc(n.id)}</b> ${esc(n.title)}<small>Repaso ${r.i+1} de 3 (día ${REVIEW_DAYS[r.i]}) · ${r.days===0?'toca hoy':'atrasado '+(-r.days)+' d'}</small></div><button class="btn sm" data-prac="${esc(n.id)}">Practicar</button><button class="btn pri sm" data-rev="${esc(n.id)}">Hecho</button></div>`; }).join('') : '<div class="muted">No tienes repasos pendientes hoy. ✅</div>';
   if(up.length) h += `<div class="muted" style="margin-top:8px">Próximos: ${up.map(([n,r])=>esc(n.id)+' en '+r.days+' d').join(' · ')}</div>`;
   h += `</div>`;
-  h += theoryCard() + examCard() + errorCard();
+  h += theoryCard() + graphCard() + examCard() + errorCard();
   // práctica
   if(!practice.topic || !B[practice.topic] || !GEN[practice.topic]) practice={topic:defaultTopic(), items:[]};
   const pt = B[practice.topic];
@@ -1154,8 +1196,8 @@ function renderStudy(){
     const okN=practice.items.filter(x=>x.ok).length, badN=practice.items.filter(x=>x.bad).length;
     if(practice.single) h += `<div class="muted" style="margin-top:10px">Ejercicio ${practice.items.length} · ✓ ${okN} · ✗ ${badN}</div>`;
     h += `<ol style="padding-left:20px;margin:12px 0 0" ${practice.single?`start="${practice.items.length}"`:''}>` + practice.items.map((it,i)=>(practice.single&&i<practice.items.length-1)?'':`<li style="margin-bottom:10px"><div style="font-size:15px">${mth(it.q)}</div>
-      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn sm" data-ans="${i}">Ver respuesta</button><button class="btn sm" data-ok="${i}" ${it.ok||it.bad?'disabled':''}>${it.ok?'✓ Sumado':'✓ Lo hice bien (+1)'}</button><button class="btn sm" data-bad="${i}" ${it.ok||it.bad?'disabled':''}>${it.bad?'📒 Anotado':'✗ Me equivoqué'}</button></div>
-      <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${mth(it.a)}</div></li>`).join('') + `</ol>`;
+      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn sm" data-ans="${i}">Ver respuesta</button>${it.g?`<button class="btn sm" data-gshow="${i}">📈 Gráfica</button>`:''}<button class="btn sm" data-ok="${i}" ${it.ok||it.bad?'disabled':''}>${it.ok?'✓ Sumado':'✓ Lo hice bien (+1)'}</button><button class="btn sm" data-bad="${i}" ${it.ok||it.bad?'disabled':''}>${it.bad?'📒 Anotado':'✗ Me equivoqué'}</button></div>
+      <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${mth(it.a)}</div><div id="gbox${i}">${it.g&&it.gopen?graphWidget(it.g,it.s||0,String(i)):''}</div></li>`).join('') + `</ol>`;
     if(practice.single) h += `<button class="btn pri" id="pNext" style="width:100%">Siguiente ejercicio ›</button>`;
     h += `<div class="muted">"Lo hice bien" suma 1 al contador de ejercicios de ${esc(practice.topic)}.</div>`;
   }
@@ -1174,7 +1216,7 @@ function renderStudy(){
   w.querySelectorAll('[data-ans]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ans]; it.show=!it.show; const el=w.querySelector('#ans'+b.dataset.ans); el.style.display=it.show?'block':'none'; el.classList.toggle('reveal',it.show); });
   w.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ok]; if(it.ok||it.bad) return; it.ok=true; const p=P(practice.topic); p.count=(+p.count||0)+1; save(); renderTree(); b.disabled=true; b.textContent='✓ Sumado'; b.nextElementSibling.disabled=true; });
   w.querySelectorAll('[data-bad]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.bad]; if(it.ok||it.bad) return; it.bad=true; addError(practice.topic, it.q, it.a); renderHeader(); b.disabled=true; b.textContent='📒 Anotado'; b.previousElementSibling.disabled=true; toast('Guardado en tu cuaderno de errores'); });
-  bindPlan(w); bindErrors(w); bindTheory(w); remindLinks(w);
+  bindPlan(w); bindErrors(w); bindTheory(w); remindLinks(w); bindGraphs(w);
 }
 
 /* ===================== Gráfico de mini evaluaciones ===================== */
@@ -1762,6 +1804,167 @@ function rankUp(k){
   const o=document.createElement('div'); o.className='rankup'; o.innerHTML=`<div class="ru-box">${emblem(k,96)}<div class="ru-t">¡Nuevo rango!</div><div class="ru-n" style="color:${k.color}">${esc(k.name)}</div><div class="muted">Toca para continuar</div></div>`;
   o.onclick=()=>{ o.classList.add('out'); setTimeout(()=>o.remove(),250); }; document.body.appendChild(o); setTimeout(()=>{ if(o.isConnected) o.onclick(); },4500);
 }
+
+/* ===================== Temas de color ===================== */
+const THEMES = {oscuro:{n:'Oscuro', c:'#0d1017'}, noche:{n:'Azul noche', c:'#0a1020'}, verde:{n:'Verde', c:'#0b1310'}};
+function curTheme(){ try{ const t=localStorage.getItem('arbolAli.theme'); return THEMES[t]?t:'oscuro'; }catch(e){ return 'oscuro'; } }
+function applyTheme(t){ document.documentElement.dataset.theme=t; const m=document.querySelector('meta[name="theme-color"]'); if(m) m.content=THEMES[t].c; }
+function setTheme(t){ try{ localStorage.setItem('arbolAli.theme',t); }catch(e){} applyTheme(t); }
+applyTheme(curTheme());
+function themeCard(){ const t=curTheme(); return `<div class="card"><h2>🎨 Apariencia</h2><div class="themes">${Object.entries(THEMES).map(([k,v])=>`<button class="theme-b ${k===t?'on':''}" data-theme-b="${k}"><span class="sw sw-${k}"></span>${esc(v.n)}</button>`).join('')}</div><div class="muted" style="margin-top:6px">El tema se guarda en este celular.</div></div>`; }
+function bindTheme(w){ w.querySelectorAll('[data-theme-b]').forEach(b=>b.onclick=()=>{ setTheme(b.dataset.themeB); w.querySelectorAll('[data-theme-b]').forEach(x=>x.classList.toggle('on',x===b)); renderHeader(); renderTree(); }); }
+
+/* ===================== Anillo de progreso ===================== */
+function planPct(){ const pl=S.nodes.filter(n=>n.week); return pl.length? Math.round(pl.filter(n=>isDom(n.id)).length/pl.length*100) : 0; }
+function ringSVG(pct, size, sw, inner){
+  const r=(size-sw)/2, c=2*Math.PI*r, off=c*(1-pct/100);
+  return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${pct} % del plan"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--bg3)" stroke-width="${sw}"/><circle class="ring-v" cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" style="--c0:${c};--c1:${off}" transform="rotate(-90 ${size/2} ${size/2})"/>${inner||''}</svg>`;
+}
+
+/* ===================== Llama de la racha ===================== */
+function flame(st, base){ const lv = st<=0?0: st<3?1: st<7?2: st<14?3: 4; const sc = st<=0?0.85: 1+Math.min(st,21)/21*0.9; return `<span class="flame fl${lv}" style="font-size:${Math.round((base||16)*sc)}px" aria-hidden="true">🔥</span>`; }
+
+/* ===================== Mapa de calor ===================== */
+function heatmap(){
+  const weeks=Math.max(19, curWeek()), cell=14, gap=2, L=18, T=16, Wd=L+weeks*(cell+gap), Hd=T+7*(cell+gap)+4, t=today(); let s='';
+  const lvl=m=>m<=0?0:m<15?1:m<30?2:m<60?3:4, colr=['var(--bg3)','#f4a26140','#f4a26180','#f4a261c0','#f4a261'];
+  let lastM=-1;
+  for(let w=0; w<weeks; w++){ const d0=addDays(START,w*7); if(d0.getMonth()!==lastM){ lastM=d0.getMonth(); s+=`<text x="${L+w*(cell+gap)}" y="10" font-size="9" fill="var(--tx3)">${fmt(d0,{month:'short'}).replace('.','')}</text>`; }
+    for(let r=0;r<7;r++){ const d=addDays(START,w*7+r), m=minutesOn(d), fut=d>t;
+      s+=`<rect x="${L+w*(cell+gap)}" y="${T+r*(cell+gap)}" width="${cell}" height="${cell}" rx="3" fill="${fut?'transparent':colr[lvl(m)]}" stroke="${iso(d)===iso(t)?'var(--tx)':fut?'var(--line)':'none'}" stroke-width="${iso(d)===iso(t)?1.5:1}" ${fut?'stroke-dasharray="2 2"':''}><title>${esc(fmt(d,{weekday:'short',day:'numeric',month:'short'}))}: ${m} min</title></rect>`; } }
+  ['L','','M','','V','','D'].forEach((x,i)=>{ if(x) s+=`<text x="2" y="${T+i*(cell+gap)+10}" font-size="9" fill="var(--tx3)">${x}</text>`; });
+  const days=Object.keys(study().log).filter(k=>study().log[k]>0 && ymd(k)>=START).length;
+  return `<div class="card"><h2>🟧 Días estudiados</h2><div class="hscroll"><svg viewBox="0 0 ${Wd} ${Hd}" width="${Wd}" height="${Hd}" class="heat">${s}</svg></div>
+    <div class="legend-row"><span class="muted">${days} día${days===1?'':'s'} con estudio desde el 16 nov</span><span class="muted">Menos ${colr.map(c=>`<i style="background:${c}"></i>`).join('')} Más</span></div></div>`;
+}
+
+/* ===================== Radar por fase ===================== */
+function nodeLevel(n){ const p=S.progress[n.id]||{}; if(p.status==='dominado') return 1;
+  const ex = n.target>0 ? Math.min(1,(+p.count||0)/n.target) : 0, ts = (p.test!==null&&p.test!==undefined)? +p.test/10 : 0;
+  const v = n.target>0 ? 0.55*ex+0.35*ts : 0; return p.status==='progreso' ? Math.max(0.15, Math.min(0.85,v||0.3)) : Math.min(0.6,v); }
+function radar(){
+  const axes=['F1','F2','F3','F4','P','R'].filter(k=>S.nodes.some(n=>n.phase===k)); const N=axes.length; if(N<3) return '';
+  const cx=160, cy=118, R=84, ang=i=>-Math.PI/2+i*2*Math.PI/N, pt=(i,v)=>[cx+Math.cos(ang(i))*R*v, cy+Math.sin(ang(i))*R*v];
+  const val=axes.map(k=>{ const ns=S.nodes.filter(n=>n.phase===k); return ns.reduce((a,n)=>a+nodeLevel(n),0)/ns.length; });
+  let s=''; [0.25,0.5,0.75,1].forEach(f=>{ s+=`<polygon points="${axes.map((_,i)=>pt(i,f).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1"/>`; });
+  axes.forEach((k,i)=>{ const [x,y]=pt(i,1), [lx,ly]=pt(i,1.2); s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)"/><text x="${lx}" y="${ly+4}" text-anchor="middle" font-size="11" font-weight="700" fill="${PHASES[k].color}">${k} ${Math.round(val[i]*100)}%</text>`; });
+  s+=`<g class="radar-v"><polygon points="${val.map((v,i)=>pt(i,Math.max(0.02,v)).join(',')).join(' ')}" fill="#7aa2ff33" stroke="#7aa2ff" stroke-width="2" stroke-linejoin="round"/>${val.map((v,i)=>{ const [x,y]=pt(i,Math.max(0.02,v)); return `<circle cx="${x}" cy="${y}" r="3.5" fill="${PHASES[axes[i]].color}"/>`; }).join('')}</g>`;
+  return `<div class="card"><h2>🕸 Nivel por fase</h2><svg viewBox="0 0 320 240" style="width:100%;max-width:420px;display:block;margin:0 auto" role="img" aria-label="Nivel por fase">${s}</svg><div class="muted">Cuenta temas dominados, ejercicios hechos y notas de examen. ${axes.map(k=>`<b style="color:${PHASES[k].color}">${k}</b> ${esc(PHASES[k].name.split('·')[1]||'').trim()}`).join(' · ')}</div></div>`;
+}
+
+/* ===================== Avance real vs planeado ===================== */
+function realVsPlan(){
+  const pl=S.nodes.filter(n=>n.week && n.week<=19), tot=pl.length; if(!tot) return '';
+  const w=Math.min(19,Math.max(1,curWeek())), plan=[], real=[];
+  for(let k=1;k<=19;k++){ plan.push(pl.filter(n=>n.week<=k).length);
+    if(k<=w){ const end=addDays(START,k*7-1); real.push(pl.filter(n=>{ if(!isDom(n.id)) return false; const d=(S.progress[n.id]||{}).date; return /^\d{4}-\d{2}-\d{2}$/.test(d||'') ? ymd(d)<=end || k===w : k===w; }).length); } }
+  const Lp=30,Rp=10,Tp=10,Bp=24,Wv=320,Hv=170, X=k=>Lp+(k-1)*(Wv-Lp-Rp)/18, Y=v=>Tp+(Hv-Tp-Bp)*(1-v/tot);
+  let s=''; [0,Math.round(tot/2),tot].forEach(v=>{ s+=`<line x1="${Lp}" x2="${Wv-Rp}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${Lp-5}" y="${Y(v)+3}" text-anchor="end" font-size="9" fill="var(--tx3)">${v}</text>`; });
+  [1,5,10,15,19].forEach(k=>{ s+=`<text x="${X(k)}" y="${Hv-8}" text-anchor="middle" font-size="9" fill="var(--tx3)">S${k}</text>`; });
+  s+=`<line x1="${X(w)}" x2="${X(w)}" y1="${Tp}" y2="${Hv-Bp}" stroke="var(--tx3)" stroke-dasharray="2 3"/><text x="${X(w)}" y="${Tp+8}" text-anchor="${w>15?'end':'start'}" dx="${w>15?-4:4}" font-size="9" fill="var(--tx2)">hoy</text>`;
+  s+=`<polyline fill="none" stroke="var(--tx3)" stroke-width="2" stroke-dasharray="5 4" points="${plan.map((v,i)=>X(i+1)+','+Y(v)).join(' ')}"/>`;
+  s+=`<polyline class="draw" fill="none" stroke="#7aa2ff" stroke-width="2.6" stroke-linejoin="round" points="${real.map((v,i)=>X(i+1)+','+Y(v)).join(' ')}"/>`;
+  const lr=real[real.length-1], lp=plan[w-1]; s+=`<circle cx="${X(w)}" cy="${Y(lr)}" r="4.5" fill="#7aa2ff" stroke="var(--bg2)" stroke-width="2"/>`;
+  const diff=lr-lp;
+  return `<div class="card"><h2>📈 Avance real vs planeado</h2><svg viewBox="0 0 ${Wv} ${Hv}" style="width:100%" role="img" aria-label="Avance real contra el plan">${s}</svg>
+    <div class="legend-row"><span><i class="ln" style="border-top:2.6px solid #7aa2ff"></i> Real: <b>${lr}</b> de ${tot} temas</span><span><i class="ln" style="border-top:2px dashed var(--tx3)"></i> Plan: ${lp}</span></div>
+    <div class="muted" style="margin-top:4px">${diff>0?`Vas ${diff} tema${diff===1?'':'s'} adelante del plan. 🚀`:diff<0?`Vas ${-diff} tema${diff===-1?'':'s'} detrás del plan; la semana se cuenta como lograda al dominar su tema.`:'Vas justo al día con el plan.'}</div></div>`;
+}
+
+/* ===================== Curva de olvido ===================== */
+function memoryOf(id){ const p=S.progress[id]; if(!p||p.status!=='dominado'||!/^\d{4}-\d{2}-\d{2}$/.test(p.date||'')) return null;
+  const rv=(Array.isArray(p.reviews)?p.reviews:[]).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)).sort(); const last=rv.length?rv[rv.length-1]:p.date;
+  const Sd=20*Math.pow(3,rv.length), t=Math.max(0,daysBetween(ymd(last),today())); return {S:Sd, t, R:Math.exp(-t/Sd), n:rv.length, last}; }
+const PAL=['#7aa2ff','#f472b6','#4ade80','#facc15','#a78bfa'];
+function forgetCard(){
+  const B=byId(), L=S.nodes.map(n=>[n,memoryOf(n.id)]).filter(x=>x[1]).sort((a,b)=>a[1].R-b[1].R);
+  let h=`<div class="card"><h2>🧠 Curva de olvido</h2>`;
+  if(!L.length) return h+`<div class="muted">Cuando domines un tema verás aquí cuánto lo recuerdas. Sin repasar, la memoria baja con los días; cada repaso (7, 21 y 60 días) hace que baje más lento.</div></div>`;
+  const Wv=320,Hv=160,Lp=30,Rp=10,Tp=10,Bp=22,D=60, X=d=>Lp+d/D*(Wv-Lp-Rp), Y=r=>Tp+(Hv-Tp-Bp)*(1-r);
+  let s=''; [0,.5,1].forEach(r=>{ s+=`<line x1="${Lp}" x2="${Wv-Rp}" y1="${Y(r)}" y2="${Y(r)}" stroke="var(--line)"/><text x="${Lp-5}" y="${Y(r)+3}" text-anchor="end" font-size="9" fill="var(--tx3)">${r*100}%</text>`; });
+  [0,15,30,45,60].forEach(d=>{ s+=`<text x="${X(d)}" y="${Hv-6}" text-anchor="middle" font-size="9" fill="var(--tx3)">${d} d</text>`; });
+  s+=`<line x1="${Lp}" x2="${Wv-Rp}" y1="${Y(.7)}" y2="${Y(.7)}" stroke="#facc15" stroke-dasharray="3 4" opacity=".6"/>`;
+  L.slice(0,5).forEach(([n,m],ci)=>{ const c=PAL[ci]; const pts=[]; for(let x=0;x<=D;x+=2) pts.push(X(x).toFixed(1)+' '+Y(Math.exp(-x/m.S)).toFixed(1)); s+=`<path class="draw" d="M${pts.join(' L')}" fill="none" stroke="${c}" stroke-width="2" opacity=".9"/>`;
+    if(m.t<=D) s+=`<circle cx="${X(m.t)}" cy="${Y(m.R)}" r="4" fill="${c}" stroke="var(--bg2)" stroke-width="1.5"><title>${esc(n.id)}: ${Math.round(m.R*100)} %</title></circle><text x="${X(m.t)+6}" y="${Y(m.R)-6}" font-size="10" font-weight="700" fill="${c}" paint-order="stroke" stroke="var(--bg2)" stroke-width="3">${esc(n.id)}</text>`; });
+  h+=`<svg viewBox="0 0 ${Wv} ${Hv}" style="width:100%" role="img" aria-label="Curva de olvido">${s}</svg>`;
+  h+=L.slice(0,6).map(([n,m],ci)=>{ const pc=Math.round(m.R*100), c=pc>=70?'#4ade80':pc>=50?'#facc15':'#f87171'; return `<div class="ph-row"><div class="t"><b style="color:${col(n)}">${ci<5?`<i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${PAL[ci]};margin-right:5px"></i>`:''}${esc(n.id)} <span style="color:var(--tx);font-weight:500">${esc(n.title)}</span></b><span style="color:${c};font-weight:700">${pc} %</span></div><div class="pbar" style="--c:${c}"><i style="width:${pc}%"></i></div><div class="muted" style="font-size:12px;margin-top:2px">${m.t} d desde ${m.n?'el último repaso':'que lo dominaste'} · ${m.n} repaso${m.n===1?'':'s'}${pc<70?' · <b style="color:#fde68a">conviene repasarlo</b>':''}</div></div>`; }).join('');
+  return h+`<div class="muted">Estimación: la memoria cae como e^(−días/estabilidad); cada repaso triplica la estabilidad. Línea amarilla = 70 %.</div></div>`;
+}
+
+/* ===================== Gráficas paso a paso ===================== */
+const gnum = v => { if(Math.abs(v-Math.round(v))<1e-9) return num(Math.round(v)); for(let d=2;d<=12;d++){ const n=v*d; if(Math.abs(n-Math.round(n))<1e-9){ const f=Fr(Math.round(n),d); return fs(f); } } const r=Math.round(v*100)/100; return (r<0?'−':'')+String(Math.abs(r)).replace('.',','); };
+function gSpec(kind){
+  switch(kind){
+    case 'line': { const m=pick([-3,-2,-1,1,2,3,0.5,-0.5]), b=rnd(-4,4); return {kind, m, b}; }
+    case 'quad': { const a=pick([1,1,-1,0.5,-0.5,2]), h=rnd(-3,3), k=rnd(-4,4); return {kind,a,h,k}; }
+    case 'abs': { const a=pick([1,-1,2]), h=rnd(-3,3), k=rnd(-3,3); return {kind,a,h,k}; }
+    case 'sqrt': { const h=rnd(-4,1), k=rnd(-3,2); return {kind,h,k}; }
+    case 'exp': { const b=pick([2,3]), k=rnd(-3,1); return {kind,b,k}; }
+    case 'log': { const b=pick([2,3]); return {kind,b}; }
+    default: { const c=rnd(-1,2), m=pick([-1,1,2]), bb=rnd(-2,3); return {kind:'piece',c,m,bb}; }
+  }
+}
+function gBuild(g){
+  const P=(x,y,l,o)=>({x,y,l,open:!!o}), ax='Dibuja los ejes x e y con la misma escala.';
+  const sh=(h)=>h===0?'x':h>0?`x − ${gnum(h)}`:`x + ${gnum(-h)}`, kk=k=>k===0?'':k>0?` + ${gnum(k)}`:` − ${gnum(-k)}`;
+  const co=a=>a===1?'':a===-1?'−':a===0.5?'(1/2)':a===-0.5?'−(1/2)':gnum(a);
+  if(g.kind==='line'){ const f=x=>g.m*x+g.b, st=[{t:ax}, {t:`Corte con el eje y: x = 0 → y = ${gnum(g.b)}.`, p:[P(0,g.b,`(0, ${gnum(g.b)})`)]}, {t:`Pendiente ${gnum(g.m)}: desde (0, ${gnum(g.b)}) avanza 1 a la derecha y ${g.m>=0?'sube':'baja'} ${gnum(Math.abs(g.m))}.`, p:[P(1,f(1),`(1, ${gnum(f(1))})`)]}];
+    if(g.m) st.push({t:`Corte con el eje x: y = 0 → x = ${gnum(-g.b/g.m)}.`, p:[P(-g.b/g.m,0,`(${gnum(-g.b/g.m)}, 0)`)]});
+    st.push({t:'Une los puntos con una recta.', curve:true}); return {f, eq:`y = ${co(g.m)}${g.m?'x':''}${g.m?kk(g.b):gnum(g.b)}`, st}; }
+  if(g.kind==='quad'){ const f=x=>g.a*(x-g.h)**2+g.k, st=[{t:ax}, {t:`Vértice en (${gnum(g.h)}, ${gnum(g.k)}). El eje de simetría es x = ${gnum(g.h)}.`, p:[{...P(g.h,g.k,`V(${gnum(g.h)}, ${gnum(g.k)})`), below:g.a>0}], vl:g.h}, {t:`a = ${gnum(g.a)} ${g.a>0?'> 0: la parábola abre hacia arriba':'< 0: abre hacia abajo'}. Calcula puntos simétricos: x = ${gnum(g.h-1)} y x = ${gnum(g.h+1)} dan y = ${gnum(f(g.h+1))}.`, p:[P(g.h-1,f(g.h-1)),P(g.h+1,f(g.h+1))]}];
+    if(g.a*g.k<0){ const d=Math.sqrt(-g.k/g.a); st.push({t:`Raíces (cortes con el eje x): x = ${gnum(g.h-d)} y x = ${gnum(g.h+d)}.`, p:[P(g.h-d,0,gnum(g.h-d)),P(g.h+d,0,gnum(g.h+d))]}); }
+    if(Math.abs(f(0))<=8 && g.h!==0) st.push({t:`Corte con el eje y: f(0) = ${gnum(f(0))}.`, p:[P(0,f(0),`(0, ${gnum(f(0))})`)]});
+    st.push({t:'Une los puntos con una curva suave en forma de U.', curve:true}); return {f, eq:`y = ${co(g.a)}${g.h?'('+sh(g.h)+')':'x'}²${kk(g.k)}`, st}; }
+  if(g.kind==='abs'){ const f=x=>g.a*Math.abs(x-g.h)+g.k; return {f, eq:`y = ${co(g.a)}|${sh(g.h)}|${kk(g.k)}`, st:[{t:ax},{t:`Vértice (punta de la V) en (${gnum(g.h)}, ${gnum(g.k)}): traslación de |x|.`, p:[P(g.h,g.k,`(${gnum(g.h)}, ${gnum(g.k)})`)], vl:g.h},{t:`Pendiente ${gnum(g.a)} a la derecha y ${gnum(-g.a)} a la izquierda: x = ${gnum(g.h)} ± 2 dan y = ${gnum(f(g.h+2))}.`, p:[P(g.h-2,f(g.h-2)),P(g.h+2,f(g.h+2))]},{t:'Traza dos rectas desde el vértice: forma de V.', curve:true}]}; }
+  if(g.kind==='sqrt'){ const f=x=>x<g.h?NaN:Math.sqrt(x-g.h)+g.k; return {f, eq:`y = √(${sh(g.h)})${kk(g.k)}`, st:[{t:ax},{t:`Punto inicial: x − (${gnum(g.h)}) = 0 → (${gnum(g.h)}, ${gnum(g.k)}). Dominio x ≥ ${gnum(g.h)}.`, p:[P(g.h,g.k,`(${gnum(g.h)}, ${gnum(g.k)})`)], vl:g.h},{t:'Usa valores con raíz exacta: avanzar 1 sube 1, avanzar 4 sube 2, avanzar 9 sube 3.', p:[P(g.h+1,g.k+1),P(g.h+4,g.k+2),P(g.h+9,g.k+3)]},{t:'Une los puntos: crece cada vez más lento.', curve:true}]}; }
+  if(g.kind==='exp'){ const f=x=>g.b**x+g.k; return {f, eq:`y = ${g.b}ˣ${kk(g.k)}`, st:[{t:ax},{t:`Asíntota horizontal y = ${gnum(g.k)}: la curva se acerca pero nunca la toca.`, hl:g.k},{t:`Puntos: x = 0 → ${gnum(1+g.k)}; x = 1 → ${gnum(g.b+g.k)}; x = −1 → ${gnum(1/g.b+g.k)}.`, p:[P(0,1+g.k,`(0, ${gnum(1+g.k)})`),P(1,g.b+g.k),P(-1,1/g.b+g.k)]},{t:`Une los puntos: crece rápido a la derecha (base ${g.b} > 1).`, curve:true}]}; }
+  if(g.kind==='log'){ const f=x=>x<=0?NaN:Math.log(x)/Math.log(g.b); return {f, eq:`y = log${sub(g.b)}(x)`, st:[{t:ax},{t:'Asíntota vertical x = 0: el dominio es x > 0.', vlA:0},{t:`Puntos: (1, 0) porque ${g.b}⁰ = 1; (${g.b}, 1); (1/${g.b}, −1).`, p:[P(1,0,'(1, 0)'),P(g.b,1,`(${g.b}, 1)`),P(1/g.b,-1)]},{t:'Une los puntos: es la reflexión de la exponencial sobre y = x.', curve:true}]}; }
+  const f=x=>x<g.c?x*x:g.m*x+g.bb;
+  return {f, brk:g.c, eq:`f(x) = x² si x < ${gnum(g.c)}; ${co(g.m)}x${kk(g.bb)} si x ≥ ${gnum(g.c)}`, st:[{t:ax},{t:`Marca la frontera x = ${gnum(g.c)}.`, vl:g.c},{t:`Trozo izquierdo x²: en x = ${gnum(g.c)} llega a ${gnum(g.c*g.c)} con punto abierto (no incluido).`, p:[P(g.c,g.c*g.c,'',true),P(g.c-1,(g.c-1)**2),P(g.c-2,(g.c-2)**2)]},{t:`Trozo derecho: en x = ${gnum(g.c)} vale ${gnum(g.m*g.c+g.bb)}, punto cerrado (incluido).`, p:[P(g.c,g.m*g.c+g.bb,`(${gnum(g.c)}, ${gnum(g.m*g.c+g.bb)})`),P(g.c+2,g.m*(g.c+2)+g.bb)]},{t:'Dibuja cada trozo solo en su intervalo.', curve:true}]};
+}
+function gSVG(b, step){
+  const Z=8, Wv=300, sc=Wv/(2*Z), X=x=>Wv/2+x*sc, Y=y=>Wv/2-y*sc; let s='';
+  for(let i=-Z;i<=Z;i++){ s+=`<line x1="${X(i)}" x2="${X(i)}" y1="0" y2="${Wv}" stroke="var(--line)" stroke-width="${i%5?0.5:1}" opacity=".6"/><line y1="${Y(i)}" y2="${Y(i)}" x1="0" x2="${Wv}" stroke="var(--line)" stroke-width="${i%5?0.5:1}" opacity=".6"/>`; }
+  s+=`<g class="g-axes"><line x1="0" x2="${Wv}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--tx2)" stroke-width="1.4"/><line y1="0" y2="${Wv}" x1="${X(0)}" x2="${X(0)}" stroke="var(--tx2)" stroke-width="1.4"/><text x="${Wv-8}" y="${Y(0)-5}" font-size="11" fill="var(--tx2)">x</text><text x="${X(0)+5}" y="11" font-size="11" fill="var(--tx2)">y</text>${[-5,5].map(i=>`<text x="${X(i)}" y="${Y(0)+12}" font-size="9" text-anchor="middle" fill="var(--tx3)">${i}</text><text x="${X(0)-4}" y="${Y(i)+3}" font-size="9" text-anchor="end" fill="var(--tx3)">${i}</text>`).join('')}</g>`;
+  b.st.slice(0,step+1).forEach((st,i)=>{ const fresh=i===step?'g-new':'';
+    if(st.vl!==undefined) s+=`<line class="${fresh}" x1="${X(st.vl)}" x2="${X(st.vl)}" y1="0" y2="${Wv}" stroke="#facc15" stroke-dasharray="4 4" opacity=".7"/>`;
+    if(st.vlA!==undefined) s+=`<line class="${fresh}" x1="${X(st.vlA)}" x2="${X(st.vlA)}" y1="0" y2="${Wv}" stroke="#f87171" stroke-dasharray="6 4"/>`;
+    if(st.hl!==undefined) s+=`<line class="${fresh}" y1="${Y(st.hl)}" y2="${Y(st.hl)}" x1="0" x2="${Wv}" stroke="#f87171" stroke-dasharray="6 4"/>`;
+    if(st.curve){ let d='', pen=false; for(let k=0;k<=600;k++){ const x=-Z+k*(2*Z)/600, y=b.f(x); const ok=Number.isFinite(y)&&Math.abs(y)<=Z+1 && !(b.brk!==undefined && pen && x>=b.brk && x-(2*Z)/600<b.brk); if(ok){ d+=(pen?'L':'M')+X(x).toFixed(1)+' '+Y(y).toFixed(1); pen=true; } else pen=false; } s+=`<path class="g-curve" d="${d}" fill="none" stroke="#7aa2ff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`; }
+    (st.p||[]).forEach(p=>{ if(Math.abs(p.x)>Z||Math.abs(p.y)>Z) return; s+=`<g class="${fresh} g-pt"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4.5" fill="${p.open?'var(--bg2)':'#facc15'}" stroke="#facc15" stroke-width="2"/>${p.l?`<text x="${X(p.x)+(p.x>Z-3?-7:7)}" y="${Y(p.y)+(p.below?18:-8)}" font-size="10.5" font-weight="700" text-anchor="${p.x>Z-3?'end':'start'}" fill="var(--tx)" paint-order="stroke" stroke="var(--bg2)" stroke-width="3">${esc(p.l)}</text>`:''}</g>`; });
+  });
+  return `<svg viewBox="0 0 ${Wv} ${Wv}" class="gsvg" role="img" aria-label="Gráfica paso a paso">${s}</svg>`;
+}
+function graphWidget(g, step, key){
+  const b=gBuild(g), last=b.st.length-1, st=Math.min(step,last);
+  return `<div class="gw" data-gw="${key}"><div class="gw-eq">${mth(b.eq)}</div>${gSVG(b,st)}<div class="gw-step"><b>Paso ${st+1} de ${b.st.length}.</b> ${mth(b.st[st].t)}</div>
+    <div class="gw-dots">${b.st.map((_,i)=>`<i class="${i<=st?'on':''}"></i>`).join('')}</div>
+    <div style="display:flex;gap:6px;margin-top:8px"><button class="btn sm" data-gprev="${key}" ${st===0?'disabled':''}>‹ Atrás</button><button class="btn pri sm" data-gnext="${key}" style="flex:1">${st<last?'Siguiente paso ›':'↺ Repetir'}</button></div></div>`;
+}
+let GW={kind:'quad', g:gSpec('quad'), s:0};
+const GKINDS=[['line','Recta'],['quad','Parábola'],['abs','Valor absoluto'],['sqrt','Raíz cuadrada'],['exp','Exponencial'],['log','Logaritmo'],['piece','A trozos']];
+function graphCard(){ return `<div class="card" id="graphCard"><h2>📐 Gráficas paso a paso</h2><p class="muted" style="margin-top:0">Así se grafica a mano: primero los puntos clave y al final la curva. Hazlo en tu cuaderno a la par.</p>
+  <div class="row"><select id="gKind">${GKINDS.map(([k,l])=>`<option value="${k}" ${GW.kind===k?'selected':''}>${l}</option>`).join('')}</select><button class="btn" id="gNew" style="flex:0 0 auto">🎲 Otra</button></div>
+  <div id="gHost" style="margin-top:10px">${graphWidget(GW.g, GW.s, 'main')}</div></div>`; }
+function bindGraphs(w){
+  const host=k=>k==='main'?GW:practice.items[+k];
+  const rer=k=>{ const o=host(k); const el=w.querySelector(`[data-gw="${k}"]`); if(el){ el.outerHTML=graphWidget(o.g,o.s||0,k); bindGraphs(w); } };
+  w.querySelectorAll('[data-gnext]').forEach(b=>b.onclick=()=>{ const k=b.dataset.gnext, o=host(k), n=gBuild(o.g).st.length; o.s=((o.s||0)+1>=n)?0:(o.s||0)+1; rer(k); });
+  w.querySelectorAll('[data-gprev]').forEach(b=>b.onclick=()=>{ const k=b.dataset.gprev, o=host(k); o.s=Math.max(0,(o.s||0)-1); rer(k); });
+  const kd=w.querySelector('#gKind'); if(kd && !kd._b){ kd._b=1; kd.onchange=()=>{ GW={kind:kd.value,g:gSpec(kd.value),s:0}; rer('main'); }; }
+  const nw=w.querySelector('#gNew'); if(nw && !nw._b){ nw._b=1; nw.onclick=()=>{ GW={kind:GW.kind,g:gSpec(GW.kind),s:0}; rer('main'); }; }
+  w.querySelectorAll('[data-gshow]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.gshow, it=practice.items[i]; it.gopen=!it.gopen; it.s=0; const box=w.querySelector('#gbox'+i); box.innerHTML=it.gopen?graphWidget(it.g,0,String(i)):''; bindGraphs(w); });
+}
+/* Ejercicios de graficar dentro de Practicar */
+(function(){
+  const gq = {
+    T12:()=>{ const g=gSpec('line'); const b=gBuild(g); return {q:`Grafica ${b.eq}: halla los cortes con los ejes`, a:`Corte y: (0, ${gnum(g.b)})${g.m?`; corte x: (${gnum(-g.b/g.m)}, 0)`:''}`, g}; },
+    T13:()=>{ const g=gSpec('quad'); const b=gBuild(g); return {q:`Grafica ${b.eq}: vértice, hacia dónde abre y rango`, a:`Vértice (${gnum(g.h)}, ${gnum(g.k)}); abre hacia ${g.a>0?'arriba':'abajo'}; rango ${g.a>0?`[${gnum(g.k)}, +∞)`:`(−∞, ${gnum(g.k)}]`}`, g}; },
+    X10:()=>{ const g=gSpec(pick(['abs','sqrt','piece'])); const b=gBuild(g); return {q:`Grafica ${b.eq}`, a: g.kind==='piece'?`En x = ${gnum(g.c)}: izquierda llega a ${gnum(g.c*g.c)} (abierto), derecha vale ${gnum(g.m*g.c+g.bb)} (cerrado)`:`Punto clave (${gnum(g.h)}, ${gnum(g.k)})`, g}; },
+    T16:()=>{ const g=gSpec(pick(['exp','log'])); const b=gBuild(g); return {q:`Grafica ${b.eq}: asíntota y dos puntos`, a: g.kind==='exp'?`Asíntota y = ${gnum(g.k)}; puntos (0, ${gnum(1+g.k)}) y (1, ${gnum(g.b+g.k)})`:`Asíntota x = 0; puntos (1, 0) y (${g.b}, 1)`, g}; }
+  };
+  Object.keys(gq).forEach(id=>{ const old=GEN[id]; GEN[id]=()=>Math.random()<0.25?gq[id]():old(); });
+})();
 
 /* ===================== General ===================== */
 let toastT; function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
