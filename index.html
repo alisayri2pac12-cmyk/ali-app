@@ -535,6 +535,38 @@ nav button.active .ic{animation:navPop .4s var(--ez)}
 .xp-k{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);font-weight:800;margin:4px 0 6px}
 .xp-chip{border-color:color-mix(in srgb,var(--c) 45%,var(--line))}.xp-chip b{color:var(--c)}
 .sm-more{margin-top:10px;width:100%}
+/* Resolver dentro de la app */
+.pi{margin-bottom:16px;padding-bottom:14px;border-bottom:1px dashed var(--line)}.pi:last-child{border-bottom:0}
+.pi-q{font-size:15.5px;line-height:1.5}
+.ans-row{display:flex;gap:6px;margin-top:9px}
+.ans-in{flex:1;min-width:0;font-size:16px;padding:9px 11px;border-radius:11px;background:var(--bg3);border:1px solid var(--line);color:var(--tx);font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.ans-in:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 25%,transparent)}
+.ans-in:disabled{opacity:.75}
+.kb{display:flex;gap:4px;overflow-x:auto;margin:6px -2px 0;padding:0 2px 2px;scrollbar-width:none}.kb::-webkit-scrollbar{display:none}
+.kb button{flex:0 0 auto;min-width:34px;height:34px;padding:0 6px;border-radius:9px;background:var(--bg3);border:1px solid var(--line);color:var(--tx);font-size:15px;font-weight:600}
+.kb button:active{background:var(--acc);color:#fff}
+.fb{font-size:14px;margin-top:7px;line-height:1.45}.fb:empty{display:none}.fb.good{color:#4ade80}.fb.bad{color:#f87171}.fb small{display:block;color:var(--tx3);font-size:12px}
+:root[data-theme="light"] .fb.good{color:#15803d}:root[data-theme="light"] .fb.bad{color:#b91c1c}
+.fb.shake{animation:shk .4s}@keyframes shk{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.hint{margin-top:7px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,#facc15 10%,var(--bg3));border-left:3px solid #facc15;font-size:14px;line-height:1.45}.hint b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#eab308;margin-bottom:2px}
+.hint.new{animation:cardIn .35s var(--ez) both}
+.pi-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.sk{margin-top:8px}.sk canvas{display:block;width:100%;height:280px;border-radius:12px;background:var(--bg3);border:1px dashed var(--line);touch-action:none}
+.sk-bar{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sk-bar .on{border-color:var(--acc);color:var(--acc)}
+.pi-man{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--tx3)}.pi-man span{flex:1 1 100%}.pi-man .btn{padding:4px 9px;font-size:12px}
+/* Modo profundo */
+.deep-tg{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 13px;margin:0 0 10px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(135deg,color-mix(in srgb,var(--c,var(--acc)) 14%,var(--bg3)),var(--bg2));color:var(--tx)}
+.deep-tg span{flex:1;min-width:0}.deep-tg b{display:block;font-size:14.5px}.deep-tg small{display:block;font-size:12px;color:var(--tx2);margin-top:1px}
+.deep-tg i{flex:0 0 auto;width:42px;height:24px;border-radius:99px;background:var(--line);position:relative;transition:background .25s}
+.deep-tg i::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .25s var(--ez)}
+.deep-tg.on{border-color:var(--c,var(--acc))}.deep-tg.on i{background:var(--c,var(--acc))}.deep-tg.on i::after{transform:translateX(18px)}
+.deep-sec{border-color:color-mix(in srgb,var(--c,var(--acc)) 45%,var(--line))}
+.dq{border-radius:12px;background:var(--bg3);margin-bottom:8px;overflow:hidden;animation:cardIn .4s var(--ez) both;animation-delay:calc(var(--i)*.05s)}
+.dq summary{list-style:none;cursor:pointer;padding:10px 34px 10px 12px;font-weight:650;font-size:14.5px;position:relative}.dq summary::-webkit-details-marker{display:none}
+.dq summary::after{content:"›";position:absolute;right:12px;top:8px;font-size:20px;color:var(--tx3);transition:transform .25s}.dq[open] summary::after{transform:rotate(90deg)}
+.dq p{margin:0;padding:0 12px 12px;font-size:14px;line-height:1.55;color:var(--tx2)}
+.rec{margin:0;padding-left:22px}.rec li{margin-bottom:7px;line-height:1.5}.rec li::marker{color:var(--c,var(--acc));font-weight:800}
+.ls-why{margin-top:6px;padding:7px 10px;border-radius:10px;background:color-mix(in srgb,var(--c,var(--acc)) 10%,transparent);border-left:2px solid var(--c,var(--acc));font-size:13.5px;line-height:1.45;color:var(--tx2)}.ls-why b{color:var(--tx);font-size:12.5px}
 </style>
 </head>
 <body class="home">
@@ -1630,6 +1662,135 @@ function genOne(id, lv){
 }
 
 function genFor(id, k, lv){ if(!GEN[id]) return []; const out=[]; for(let i=0;i<k;i++){ try{ out.push(genOne(id, lv)); }catch(e){ try{ out.push(GEN[id]()); }catch(e2){} } } return out; }
+/* ===================== Resolver dentro de la app: corrección automática ===================== */
+const SUPN={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁻':'-'};
+function mParse(src){ // devuelve f(x) o null
+  let s=String(src).replace(/[−–]/g,'-').replace(/[·×]/g,'*').replace(/÷/g,'/').replace(/\bsin\b/g,'sen').replace(/\s+/g,' ').trim();
+  s=s.replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+/g,m=>'^('+[...m].map(c=>SUPN[c]).join('')+')');
+  if(!s || /[=<>≤≥;∞±∪∈ℝ{}\[\]|:°%¿?!,]/.test(s)) return null;
+  const T=[]; let i=0;
+  while(i<s.length){ const c=s[i];
+    if(c===' '){ i++; continue; }
+    let m=s.slice(i).match(/^\d+(?:\.\d+)?/); if(m){ T.push({t:'n',v:+m[0]}); i+=m[0].length; continue; }
+    m=s.slice(i).match(/^(sen|cos|tan|ln|log)/); if(m){ T.push({t:'f',v:m[0]}); i+=m[0].length; continue; }
+    if(c==='√'||c==='∛'){ T.push({t:'f',v:c}); i++; continue; }
+    if(c==='x'||c==='X'){ T.push({t:'x'}); i++; continue; }
+    if(c==='y'){ T.push({t:'y'}); i++; continue; }
+    if(c==='π'){ T.push({t:'n',v:Math.PI}); i++; continue; }
+    if(c==='e'){ T.push({t:'n',v:Math.E}); i++; continue; }
+    if('+-*/^()'.includes(c)){ T.push({t:c}); i++; continue; }
+    return null; }
+  let p=0; const pk=()=>T[p], nx=()=>T[p++];
+  const startsAtom=t=>t&&(t.t==='n'||t.t==='x'||t.t==='y'||t.t==='f'||t.t==='(');
+  function expr(){ let a=term(); while(pk()&&(pk().t==='+'||pk().t==='-')){ const o=nx().t, b=term(); const A=a; a=o==='+'?x=>A(x)+b(x):x=>A(x)-b(x); } return a; }
+  function term(){ let a=unary(); for(;;){ const t=pk(); if(t&&(t.t==='*'||t.t==='/')){ nx(); const b=unary(), A=a; a=t.t==='*'?x=>A(x)*b(x):x=>A(x)/b(x); } else if(startsAtom(t)){ const b=power(), A=a; a=x=>A(x)*b(x); } else break; } return a; }
+  function unary(){ if(pk()&&pk().t==='-'){ nx(); const a=unary(); return x=>-a(x); } if(pk()&&pk().t==='+'){ nx(); return unary(); } return power(); }
+  function power(){ const b=atom(); if(pk()&&pk().t==='^'){ nx(); const e=unaryPow(); return x=>Math.pow(b(x),e(x)); } return b; }
+  function unaryPow(){ if(pk()&&pk().t==='-'){ nx(); const a=power(); return x=>-a(x); } return power(); }
+  function atom(){ const t=nx(); if(!t) throw 0;
+    if(t.t==='n'){ const v=t.v; return ()=>v; }
+    if(t.t==='x') return x=>x;
+    if(t.t==='y') return ()=>_Y;
+    if(t.t==='('){ const a=expr(); if(!nx()||T[p-1].t!==')') throw 0; return a; }
+    if(t.t==='f'){ let ex=null; if(pk()&&pk().t==='^'){ nx(); ex=atom(); }
+      let arg; if(pk()&&pk().t==='('){ arg=atom(); } else { arg=atom(); while(pk()&&(pk().t==='n'||pk().t==='x')&&!(t.v==='√'||t.v==='∛')){ const b=atom(), A=arg; arg=x=>A(x)*b(x); } }
+      const F={sen:Math.sin,cos:Math.cos,tan:Math.tan,ln:Math.log,log:Math.log10,'√':Math.sqrt,'∛':Math.cbrt}[t.v];
+      return ex? x=>Math.pow(F(arg(x)),ex(x)) : x=>F(arg(x)); }
+    throw 0; }
+  try{ const f=expr(); if(p!==T.length) return null; return f; }catch(e){ return null; }
+}
+const XPTS=[0.37,1.21,2.63,-1.7,3.3], YPTS=[1.9,-0.6,0.83,2.4,-1.35]; let _Y=0;
+function fSig(str){ const f=mParse(str); if(!f) return null; const v=XPTS.map((x,k)=>{ _Y=YPTS[k]; const y=f(x); return Number.isFinite(y)?y:null; }); if(v.every(y=>y===null)) return null; return v; }
+function sameSig(a,b){ if(!a||!b||a.length!==b.length) return false; let n=0; for(let i=0;i<a.length;i++){ if(a[i]===null||b[i]===null){ if(a[i]!==b[i]) return false; continue; } n++; if(Math.abs(a[i]-b[i])>1e-6*Math.max(1,Math.abs(a[i]))) return false; } return n>0; }
+function stripLabel(s){ s=s.trim(); const k=s.split('=');
+  if(k.length===2 && k[0].trim().length<=12 && /[a-zA-Zα-ωΔ|]/.test(k[0]) && !/ o /.test(k[0])) s=k[1].trim();
+  s=s.replace(/^[A-Za-zÁÉÍÓÚáéíóúñ ]{2,20}:\s*/,''); return s.trim(); }
+function ansClean(s, decComma){ s=String(s).replace(/\s*·\s*caso:.*$/i,'').replace(/\s*\((?:=|[^()]*[a-záéíóúñ]{4,})[^()]*(?:\([^()]*\)[^()]*)*\)/gi,'').replace(/\binf(inito)?\b/gi,'∞').replace(/\bU\b/g,'∪').replace(/\s+/g,' ').trim();
+  if(decComma) s=s.replace(/(\d),(\d)/g,'$1.$2'); return s; }
+function numChunks(s){ const out=[]; const re=/([±+\-−]?)\s?∞|(±?)([\-−]?)((?:\d+(?:\.\d+)?|√(?:\(\d+\)|\d+)|π)(?:√(?:\(\d+\)|\d+)|π)*(?:\/(?:\([\-−]?\d+(?:\.\d+)?(?:√\d+)?\)|[\-−]?\d+(?:\.\d+)?(?:√\d+)?))?)/g; let m;
+  while((m=re.exec(s))){ if(m[0].includes('∞')){ out.push('inf'+(/[-−]/.test(m[1])?'-':'+')); continue; } const v=fSig(m[3]+m[4]); if(v) out.push((m[2]?'±':'')+v[0].toPrecision(7)); }
+  return out; }
+function ansSigs(raw, decComma, user){
+  const s=ansClean(raw, decComma), whole=fSig(stripLabel(s));
+  if(whole) return {list:[whole], expr:true};
+  const parts=s.split(user? /\s*(?:;|,|·|\s+o\s+|\s+y\s+|\n)\s*/ : /\s*(?:;|,\s|\s·\s|\s+o\s+|\s+y\s+)\s*/).filter(Boolean);
+  const list=[]; parts.forEach(p=>{ const q=stripLabel(p), f=fSig(q)||fSig(q.replace(/^[\[(]|[\])]$/g,'')); if(f && /x/.test(q)) list.push(f); else numChunks(q).forEach(c=>list.push(c)); });
+  return {list, expr:false};
+}
+function eqSig(s){ const k=String(s).split('='); if(k.length!==2) return null; const L=fSig(k[0]), R=fSig(k[1]); if(!L||!R) return null; return L.map((v,i)=>v===null||R[i]===null?null:v-R[i]); }
+function propSig(a,b){ if(!a||!b) return false; let r=null; for(let i=0;i<a.length;i++){ if(a[i]===null||b[i]===null) continue; if(Math.abs(a[i])<1e-9){ if(Math.abs(b[i])>1e-6) return false; continue; } const q=b[i]/a[i]; if(r===null) r=q; else if(Math.abs(q-r)>1e-6*Math.max(1,Math.abs(r))) return false; } return r!==null && Math.abs(r)>1e-9; }
+const noAcc=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function checkAnswer(user, expected, q){
+  const u=String(user||'').trim(); if(!u) return null; const e=String(expected);
+  const yn=noAcc(e).match(/^(si|no)\b/); if(yn){ const uy=noAcc(u).match(/^(si|no)\b/); return !!uy && uy[1]===yn[1]; }
+  if(/^factoriza/i.test(q||'') && /\(/.test(e) && !/\(/.test(u)) return false;
+  const ce=ansClean(e), ee=/[xy]/.test(ce)&&!/;| o /.test(ce)&&stripLabel(ce)===ce?eqSig(ce):null; if(ee) return propSig(ee, eqSig(ansClean(u)));
+  const dc=/\d,\d/.test(e), E=ansSigs(e,dc,false), U=ansSigs(u,dc,true);
+  if(!E.list.length){ if(/∅/.test(e)) return /∅|vac/.test(noAcc(u)) || /^\{\s*\}$/.test(u); const w=noAcc(ansClean(e)).match(/[a-zñ]+/)||noAcc(e).match(/[a-zñ]+/); return !!w && noAcc(u).includes(w[0]); }
+  if(/[∞∪∈]/.test(e)){ const sh=x=>(ansClean(x).match(/[\[\]()]/g)||[]).join(''); const se=sh(e).replace(/^\(\)/,''), su=sh(u); if(se && su && se!==su && sh(e)!==su) return false; }
+  const key=v=>Array.isArray(v)?'f'+v.map(y=>y===null?'n':y.toPrecision(7)).join('|'):v;
+  if(E.list.length!==U.list.length) return false;
+  const ordered=!/ o |°/.test(e) && !/^[−\-\d\/√]+ y [−\-\d\/√]+$/.test(e.trim());
+  if(ordered) return E.list.every((v,i)=>Array.isArray(v)?sameSig(v,U.list[i]):v===U.list[i] || (v.startsWith('±')&&U.list[i]===v.slice(1)) );
+  const a=E.list.map(key).sort(), b=U.list.map(key).sort(); return a.every((v,i)=>v===b[i]);
+}
+/* Teclado de símbolos y hoja de trabajo */
+const KB_KEYS=['x','²','³','√','(',')','/','−','^','π','∞','±','∪','°',';','∅'];
+function kbRow(i){ return `<div class="kb" data-kb="${i}">${KB_KEYS.map(k=>`<button type="button" data-key="${k==='−'?'-':k}">${k}</button>`).join('')}</div>`; }
+function sketchPad(i){ return `<div class="sk" id="sk${i}"><canvas data-sk="${i}"></canvas><div class="sk-bar"><button class="btn sm" data-skpen="${i}">✏️ Lápiz</button><button class="btn sm" data-sker="${i}">🧽 Borrador</button><button class="btn sm" data-skclr="${i}">🗑️ Limpiar</button></div></div>`; }
+function initSketch(cv, it){
+  const dpr=window.devicePixelRatio||1, w=cv.clientWidth||300, h=cv.clientHeight||260; cv.width=w*dpr; cv.height=h*dpr; const g=cv.getContext('2d'); g.scale(dpr,dpr); g.lineCap='round'; g.lineJoin='round';
+  const ink=getComputedStyle(document.body).color||'#fff'; let er=false, dr=false, last=null;
+  if(it.sk){ const im=new Image(); im.onload=()=>g.drawImage(im,0,0,w,h); im.src=it.sk; }
+  const pos=e=>{ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; };
+  cv.onpointerdown=e=>{ dr=true; last=pos(e); cv.setPointerCapture(e.pointerId); e.preventDefault(); };
+  cv.onpointermove=e=>{ if(!dr) return; const p=pos(e); g.globalCompositeOperation=er?'destination-out':'source-over'; g.strokeStyle=ink; g.lineWidth=er?22:2.4; g.beginPath(); g.moveTo(last[0],last[1]); g.lineTo(p[0],p[1]); g.stroke(); last=p; };
+  cv.onpointerup=cv.onpointercancel=()=>{ if(!dr) return; dr=false; try{ it.sk=cv.toDataURL(); }catch(e){} };
+  return { pen:()=>{ er=false; }, eraser:()=>{ er=true; }, clear:()=>{ g.clearRect(0,0,w,h); it.sk=null; } };
+}
+function practiceItem(it,i){
+  const hs=it.st||[], hn=it.h||0, done=it.ok||it.bad;
+  return `<li class="pi" id="pi${i}"><div class="pi-q">${it.l?`<span class="lvt l${it.l}">${LVN[it.l]}</span>`:''}${mth(it.q)}</div>
+    <div class="ans-row"><input class="ans-in" id="in${i}" data-in="${i}" value="${esc(it.u||'')}" placeholder="Escribe tu respuesta" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" ${done?'disabled':''}><button class="btn pri sm" data-chk="${i}" ${done?'disabled':''}>Comprobar</button></div>
+    ${done?'':kbRow(i)}<div class="fb ${it.fbc||''}" id="fb${i}">${it.fb||''}</div>
+    <div class="hints" id="hn${i}">${hs.slice(0,hn).map((x,k)=>`<div class="hint"><b>Pista ${k+1}</b>${mth(x)}</div>`).join('')}</div>
+    <div class="pi-tools">${hs.length&&!done?`<button class="btn sm" data-hint="${i}" ${hn>=hs.length?'disabled':''}>💡 Pista ${Math.min(hn+1,hs.length)}/${hs.length}</button>`:''}<button class="btn sm" data-ans="${i}">${hs.length?'Ver solución':'Ver respuesta'}</button><button class="btn sm" data-skt="${i}">📝 Hoja</button>${it.g?`<button class="btn sm" data-gshow="${i}">📈 Gráfica</button>`:''}</div>
+    <div id="skb${i}">${it.skOpen?sketchPad(i):''}</div>
+    <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${hs.length?`<ol class="stp">${hs.map(x=>`<li>${mth(x)}</li>`).join('')}</ol><b>Respuesta:</b> `:''}${mth(it.a)}</div><div id="gbox${i}">${it.g&&it.gopen?graphWidget(it.g,it.s||0,String(i)):''}</div>
+    <div class="pi-man"><span>¿El corrector no entendió tu forma de escribir? Marca a mano:</span><button class="btn sm" data-ok="${i}" ${done?'disabled':''}>${it.ok?'✓ Sumado':'✓ Lo hice bien'}</button><button class="btn sm" data-bad="${i}" ${done?'disabled':''}>${it.bad?'📒 Anotado':'✗ Me equivoqué'}</button></div></li>`;
+}
+function bindSolve(w){
+  const card=w.querySelector('#practiceCard'); if(!card) return; const vs=document.getElementById('vStudy');
+  const rer=()=>{ const y=vs.scrollTop; renderStudy(); vs.scrollTop=y; };
+  card.querySelectorAll('.kb button').forEach(b=>{ b.onpointerdown=e=>e.preventDefault(); b.onclick=()=>{ const i=b.parentNode.dataset.kb, inp=card.querySelector('#in'+i); if(!inp) return; const k=b.dataset.key, a=inp.selectionStart??inp.value.length, z=inp.selectionEnd??a;
+    inp.value=inp.value.slice(0,a)+k+inp.value.slice(z); const c=a+k.length; inp.focus(); try{ inp.setSelectionRange(c,c); }catch(e){} practice.items[+i].u=inp.value; buzz(4); }; });
+  card.querySelectorAll('[data-in]').forEach(inp=>{ inp.oninput=()=>{ practice.items[+inp.dataset.in].u=inp.value; }; inp.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); const b=card.querySelector(`[data-chk="${inp.dataset.in}"]`); if(b) b.click(); } }; });
+  card.querySelectorAll('[data-ans]').forEach(b=>b.addEventListener('click',()=>{ practice.items[+b.dataset.ans].seen=true; }));
+  card.querySelectorAll('[data-chk]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.chk, it=practice.items[i]; if(it.ok||it.bad) return; const inp=card.querySelector('#in'+i); it.u=inp?inp.value:it.u;
+    const r=checkAnswer(it.u, it.a, it.q), fb=card.querySelector('#fb'+i);
+    if(r===null){ fb.className='fb'; fb.textContent='Escribe tu respuesta primero ✍️'; return; }
+    if(r){ const helped=(it.h||0)>0||it.seen; it.ok=true; it.show=true; it.fbc='good';
+      if(!it.tries) addAcc(true);
+      if(!helped){ const p=P(practice.topic); p.count=(+p.count||0)+1; it.fb=`✅ ¡Correcto!${it.tries?' Lo lograste corrigiendo tu error.':''} +1 ejercicio de ${esc(practice.topic)}`; save(); renderTree(); }
+      else it.fb='✅ Correcto. Como usaste pistas o viste la solución, no suma al contador: inténtalo sin ayuda en el siguiente.';
+      buzz(14); rer(); return; }
+    it.tries=(it.tries||0)+1; buzz([30,40,30]);
+    if(it.tries===1){ addAcc(false); addError(practice.topic, it.q, it.a); renderHeader(); }
+    it.fbc='bad'; it.fb=`❌ Todavía no${it.tries>1?' (intento '+it.tries+')':''}. Revisa tu desarrollo${(it.st||[]).length?' o pide una pista':''}. ${it.tries===1?'<small>Lo guardé en tu cuaderno de errores.</small>':''}`; fb.className='fb bad'; fb.innerHTML=it.fb;
+    fb.classList.remove('shake'); void fb.offsetWidth; fb.classList.add('shake'); });
+  card.querySelectorAll('[data-hint]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.hint, it=practice.items[i], hs=it.st||[]; if((it.h||0)>=hs.length) return; it.h=(it.h||0)+1; buzz(6);
+    card.querySelector('#hn'+i).insertAdjacentHTML('beforeend',`<div class="hint new"><b>Pista ${it.h}</b>${mth(hs[it.h-1])}</div>`);
+    if(it.h>=hs.length){ b.disabled=true; b.textContent='💡 Sin más pistas'; } else b.textContent=`💡 Pista ${it.h+1}/${hs.length}`; });
+  const initPad=i=>{ const box=card.querySelector('#skb'+i), cv=box&&box.querySelector('canvas'); if(!cv) return; const it=practice.items[i], ctl=initSketch(cv,it);
+    box.querySelector('[data-skpen]').onclick=e=>{ ctl.pen(); e.target.classList.add('on'); box.querySelector('[data-sker]').classList.remove('on'); };
+    box.querySelector('[data-sker]').onclick=e=>{ ctl.eraser(); e.target.classList.add('on'); box.querySelector('[data-skpen]').classList.remove('on'); };
+    box.querySelector('[data-skclr]').onclick=()=>ctl.clear(); box.querySelector('[data-skpen]').classList.add('on'); };
+  practice.items.forEach((it,i)=>{ if(it.skOpen) initPad(i); });
+  card.querySelectorAll('[data-skt]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.skt, it=practice.items[i], box=card.querySelector('#skb'+i); it.skOpen=!it.skOpen; box.innerHTML=it.skOpen?sketchPad(i):''; if(it.skOpen){ initPad(i); box.scrollIntoView({behavior:RM()?'auto':'smooth',block:'nearest'}); } });
+}
+
 function practiceTopics(){ return S.nodes.filter(n=>GEN[n.id]); }
 function defaultTopic(){ const w=curWeek(); const n=S.nodes.find(x=>x.week===w&&GEN[x.id]) || practiceTopics().find(x=>!isDom(x.id)) || practiceTopics()[0]; return n?n.id:null; }
 function goPractice(id){ practice={topic:id, items:genFor(id,5)}; goView('vStudy'); setTimeout(()=>{ const el=document.getElementById('practiceCard'); if(el) el.scrollIntoView({behavior:'smooth'}); },60); }
@@ -1672,11 +1833,9 @@ function renderStudy(){
   if(practice.items.length){
     const okN=practice.items.filter(x=>x.ok).length, badN=practice.items.filter(x=>x.bad).length;
     if(practice.single) h += `<div class="muted" style="margin-top:10px">Ejercicio ${practice.items.length} · ✓ ${okN} · ✗ ${badN}</div>`;
-    h += `<ol style="padding-left:20px;margin:12px 0 0" ${practice.single?`start="${practice.items.length}"`:''}>` + practice.items.map((it,i)=>(practice.single&&i<practice.items.length-1)?'':`<li style="margin-bottom:10px"><div style="font-size:15px">${it.l?`<span class="lvt l${it.l}">${LVN[it.l]}</span>`:''}${mth(it.q)}</div>
-      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn sm" data-ans="${i}">${it.st&&it.st.length?'Ver solución':'Ver respuesta'}</button>${it.g?`<button class="btn sm" data-gshow="${i}">📈 Gráfica</button>`:''}<button class="btn sm" data-ok="${i}" ${it.ok||it.bad?'disabled':''}>${it.ok?'✓ Sumado':'✓ Lo hice bien (+1)'}</button><button class="btn sm" data-bad="${i}" ${it.ok||it.bad?'disabled':''}>${it.bad?'📒 Anotado':'✗ Me equivoqué'}</button></div>
-      <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${it.st&&it.st.length?`<ol class="stp">${it.st.map(x=>`<li>${mth(x)}</li>`).join('')}</ol><b>Respuesta:</b> `:''}${mth(it.a)}</div><div id="gbox${i}">${it.g&&it.gopen?graphWidget(it.g,it.s||0,String(i)):''}</div></li>`).join('') + `</ol>`;
+    h += `<ol style="padding-left:20px;margin:12px 0 0" ${practice.single?`start="${practice.items.length}"`:''}>` + practice.items.map((it,i)=>(practice.single&&i<practice.items.length-1)?'':practiceItem(it,i)).join('') + `</ol>`;
     if(practice.single) h += `<button class="btn pri" id="pNext" style="width:100%">Siguiente ejercicio ›</button>`;
-    h += `<div class="muted">"Lo hice bien" suma 1 al contador de ejercicios de ${esc(practice.topic)}.</div>`;
+    h += `<div class="muted">Resuelve en tu cuaderno o en la 📝 Hoja, escribe el resultado y toca <b>Comprobar</b>. Si aciertas sin pistas, suma 1 al contador de ${esc(practice.topic)}.</div>`;
   }
   if(pt){ h += `<h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:14px 0 6px">Más ejercicios de ${esc(pt.id)}</h3><div class="chips">${topicLinks(pt).map(([l,u])=>`<a class="nchip" style="color:var(--tx);text-decoration:none" href="${esc(u)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div>`; }
   h += `</div>`;
@@ -1692,9 +1851,9 @@ function renderStudy(){
   const oneMore=()=>{ if(!practice.single){ practice.single=true; practice.items=[]; } practice.items.push(...genFor(practice.topic,1)); renderStudy(); const c=w.querySelector('#practiceCard'); if(c) c.scrollIntoView({block:'start'}); };
   w.querySelector('#pOne').onclick=oneMore; if(w.querySelector('#pNext')) w.querySelector('#pNext').onclick=oneMore;
   w.querySelectorAll('[data-ans]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ans]; it.show=!it.show; const el=w.querySelector('#ans'+b.dataset.ans); el.style.display=it.show?'block':'none'; el.classList.toggle('reveal',it.show); });
-  w.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ok]; if(it.ok||it.bad) return; it.ok=true; addAcc(true); buzz(12); const p=P(practice.topic); p.count=(+p.count||0)+1; save(); renderTree(); b.disabled=true; b.textContent='✓ Sumado'; b.nextElementSibling.disabled=true; });
-  w.querySelectorAll('[data-bad]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.bad]; if(it.ok||it.bad) return; it.bad=true; addAcc(false); buzz([30,40,30]); addError(practice.topic, it.q, it.a); renderHeader(); b.disabled=true; b.textContent='📒 Anotado'; b.previousElementSibling.disabled=true; toast('Guardado en tu cuaderno de errores'); });
-  bindPlan(w); bindErrors(w); bindTheory(w); remindLinks(w); bindGraphs(w);
+  w.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.ok]; if(it.ok||it.bad) return; it.ok=true; if(!it.tries) addAcc(true); buzz(12); const p=P(practice.topic); p.count=(+p.count||0)+1; save(); renderTree(); b.disabled=true; b.textContent='✓ Sumado'; b.nextElementSibling.disabled=true; });
+  w.querySelectorAll('[data-bad]').forEach(b=>b.onclick=()=>{ const it=practice.items[+b.dataset.bad]; if(it.ok||it.bad) return; it.bad=true; buzz([30,40,30]); if(!it.tries){ addAcc(false); addError(practice.topic, it.q, it.a); } renderHeader(); b.disabled=true; b.textContent='📒 Anotado'; b.previousElementSibling.disabled=true; toast('Guardado en tu cuaderno de errores'); });
+  bindPlan(w); bindErrors(w); bindTheory(w); remindLinks(w); bindGraphs(w); bindSolve(w);
   w.querySelectorAll('.ls-chip.cur').forEach(c=>{ const g=c.parentNode; g.scrollLeft+=c.getBoundingClientRect().left-g.getBoundingClientRect().left-16; });
 }
 
@@ -3098,26 +3257,238 @@ const EXPLAIN = {
       {q:'Resuelve 2sen²x − 1 = 0 para 0° ≤ x < 360°', s:[['Despeja','sen²x = 1/2 → sen x = ±√2/2'],['sen x = √2/2 (cuadrantes I y II)','x = 45° o 135°'],['sen x = −√2/2 (cuadrantes III y IV)','x = 225° o 315°']], r:'45°, 135°, 225° y 315°'}],
     err:['Escribir sen²x como sen(x²): sen²x significa (sen x)².','Dividir ambos lados entre sen x y perder las soluciones donde sen x = 0.']}
 };
+/* ---------- Modo profundo: el porqué de cada cosa ---------- */
+const DEEP = {
+  T1:{pq:[['¿Por qué menos por menos da más?','Multiplicar por −1 significa "dar la vuelta" en la recta numérica. Si das la vuelta dos veces, vuelves a mirar hacia el mismo lado. Además, si (−1)(−1) fuera −1, la propiedad distributiva fallaría: (−1)(1 + (−1)) = 0 obliga a que (−1)(−1) = 1.'],
+      ['¿Por qué existe la jerarquía de operaciones?','Es un acuerdo para que una expresión tenga un solo resultado. Multiplicar es una suma repetida, por eso "pesa" más y se hace antes: 2 + 3·4 significa 2 más tres cuatros, es decir 14.'],
+      ['¿Por qué para sumar fracciones necesito denominador común?','Solo se suman partes del mismo tamaño. Un medio y un tercio son pedazos distintos; al pasarlos a sextos (3/6 y 2/6) ya son pedazos iguales y se pueden contar: 5/6.'],
+      ['¿Por qué dividir es multiplicar por el inverso?','Dividir entre 2/3 pregunta "¿cuántos 2/3 caben?". Como 1 ÷ (2/3) = 3/2, dividir entre 2/3 es lo mismo que multiplicar por 3/2.']],
+    rec:['Resuelve primero lo de adentro de los paréntesis.','Luego las potencias, después multiplicaciones y divisiones, y al final sumas y restas.','Para sumar o restar fracciones, busca el MCM; para multiplicar, no lo necesitas.','Simplifica al final y revisa el signo.'],
+    w:[['Sin el mismo denominador las partes son de tamaños distintos y no se pueden sumar ni restar.','Se multiplica arriba y abajo por el mismo número (3 y 2): la fracción cambia de forma pero no de valor.','Con el mismo denominador, solo cuentas cuántas partes hay: 9 − 10 = −1 doceavo.'],
+       ['El paréntesis manda: se resuelve antes que todo lo de afuera.','Dividir entre −5/6 es multiplicar por su inverso −6/5. El signo sale negativo porque + por − da −.','La suma va al final por la jerarquía; para sumar 1 se escribe como 5/5.']]},
+  T2:{pq:[['¿Por qué al multiplicar potencias se suman los exponentes?','x³ · x² = (x·x·x)·(x·x): en total hay 5 factores x. Contar factores es sumar exponentes.'],
+      ['¿Por qué a⁰ = 1?','Por la regla de la división: a³ ÷ a³ = a^(3−3) = a⁰, pero todo número entre sí mismo da 1. Para que la regla siga funcionando, a⁰ tiene que valer 1.'],
+      ['¿Por qué un exponente negativo es una fracción?','a² ÷ a⁵ = a^(−3), pero también es (a·a) ÷ (a·a·a·a·a) = 1/a³. Por eso a^(−3) = 1/a³.'],
+      ['¿Por qué subir 20 % es multiplicar por 1,2?','Tienes el 100 % y le agregas 20 %: te queda el 120 % = 120/100 = 1,2 veces lo que tenías.']],
+    rec:['Si hay potencias con la misma base, suma o resta exponentes.','Si hay potencia de potencia, multiplica exponentes.','Exponente negativo: pasa la potencia al otro lado de la fracción.','En porcentajes, convierte a un factor (1 + p ÷ 100 o 1 − p ÷ 100) y multiplica.'],
+    w:[['Al multiplicar, los factores 2 se juntan: 3 + 5 = 8 factores.','Al dividir, se cancelan 6 factores de arriba con 6 de abajo y quedan 2.','2² es 2·2.'],
+       ['Subir 20 % es quedarte con el 100 % más el 20 %, o sea 120 %.','Bajar 20 % deja el 80 % de lo que había.','Aplicar un cambio después de otro es multiplicar los factores.','El 20 % de bajada se calcula sobre un precio mayor, por eso se pierde más de lo que se ganó.']]},
+  T3:{pq:[['¿Por qué √(a·b) = √a · √b?','Porque (√a·√b)² = a·b. Si al cuadrado da a·b y es positivo, es justamente √(a·b). Esto permite sacar factores cuadrados: √50 = √(25·2) = 5√2.'],
+      ['¿Por qué √(a + b) no es √a + √b?','Elevar al cuadrado una suma produce un término extra: (√a + √b)² = a + b + 2√(ab). Ese 2√(ab) hace que no coincidan.'],
+      ['¿Por qué funciona el conjugado?','Por la suma por diferencia: (√a − b)(√a + b) = a − b². El término con raíz se cancela, así que el denominador queda sin raíz.'],
+      ['¿Por qué racionalizar?','Es una convención para comparar y operar resultados con facilidad. 1/√2 y √2/2 valen lo mismo, pero la segunda forma es más fácil de sumar con otros radicales.']],
+    rec:['Descompón cada radicando buscando el mayor cuadrado perfecto.','Saca ese cuadrado de la raíz.','Suma solo radicales semejantes.','Si hay raíz abajo, multiplica por la raíz (si es una sola) o por el conjugado (si es una suma o resta).'],
+    w:[['75 = 25·3, 12 = 4·3 y 27 = 9·3: en los tres aparece 3 multiplicado por un cuadrado perfecto.','Todos tienen √3, así que se comportan como "x": 5x − 2x + 3x.','5 − 2 + 3 = 6.'],
+       ['Multiplicar arriba y abajo por lo mismo es multiplicar por 1: no cambia el valor.','Suma por diferencia elimina la raíz: (√5)² = 5.','El numerador solo se distribuye o se deja indicado.','6 entre 3 se puede simplificar porque 3 divide al 6.']]},
+  T4:{pq:[['¿Por qué solo se suman términos semejantes?','3x² + 5x no se pueden juntar porque representan cosas distintas, como sumar áreas con longitudes. 3x² + 5x² sí da 8x² porque ambos cuentan "x²".'],
+      ['¿De dónde sale (a + b)² = a² + 2ab + b²?','Es (a + b)(a + b): a·a + a·b + b·a + b·b. Los dos términos del medio son iguales, por eso aparece 2ab. Geométricamente, es un cuadrado de lado a + b partido en 4 piezas.'],
+      ['¿Por qué (a + b)(a − b) = a² − b²?','Al multiplicar aparecen −ab y +ab, que se anulan. Solo quedan a² y −b².'],
+      ['¿Para qué memorizar productos notables?','Porque leídos al revés son factorizaciones. Si ves x² − 9, reconoces (x + 3)(x − 3) al instante.']],
+    rec:['Identifica si es un producto notable; si lo es, usa la fórmula directa.','Si no, multiplica cada término del primero por cada término del segundo.','Cuida los signos en cada producto.','Junta los términos semejantes y ordena por grado.'],
+    w:[['Es la propiedad distributiva aplicada dos veces: cada término se multiplica con todos los del otro paréntesis.','Al multiplicar x por x los exponentes se suman: x². El signo de 2·(−4) es negativo.','−12x y 2x son semejantes (ambos llevan x): −12 + 2 = −10.'],
+       ['(a + b)³ = a³ + 3a²b + 3ab² + b³ con a = x y b = 2.','Con b = −2, los términos con potencia impar de b cambian de signo.','El signo menos delante del paréntesis multiplica a cada término por −1.','x³ se cancela con −x³ y 12x con −12x; 6x² + 6x² = 12x² y 8 + 8 = 16.']]},
+  T5:{pq:[['¿Por qué factorizar ayuda a resolver ecuaciones?','Si A·B = 0, uno de los dos tiene que ser 0: ningún producto de números distintos de 0 da 0. Así una ecuación difícil se divide en ecuaciones simples.'],
+      ['¿Por qué buscar dos números que sumen b y multipliquen c?','Porque (x + p)(x + q) = x² + (p + q)x + pq. Comparando con x² + bx + c, se necesita p + q = b y pq = c.'],
+      ['¿Por qué empezar con el factor común?','Simplifica todo lo demás: deja números más chicos y a veces revela una diferencia de cuadrados escondida.'],
+      ['¿Cómo sé que factoricé bien?','Multiplica tus factores: si vuelves al polinomio original, está bien. Es la comprobación más rápida.']],
+    rec:['¿Hay factor común? Sácalo primero.','¿Dos términos con resta de cuadrados? Diferencia de cuadrados.','¿Tres términos? Trinomio cuadrado perfecto, x² + bx + c o aspa.','¿Cuatro términos? Agrupa de dos en dos.','Revisa si algún factor se puede seguir factorizando.'],
+    w:[['2 divide a 2 y a 8, y x aparece en ambos términos (con la menor potencia, x¹).','x² − 4 = x² − 2²: es una resta de dos cuadrados.','Se pone todo junto: el factor común no se pierde.'],
+       ['Los primeros términos de los factores deben multiplicar 6x² y los últimos −2.','El término del medio sale de los productos cruzados; si no da x, se prueba otra combinación.','Cada fila del aspa es un factor.']]},
+  X1:{pq:[['¿Por qué el residuo de P(x) ÷ (x − r) es P(r)?','Siempre P(x) = (x − r)·Q(x) + R. Si reemplazas x = r, el primer término se anula porque (r − r) = 0, y queda P(r) = R.'],
+      ['¿Por qué las raíces enteras dividen al término independiente?','Si P(x) = (x − r)·Q(x), el término independiente es (−r) por el término independiente de Q. Así que r tiene que ser un divisor de ese número.'],
+      ['¿Por qué Ruffini funciona solo con x − r?','El esquema se basa en multiplicar por r y sumar, que es exactamente lo que pasa al dividir entre (x − r). Para dividir entre 2x − 1, primero se divide todo entre 2.'],
+      ['¿Por qué se pone 0 en el grado que falta?','Cada columna representa una potencia de x. Si saltas una, todo queda corrido y los coeficientes se mezclan.']],
+    rec:['Ordena el polinomio y completa con 0 los grados que faltan.','Si te piden el residuo, usa el teorema del resto: calcula P(r).','Para factorizar, prueba divisores del término independiente hasta que P(r) = 0.','Haz Ruffini con esa raíz y factoriza el cociente (que es de grado menor).'],
+    w:[['x + 1 = x − (−1): por eso r = −1.','El teorema del resto evita hacer toda la división.','Potencia impar de −1 da −1; −2 por −1 da +2.'],
+       ['Si hay una raíz entera, tiene que dividir a 6.','P(1) = 0 significa que el residuo es 0: la división es exacta.','Ruffini divide entre (x − 1) y baja un grado: de cúbico a cuadrático.','El cociente cuadrático se factoriza con la técnica de T5.','P(x) = (x − 1)·cociente, y el cociente ya está factorizado.']]},
+  T7:{pq:[['¿Por qué puedo "pasar" un número al otro lado?','En realidad sumas o restas lo mismo en ambos lados. Si a los dos platos de una balanza les quitas 7, sigue equilibrada; "pasar restando" es un atajo de eso.'],
+      ['¿Por qué multiplicar por el MCM quita los denominadores?','El MCM es múltiplo de todos los denominadores, así que cada fracción se simplifica a un número entero. Y como multiplicas los dos lados por lo mismo, la igualdad se mantiene.'],
+      ['¿Por qué comprobar la solución?','Porque un error de signo no se nota hasta que reemplazas. Si ambos lados dan lo mismo, estás 100 % seguro.'],
+      ['¿Cuándo una ecuación lineal no tiene solución?','Si al simplificar las x desaparecen y queda algo falso como 0 = 5. Si queda 0 = 0, cualquier x sirve.']],
+    rec:['Quita paréntesis distribuyendo (cuidado con el signo menos).','Si hay fracciones, multiplica todo por el MCM.','Lleva las x a un lado y los números al otro.','Divide entre el coeficiente de x.','Comprueba en la ecuación original.'],
+    w:[['Restar 2x y sumar 7 en ambos lados mantiene la balanza equilibrada.','5x − 2x = 3x y 8 + 7 = 15.','Dividir los dos lados entre 3 deja la x sola.'],
+       ['12 es el MCM de 3 y 4: así desaparecen las fracciones.','El menos afecta a todo el paréntesis: −3·(−2) = +6.','4x − 3x = x y 4 + 6 = 10.','Restar 10 en ambos lados.','Reemplazar confirma que no hubo errores de signo.']]},
+  T8:{pq:[['¿Por qué no puedo cancelar términos que se suman?','(x + 3)/3: el 3 de abajo divide a TODO el numerador, no solo al 3. Solo se cancela lo que multiplica a todo, es decir un factor.'],
+      ['¿Por qué hay restricciones?','Dividir entre 0 no está definido. Aunque después de simplificar el factor desaparezca, la expresión original no existe en ese valor.'],
+      ['¿Por qué aparecen soluciones falsas?','Al multiplicar por (x − 1) multiplicas por algo que puede ser 0. Eso puede agregar soluciones que no cumplen la ecuación original.'],
+      ['¿Por qué factorizar antes de sumar?','Para encontrar el denominador común más simple, igual que el MCM con números.']],
+    rec:['Anota las restricciones mirando los denominadores originales.','Factoriza numeradores y denominadores.','Para simplificar, cancela factores iguales.','Para resolver, multiplica todo por el denominador común.','Descarta las soluciones que violen las restricciones.'],
+    w:[['x² − 9 es diferencia de cuadrados.','Factor común x en x² + 3x.','(x + 3) multiplica arriba y abajo, así que se puede cancelar.','Las restricciones se toman antes de cancelar: x = −3 también anulaba el original.'],
+       ['x = 1 haría 0 los denominadores.','Multiplicar por (x − 1) elimina todas las fracciones a la vez.','Se agrupan las x: x − 2x = −1.','La única solución algebraica es justo el valor prohibido.']]},
+  T9:{pq:[['¿De dónde sale la fórmula general?','De completar cuadrados en ax² + bx + c = 0: se divide entre a, se suma (b/2a)² a ambos lados y se saca raíz. El resultado es x = (−b ± √Δ)/(2a).'],
+      ['¿Por qué el discriminante dice cuántas soluciones hay?','Es lo que va dentro de la raíz. Si es positivo hay dos valores (±), si es 0 el ± no cambia nada, y si es negativo no hay raíz real.'],
+      ['¿Por qué no puedo dividir entre x?','Porque x podría ser 0, y dividir entre 0 no existe. Al hacerlo pierdes justamente la solución x = 0.'],
+      ['¿Por qué hay dos soluciones?','Porque la parábola puede cortar al eje x en dos puntos: uno a cada lado del vértice.']],
+    rec:['Pasa todo a un lado: ax² + bx + c = 0.','Si falta c, saca factor común x. Si falta b, despeja x².','Si no, intenta factorizar.','Si no sale, usa la fórmula general (primero Δ).','En problemas, descarta soluciones sin sentido (medidas negativas).'],
+    w:[['Así (x + p)(x + q) da x² + (p + q)x + pq.','4 · (−3) = −12 y 4 + (−3) = 1.','Si un producto es 0, uno de los factores es 0.'],
+       ['El área de un rectángulo es largo por ancho.','Para usar producto cero, todo debe estar igualado a 0.','−60 = 10·(−6) y 10 − 6 = 4.','Una longitud no puede ser negativa.','El largo es 4 más que el ancho.']]},
+  T10:{pq:[['¿Por qué la solución es el cruce de las rectas?','Cada ecuación es el conjunto de puntos que la cumplen (una recta). El punto que cumple las dos está en ambas rectas: su intersección.'],
+      ['¿Por qué sumar ecuaciones es válido?','Si A = B y C = D, entonces A + C = B + D. Sumas cantidades iguales a ambos lados.'],
+      ['¿Cuándo uso sustitución y cuándo reducción?','Sustitución si una variable ya está despejada o tiene coeficiente 1. Reducción si los coeficientes son opuestos o fáciles de igualar.'],
+      ['¿Qué significa que no tenga solución?','Que las rectas son paralelas: tienen la misma pendiente y nunca se cruzan. Al operar llegas a algo falso como 0 = 3.']],
+    rec:['Ordena las ecuaciones: x, y = número.','Elige método: sustitución si hay coeficiente 1, reducción si se cancelan fácil.','Halla una variable y reemplaza para hallar la otra.','Comprueba en las dos ecuaciones.'],
+    w:[['y y −y son opuestos: al sumar se cancelan.','14 ÷ 2 = 7.','Cualquiera de las ecuaciones sirve para hallar y.'],
+       ['Una ecuación cuenta entradas y la otra cuenta dinero.','La primera ecuación tiene coeficientes 1: es fácil despejar.','Así queda una ecuación con una sola incógnita.','12a − 7a = 5a; 7·50 = 350.','Vuelves a la primera ecuación.']]},
+  T11:{pq:[['¿Por qué se invierte el signo al multiplicar por un negativo?','Multiplicar por −1 refleja la recta numérica: 2 < 5 pero −2 > −5. El orden se da vuelta.'],
+      ['¿Por qué |x| < 3 da un intervalo y |x| > 3 dos?','|x| es la distancia al 0. "Menos de 3" son los puntos cerca del 0: un tramo. "Más de 3" son los que están lejos, a la izquierda o a la derecha: dos tramos.'],
+      ['¿Por qué en las cuadráticas se usan signos por intervalos?','Un producto solo cambia de signo cuando uno de sus factores pasa por 0. Entre raíces, el signo se mantiene; basta probar un punto de cada tramo.'],
+      ['¿Paréntesis o corchete?','Corchete si el extremo cumple (≤ o ≥); paréntesis si no (< o >) y siempre con ∞, que no es un número.']],
+    rec:['Despeja como en una ecuación.','Si multiplicas o divides por negativo, invierte el signo.','Con valor absoluto: < da un intervalo, > da dos.','Con cuadráticas: factoriza, ubica las raíces y analiza signos.','Escribe la respuesta como intervalo.'],
+    w:[['Restar 3 en ambos lados no cambia la desigualdad.','Dividir entre negativo da vuelta el orden de la recta.','≥ incluye el −3: corchete.'],
+       ['Estar a más de 5 del 0 es estar a la derecha de 5 o a la izquierda de −5.','Sumar 1 y dividir entre 2 (positivo, no se invierte).','Igual, con el otro caso.','"o" significa unión de los dos tramos.']]},
+  T12:{pq:[['¿Por qué la pendiente es Δy entre Δx?','Mide cuánto sube la recta por cada unidad que avanza hacia la derecha. En una recta ese cociente es igual entre cualquier par de puntos.'],
+      ['¿Por qué las perpendiculares cumplen m₁·m₂ = −1?','Girar una recta 90° convierte el avance (1, m) en (−m, 1), cuya pendiente es −1/m. Multiplicadas dan −1.'],
+      ['¿De dónde sale la fórmula de distancia?','Δx y Δy son los catetos de un triángulo rectángulo y la distancia es la hipotenusa: Pitágoras.'],
+      ['¿Por qué usar punto-pendiente?','Porque viene directo de la definición de pendiente: (y − y₁)/(x − x₁) = m. Solo necesitas un punto y m.']],
+    rec:['Halla la pendiente (con dos puntos o despejando y).','Si es paralela, la misma m; si es perpendicular, −1/m.','Usa y − y₁ = m(x − x₁) con un punto conocido.','Despeja y para dejarla como y = mx + b.'],
+    w:[['Son los catetos del triángulo rectángulo entre los puntos.','La distancia es la hipotenusa.','3, 4, 5 es un triángulo rectángulo clásico.'],
+       ['En y = mx + b, m es el número que acompaña a x.','El producto de las pendientes debe ser −1: (−2)·(1/2) = −1.','Se usa el punto dado (4, 1).','Distribuye 1/2 y suma 1.']]},
+  T13:{pq:[['¿Por qué una función no puede dar dos y para el mismo x?','Porque una función debe ser predecible: cada entrada produce una única salida. Si no, no sabrías qué valor usar.'],
+      ['¿Por qué el vértice está en x = −b/(2a)?','La parábola es simétrica y sus raíces están en (−b ± √Δ)/(2a). El punto medio entre ellas, donde está el eje, es −b/(2a).'],
+      ['¿Por qué el radicando debe ser ≥ 0?','Ningún número real al cuadrado da negativo, así que la raíz cuadrada de un negativo no existe en los reales.'],
+      ['¿Cómo sé el rango de una parábola?','Si abre hacia arriba, el vértice es el punto más bajo: rango [k, +∞). Si abre hacia abajo, es el más alto: (−∞, k].']],
+    rec:['Dominio: busca denominadores (≠ 0) y raíces pares (≥ 0).','Para parábolas, halla el vértice.','Mira hacia dónde abre (signo de a) para el rango.','Cortes: x = 0 para el eje y; f(x) = 0 para el eje x.'],
+    w:[['La raíz cuadrada solo acepta números ≥ 0.','Sumar 3 en ambos lados.','El corchete incluye al 3 porque √0 sí existe.'],
+       ['Es el eje de simetría de la parábola.','Se reemplaza x = 2 en la función.','a positivo: las ramas suben, el vértice es el mínimo.','En el eje y, x vale 0.']]},
+  X10:{pq:[['¿Por qué f(x − h) se mueve a la derecha?','Para obtener el mismo valor que f tenía en x = 0, ahora necesitas x = h. Todo ocurre h unidades después: a la derecha.'],
+      ['¿Por qué −f(x) refleja sobre el eje x?','Cada altura y se vuelve −y: lo que estaba arriba queda abajo a la misma distancia.'],
+      ['¿Por qué importa < o ≤ en una función a trozos?','Indica a qué trozo pertenece exactamente el punto de unión. Solo un trozo puede incluirlo.'],
+      ['¿Qué significa que sea continua?','Que los trozos se unen sin salto: los dos trozos valen lo mismo en el punto de unión.']],
+    rec:['Identifica la función base (x², |x|, √x).','Lo que está dentro del paréntesis mueve en horizontal (al revés del signo).','Lo que está fuera mueve en vertical (con el signo).','Un menos afuera refleja; un número afuera estira.','En trozos, ubica primero en qué tramo está x.'],
+    w:[['−2 cumple x < 1.','3 cumple x ≥ 1.'],
+       ['Multiplica todas las alturas por −1.','Para que x + 3 valga 0 se necesita x = −3: el vértice se va a la izquierda.','El + 4 se suma a la salida: sube.','Se aplican los movimientos al vértice (0, 0).']]},
+  T14:{pq:[['¿De dónde sale la ecuación de la circunferencia?','Un punto (x, y) está en ella si su distancia al centro es r: √((x − h)² + (y − k)²) = r. Elevando al cuadrado se obtiene la ecuación.'],
+      ['¿Por qué completar cuadrados?','x² − 6x no muestra el centro, pero (x − 3)² − 9 sí. Completar el cuadrado convierte la forma general en una que se lee directo.'],
+      ['¿Por qué la parábola tiene foco?','Todos sus puntos están a la misma distancia del foco y de la directriz. Por eso las antenas parabólicas concentran la señal en el foco.'],
+      ['¿Qué indica el signo de p?','Hacia dónde abre: p > 0 hacia arriba (o derecha), p < 0 hacia abajo (o izquierda).']],
+    rec:['Agrupa x con x y y con y; pasa el número al otro lado.','Completa cuadrados sumando (b/2)² a ambos lados.','Circunferencia: lee centro (h, k) y radio √(lado derecho).','Parábola: deja el cuadrado a un lado y factoriza el otro para leer 4p.'],
+    w:[['El radio es la distancia de cualquier punto de la circunferencia al centro.','Pitágoras: 9 + 16 = 25.','h = −1 da x + 1 y k = 4 da y − 4.'],
+       ['La variable al cuadrado (y) se queda sola a un lado.','(−4 ÷ 2)² = 4 se suma en ambos lados.','Se saca factor común 8 para ver la forma (y − k)² = 4p(x − h).','Está al cuadrado la y: el eje es horizontal y p > 0 abre a la derecha.','El foco está sobre el eje, a distancia p del vértice.']]},
+  T15:{pq:[['¿Por qué se multiplica fila por columna?','Una matriz representa una transformación. Multiplicar es aplicar una tras otra, y la fila por columna es justo lo que combina los coeficientes correctamente.'],
+      ['¿Por qué A·B no es igual a B·A?','Aplicar transformaciones en distinto orden da resultados distintos, igual que ponerse medias y zapatos en diferente orden.'],
+      ['¿Por qué deben coincidir columnas de A con filas de B?','Cada elemento del producto empareja los números de una fila de A con los de una columna de B; si no tienen el mismo largo, sobran números.'],
+      ['¿Para qué sirve la identidad?','Es el "1" de las matrices: no cambia nada al multiplicar. Se usa para definir la inversa: A·A⁻¹ = I.']],
+    rec:['Revisa los órdenes antes de operar.','Suma y resta: posición por posición.','Escalar: multiplica cada elemento.','Producto: fila i por columna j, multiplicando pares y sumando.'],
+    w:[['Un escalar afecta a todos los elementos.','Se restan los elementos que ocupan la misma posición.','Cada posición se calcula por separado.'],
+       ['La fila 1 de la primera combina con cada columna de la segunda.','Igual con la fila 2.','El resultado (i, j) se coloca en la fila i y columna j.']]},
+  X9:{pq:[['¿Por qué det = 0 significa que no hay inversa?','La inversa lleva un factor 1 ÷ det. Si det = 0, esa división no existe. Geométricamente, la matriz "aplasta" el plano y no se puede deshacer.'],
+      ['¿De dónde sale la regla de Cramer?','De resolver el sistema general por reducción: al despejar x aparece un cociente de determinantes.'],
+      ['¿Qué significa el determinante?','En 2×2 es el factor por el que cambia el área. Si es 0, el área se vuelve 0: todo cae sobre una recta.'],
+      ['¿Por qué Sarrus solo sirve en 3×3?','Porque es un atajo de cofactores que solo coincide en 3×3. Para 4×4 hay que usar cofactores.']],
+    rec:['Calcula det A primero: si es 0, no hay inversa ni solución única.','Inversa 2×2: intercambia a y d, cambia signo a b y c, divide entre det.','Cramer: reemplaza la columna de la incógnita por los resultados.','Divide cada determinante entre det A.'],
+    w:[['Diagonal principal menos diagonal secundaria.','La columna de x se reemplaza por los resultados 7 y 2.','Ahora se reemplaza la columna de y.'],
+       ['Se repiten las dos primeras columnas a la derecha y se multiplican tres diagonales hacia abajo.','Las tres diagonales hacia arriba van con signo menos.','Diferencia de ambas sumas.']]},
+  T16:{pq:[['¿Por qué log(A·B) = log A + log B?','Porque los logaritmos son exponentes, y al multiplicar potencias de la misma base los exponentes se suman.'],
+      ['¿Por qué el logaritmo solo existe para x > 0?','bʸ es siempre positivo si b > 0. No hay exponente que haga que una potencia positiva dé 0 o un negativo.'],
+      ['¿Por qué igualar bases permite igualar exponentes?','La función bˣ es inyectiva: nunca repite un valor. Si b^m = b^n, necesariamente m = n.'],
+      ['¿Qué tiene de especial e?','Es la base donde la función crece con una rapidez igual a su propio valor. Por eso aparece en interés continuo, poblaciones y derivadas.']],
+    rec:['Si puedes, escribe todo con la misma base e iguala exponentes.','Si no, saca logaritmo a ambos lados.','En ecuaciones logarítmicas, junta los logaritmos con las propiedades.','Pasa a forma exponencial.','Descarta las soluciones con argumento ≤ 0.'],
+    w:[['81 = 3·3·3·3.','Si las potencias son iguales y la base también, los exponentes son iguales.','Restar 1.'],
+       ['Propiedad del producto: log₂x + log₂(x − 2) = log₂(x·(x − 2)), porque los logaritmos son exponentes y al multiplicar potencias de 2 los exponentes se suman.','log₂(algo) = 3 significa que algo = 2³.','Ahora es una cuadrática que se factoriza.','log₂(−2) no existe.']]},
+  T17:{pq:[['¿Por qué puedo cancelar (x − a) si x → a?','El límite mira lo que pasa cerca de a, no en a. Para x ≠ a, (x − a) ≠ 0 y cancelar es válido.'],
+      ['¿Por qué 0/0 no es un resultado?','Porque 0/0 puede terminar siendo cualquier valor: depende de qué tan rápido van a 0 numerador y denominador. Hay que simplificar para descubrirlo.'],
+      ['¿Por qué al infinito mandan los términos de mayor grado?','Para x enorme, x³ es muchísimo mayor que x² o x. Los demás términos se vuelven insignificantes.'],
+      ['¿Por qué importa la continuidad?','Las funciones continuas se pueden evaluar directo en el límite. Además, muchas propiedades del cálculo (como hallar máximos) solo valen para funciones continuas.']],
+    rec:['Reemplaza directo.','Si sale un número, ese es el límite.','Si sale 0/0: factoriza y cancela, o racionaliza.','Si sale k/0: revisa los laterales (puede ser ±∞).','Si x → ∞: compara grados.'],
+    w:[['Los polinomios son continuos en todo punto.','3·4 − 2 + 1 = 11.'],
+       ['Numerador y denominador tienden a 0: hay que simplificar.','El conjugado elimina la raíz del numerador.','x ≠ 4 mientras se acerca, así que se puede cancelar.','Ya no hay 0/0: reemplazar es válido.']]},
+  T18:{pq:[['¿De dónde sale (xⁿ)′ = n·x^(n−1)?','Del límite de [(x + h)ⁿ − xⁿ]/h. Al desarrollar (x + h)ⁿ, el único término que sobrevive al hacer h → 0 es n·x^(n−1)·h, que dividido entre h da n·x^(n−1).'],
+      ['¿Por qué la derivada es una pendiente?','Es el límite de la pendiente de rectas secantes cuando los dos puntos se juntan: queda la pendiente de la tangente.'],
+      ['¿Por qué en un máximo la derivada es 0?','Justo antes la función sube (f′ > 0) y justo después baja (f′ < 0). Al pasar de positivo a negativo, f′ vale 0: la tangente es horizontal.'],
+      ['¿Por qué la regla de la cadena multiplica?','Si g cambia 3 veces más rápido que x y f cambia 2 veces más rápido que g, f cambia 2·3 = 6 veces más rápido que x.']],
+    rec:['Identifica la forma: suma, producto, cociente o composición.','Aplica la regla correspondiente.','Deriva cada término con la regla de la potencia.','Simplifica.','Para tangentes: punto con f(a), pendiente con f′(a).'],
+    w:[['Regla de la potencia: el exponente baja multiplicando y se reduce en 1.','x¹ se vuelve 1 y una constante no cambia, su derivada es 0.','Se deriva término a término porque la derivada de una suma es la suma de derivadas.'],
+       ['La tangente toca a la curva en ese punto.','La pendiente de la tangente es f′ en el punto.','Ecuación de una recta con punto y pendiente.','Restar 2 en ambos lados.']]},
+  X2:{pq:[['¿Por qué las razones no dependen del tamaño del triángulo?','Triángulos con los mismos ángulos son semejantes: sus lados son proporcionales, así que los cocientes entre lados son iguales.'],
+      ['¿Por qué sen²θ + cos²θ = 1?','En la circunferencia de radio 1, el punto (cos θ, sen θ) cumple Pitágoras: x² + y² = 1.'],
+      ['¿Por qué usar radianes?','Un radián es el ángulo que abarca un arco igual al radio. Con radianes, la longitud de arco es simplemente r·θ y las derivadas trigonométricas salen limpias.'],
+      ['¿Por qué el seno es positivo en el cuadrante II?','El seno es la coordenada y del punto en la circunferencia, y en el cuadrante II los puntos están arriba del eje x.']],
+    rec:['Dibuja el triángulo y marca el ángulo.','Nombra los lados: opuesto, adyacente e hipotenusa.','Elige la razón que use el dato y la incógnita.','Despeja y usa valores exactos cuando el ángulo es notable.'],
+    w:[['180° equivalen a π radianes.','Se divide entre 30, el factor común.','Queda 5π/6.'],
+       ['La tangente relaciona el opuesto (lo que buscas) con el adyacente (lo que tienes).','30° es un ángulo notable.','Multiplicar ambos lados por 60.','√3 ≈ 1,732.']]},
+  X3:{pq:[['¿Por qué en la elipse c² = a² − b²?','En el extremo del eje menor, la distancia a cada foco es a (por la suma 2a). Ese punto, el centro y un foco forman un triángulo rectángulo con catetos b y c e hipotenusa a.'],
+      ['¿Por qué en la hipérbola c² = a² + b²?','Porque los focos están más lejos que los vértices (c > a). La relación sale del rectángulo que forman a y b, cuya diagonal mide c.'],
+      ['¿Qué dicen las asíntotas?','Para x muy grande, el 1 de la ecuación casi no importa y x²/a² ≈ y²/b², es decir y ≈ ±(b/a)x.'],
+      ['¿Qué mide la excentricidad?','Qué tan estirada está: e cerca de 0 es casi un círculo; cerca de 1 es muy alargada.']],
+    rec:['Lleva la ecuación a la forma canónica (igualada a 1).','Elipse si es suma; hipérbola si es resta.','El denominador mayor (elipse) o el positivo (hipérbola) marca el eje principal.','Calcula c con la relación correcta.','Ubica vértices y focos sobre ese eje.'],
+    w:[['Los denominadores son a² y b².','Elipse: los focos están dentro, c < a.','16 está debajo de x: el eje mayor es horizontal.','e < 1 confirma que es elipse.'],
+       ['El signo menos indica hipérbola.','En la hipérbola los focos están más afuera que los vértices.','Están sobre el eje x porque el término positivo es el de x.','Pendientes ±b/a.'],
+       ['La forma canónica tiene un 1 a la derecha.','El denominador mayor está bajo y.','Elipse: c² = a² − b².','Todo se ubica sobre el eje y.']]},
+  X4:{pq:[['¿Por qué se suman componente a componente?','Un vector es un desplazamiento: moverse (3, −1) y luego (1, 4) es moverse en total 3 + 1 en x y −1 + 4 en y.'],
+      ['¿De dónde sale la magnitud?','Las componentes son los catetos de un triángulo rectángulo y la flecha es la hipotenusa: Pitágoras.'],
+      ['¿Por qué u·v = 0 significa perpendiculares?','Porque u·v = |u||v| cos θ, y cos 90° = 0.'],
+      ['¿Para qué sirve el vector unitario?','Separa la dirección de la magnitud: indica hacia dónde, con largo 1.']],
+    rec:['Escribe los vectores por componentes.','Operaciones: componente a componente.','Magnitud con Pitágoras.','Ángulo: producto escalar entre producto de magnitudes.'],
+    w:[['Multiplicar por 2 duplica cada componente.','Restar es sumar el opuesto, componente por componente.','5 y −6.'],
+       ['Pitágoras con catetos 6 y 8.','Dividir entre la magnitud deja el largo en 1.','6/10 y 8/10 se simplifican.'],
+       ['Se multiplican componentes iguales y se suma.','Pitágoras para cada vector.','√5·√10 = √50 = 5√2; 5 ÷ (5√2) = √2/2 al racionalizar.','cos θ = √2/2 corresponde a 45°.']]},
+  X5:{pq:[['¿Por qué p → q es verdadera si p es falsa?','Una promesa "si llueve, llevo paraguas" solo se rompe si llueve y no llevas. Si no llueve, no rompiste nada.'],
+      ['¿Por qué De Morgan cambia ∧ por ∨?','Negar "A y B" es decir que falla al menos uno: "no A o no B".'],
+      ['¿Por qué se resta la intersección?','Los elementos que están en A y en B se cuentan dos veces al sumar n(A) + n(B).'],
+      ['¿Cuál es la negación de "todos"?','"Al menos uno no". Para desmentir que todos aprueban basta con que uno no apruebe.']],
+    rec:['Traduce el enunciado a símbolos.','Para valores de verdad, resuelve de adentro hacia afuera.','En conjuntos, dibuja un diagrama de Venn.','Llena primero la intersección y luego las zonas exclusivas.'],
+    w:[['La unión junta todo, sin repetir.','La intersección es solo lo que comparten.','La diferencia quita a A lo que también está en B.'],
+       ['∧ solo es V si ambas son V.','¬ cambia el valor.','Un condicional solo es F si va de V a F.'],
+       ['Los 10 de ambos se contaron en los 25 y en los 18.','Los demás no llevan ninguno.','Restas la intersección de A.']]},
+  X6:{pq:[['¿Por qué el orden importa en la composición?','f ∘ g aplica primero g; g ∘ f aplica primero f. Como ponerse y quitarse algo, el orden cambia el resultado.'],
+      ['¿Por qué se intercambian x e y para la inversa?','La inversa cambia entradas por salidas. Despejar x y luego llamarle x a la nueva entrada es justamente intercambiar papeles.'],
+      ['¿Por qué la inversa necesita que f sea inyectiva?','Si dos x dan el mismo y, la inversa no sabría a cuál volver.'],
+      ['¿Por qué la gráfica de f⁻¹ es el reflejo en y = x?','Cada punto (a, b) de f se vuelve (b, a) en f⁻¹, y ese es el reflejo sobre la recta y = x.']],
+    rec:['Composición: reemplaza x en la función de afuera por la función de adentro.','Inversa: escribe y = f(x).','Despeja x.','Intercambia x e y.','Comprueba con un valor.'],
+    w:[['g está adentro: se aplica primero.','Ahora f está adentro.','Distintas: la composición no conmuta.'],
+       ['Se despeja x.','Dividir entre 3.','Se renombra: la entrada vuelve a ser x.'],
+       ['Para quitar el denominador.','Las x a un lado para factorizar.','Factor común x.','Dividir entre (y − 2) y acomodar el signo.','Intercambio final.']]},
+  X7:{pq:[['¿Por qué en aₙ aparece n − 1 y no n?','Para llegar al término n desde el primero hay n − 1 saltos. Del a₁ al a₂ hay un salto, del a₁ al a₃ hay dos.'],
+      ['¿De dónde sale la suma aritmética?','Si emparejas el primero con el último, el segundo con el penúltimo… cada pareja suma lo mismo. Hay n/2 parejas.'],
+      ['¿De dónde sale la suma geométrica?','Si restas S y r·S, casi todos los términos se cancelan y queda S(r − 1) = a₁(rⁿ − 1).'],
+      ['¿Cómo distingo aritmética de geométrica?','Resta términos consecutivos: si da siempre lo mismo es aritmética. Divide: si da siempre lo mismo es geométrica.']],
+    rec:['Identifica el tipo (resta o divide consecutivos).','Halla d o r.','Usa la fórmula del término o de la suma.','Cuenta bien cuántos términos hay.'],
+    w:[['Se resta un término del anterior.','Del término 1 al 20 hay 19 saltos.','5 + 76 = 81.'],
+       ['11 saltos de 5.','12 términos, primero 7 y último 62.','12 ÷ 2 = 6 parejas que suman 69.'],
+       ['Cada término es el doble del anterior.','Fórmula de suma geométrica con r = 2.','2⁸ = 256.']]},
+  X8:{pq:[['¿Por qué se multiplica en el principio multiplicativo?','Por cada opción de la primera elección tienes todas las de la segunda: es un árbol con m ramas que se abren en n cada una.'],
+      ['¿Por qué la combinación divide entre k!?','Porque cuenta grupos sin orden. Cada grupo de k aparece k! veces en las permutaciones (todas sus ordenaciones).'],
+      ['¿Por qué 0! = 1?','Hay exactamente una forma de ordenar nada. Además, así las fórmulas funcionan cuando k = n.'],
+      ['¿Por qué usar el complemento?','"Al menos uno" incluye muchos casos; "ninguno" es uno solo. Es más fácil calcular ese y restarlo de 1.']],
+    rec:['¿Importa el orden? Permutación. ¿No importa? Combinación.','¿Se usan todos? n!.','Probabilidad: favorables entre posibles.','Si dice "al menos uno", usa 1 − P(ninguno).'],
+    w:[['Cada posición del estante es una elección distinta.','4 opciones para el primero, 3 para el segundo…'],
+       ['Un comité con A, B y C es el mismo que con C, B y A.','8·7·6 cuenta ordenados; 3·2·1 elimina el orden.','336 ÷ 6.'],
+       ['Todas las parejas posibles de 10 bolas.','Parejas que usan solo rojas.','Se simplifica dividiendo entre 3.']]},
+  X11:{pq:[['¿Por qué cos 2x = cos²x − sen²x?','Es la fórmula de cos(a + b) con a = b = x: cos x cos x − sen x sen x.'],
+      ['¿Por qué conviene pasar todo a seno y coseno?','Porque todas las funciones trigonométricas se escriben con ellos. Así reduces la variedad y es más fácil ver qué se cancela.'],
+      ['¿Por qué no dividir entre sen x?','sen x puede ser 0, y dividir entre 0 no existe. Perderías las soluciones donde sen x = 0. Mejor factoriza.'],
+      ['¿Por qué una ecuación trigonométrica tiene varias soluciones?','Porque las funciones trigonométricas se repiten: el mismo valor de seno aparece en dos cuadrantes por vuelta.']],
+    rec:['Escribe todo en seno y coseno.','Usa la pitagórica para cambiar sen² por 1 − cos² (o al revés).','Factoriza si hay algo en común.','En ecuaciones, halla el ángulo de referencia y ubica los cuadrantes según el signo.'],
+    w:[['tan x es sen x entre cos x.','cos x multiplica y divide: se cancela.'],
+       ['sec x = 1 ÷ cos x y tan x = sen x ÷ cos x.','Igual denominador: se restan los numeradores.','Pitagórica despejada.'],
+       ['Se despeja como una cuadrática simple.','El seno es positivo en I y II.','El seno es negativo en III y IV.']]}
+};
+let DEEPON=false; try{ DEEPON=localStorage.getItem('arbolAli.deep')==='1'; }catch(e){}
+function explainWhy(id,k){ const D=DEEP[id]; if(!DEEPON||!D||!D.w) return null; const E=EXPLAIN[id], L=LESSONS[id]; const map=L&&E.ex.length===2?[0,null,1]:[0,1,2]; const j=map[k]; return j===null?null:(D.w[j]||null); }
+function xpStep(s,i,fresh,k){ const w=explainWhy(XP.id,k), h=lessonStep(s,i,fresh); if(!w||!w[i]) return h; return h.replace(/<\/div><\/li>$/, `<div class="ls-why">💭 <b>¿Por qué?</b> ${mth(w[i])}</div></div></li>`); }
 let XP=null;
 const XLV=['Básico','Intermedio','Avanzado'];
 function explainExamples(id){ const E=EXPLAIN[id], L=LESSONS[id]; if(!E) return []; return L&&E.ex.length===2 ? [E.ex[0], L.ex, E.ex[1]] : E.ex.slice(0,3); }
 function explainNext(id){ const B=byId(), ids=Object.keys(EXPLAIN).filter(k=>B[k]).sort((a,b)=>((B[a].week||30)-(B[b].week||30))||a.localeCompare(b,'es',{numeric:true})); const i=ids.indexOf(id); return ids[i+1]||null; }
 function xpExample(e,k){ const shown=XP.st[k]||0, ns=e.s.length;
   return `<div class="xp-ex" style="--i:${k}"><div class="xp-ext"><span class="lvt l${k+1}">${XLV[k]}</span><span class="muted" style="font-size:12px">Ejemplo ${k+1} de 3</span></div><div class="ls-q">${mth(e.q)}</div>
-    <ol class="ls-steps" id="xpS${k}">${e.s.slice(0,shown).map((s,i)=>lessonStep(s,i,false)).join('')}</ol>
+    <ol class="ls-steps" id="xpS${k}">${e.s.slice(0,shown).map((s,i)=>xpStep(s,i,false,k)).join('')}</ol>
     ${shown<ns?`<div class="xp-btns"><button class="btn pri sm" data-xstep="${k}">${shown?'Siguiente paso ›':'Resolver paso a paso ›'}</button><button class="btn sm" data-xall="${k}">Ver todo</button></div>`:`<div class="ls-res">✅ Resultado: <b>${mth(e.r)}</b></div>`}</div>`; }
 function openExplain(id){
-  const E=EXPLAIN[id], n=byId()[id]; if(!E||!n) return; LS=null; XP={id, st:[0,0,0]};
+  const E=EXPLAIN[id], n=byId()[id]; if(!E||!n) return; LS=null; const keep=XP&&XP.id===id&&XP.keep; XP={id, st:keep?XP.st:[0,0,0]}; const D=DEEPON?DEEP[id]:null;
   const box=lessonBox(), c=col(n), sm=SUMMARY[id], L=LESSONS[id], B=byId();
   const reqs=(n.reqs||[]).filter(r=>B[r]), kids=S.nodes.filter(m=>(m.reqs||[]).includes(id));
   const chip=m=>`<button class="nchip xp-chip" ${EXPLAIN[m.id]?`data-exp="${esc(m.id)}"`:''} style="--c:${col(m)}"><b>${esc(m.id)}</b> ${esc(m.title)}</button>`;
   const errs=E.err.concat(L&&L.err?[L.err]:[]), nx=explainNext(id), exs=explainExamples(id);
   box.innerHTML=`<div class="ls-wrap" style="--c:${c}"><div class="ls-top"><span class="p-id" style="background:${c};margin-top:0">${esc(n.id)}</span><div class="ls-tt"><div class="ls-k">Explicación${n.week?' · semana '+n.week:''}</div><h2>${esc(n.title)}</h2></div><button class="xbtn" id="xpX" aria-label="Cerrar" style="margin-top:0">✕</button></div>
-    <div class="xp-nav">${[['xs1','🌱 Desde cero'],['xs2','🔑 Conceptos'],['xs3','📐 Fórmulas'],['xs4','✏️ Ejemplos'],['xs5','⚠️ Errores'],['xs6','🔗 Conexiones']].map(([a,t])=>`<button class="nchip" data-xgo="${a}">${t}</button>`).join('')}</div>
+    <button class="deep-tg ${DEEPON?'on':''}" id="xpDeep"><span><b>🔬 Modo profundo</b><small>${DEEPON?'Activado: el porqué de cada fórmula y de cada paso':'Actívalo para ver el porqué de cada fórmula y de cada paso'}</small></span><i></i></button>
+    <div class="xp-nav">${[['xs1','🌱 Desde cero'],['xs2','🔑 Conceptos']].concat(D?[['xs7','🧠 El porqué']]:[],[['xs3','📐 Fórmulas'],['xs4','✏️ Ejemplos']],D?[['xs8','🧭 Receta']]:[],[['xs5','⚠️ Errores'],['xs6','🔗 Conexiones']]).map(([a,t])=>`<button class="nchip" data-xgo="${a}">${t}</button>`).join('')}</div>
     <section class="ls-sec" id="xs1"><h3>🌱 Desde cero</h3>${E.intro.map(p=>`<p class="xp-p">${mth(p)}</p>`).join('')}</section>
     <section class="ls-sec" id="xs2"><h3>🔑 Conceptos clave</h3><div class="xp-conc">${E.conc.map(([t,d],i)=>`<div class="xp-cc" style="--i:${i}"><b>${esc(t)}</b><span>${mth(d)}</span></div>`).join('')}</div></section>
+    ${D?`<section class="ls-sec deep-sec" id="xs7"><h3>🧠 El porqué de cada cosa</h3>${D.pq.map(([q,a],i)=>`<details class="dq" ${i===0?'open':''} style="--i:${i}"><summary>${mth(q)}</summary><p>${mth(a)}</p></details>`).join('')}</section>`:''}
     ${sm?`<section class="ls-sec" id="xs3"><h3>📐 Fórmulas explicadas</h3>${sm.f.map(([f,e],i)=>`<div class="sm-f" style="--i:${i}"><div class="sm-fx">${mth(f)}</div><div class="sm-ex">${mth(e)}</div></div>`).join('')}</section>`:''}
     <section class="ls-sec" id="xs4"><h3>✏️ Ejemplos resueltos, de menos a más</h3>${exs.map((e,k)=>xpExample(e,k)).join('')}</section>
+    ${D?`<section class="ls-sec deep-sec" id="xs8"><h3>🧭 Receta: cómo atacar cualquier ejercicio del tema</h3><ol class="rec">${D.rec.map(r=>`<li>${mth(r)}</li>`).join('')}</ol></section>`:''}
     <section class="ls-sec warn-sec" id="xs5"><h3>⚠️ Errores comunes</h3><ul class="xp-err">${errs.map(e=>`<li>${mth(e)}</li>`).join('')}</ul></section>
     <section class="ls-sec" id="xs6"><h3>🔗 Conexiones</h3>${reqs.length?`<div class="xp-k">Necesitas antes</div><div class="chips">${reqs.map(r=>chip(B[r])).join('')}</div>`:''}${kids.length?`<div class="xp-k">Este tema te abre</div><div class="chips">${kids.map(chip).join('')}</div>`:''}${sm&&sm.uso?`<div class="sm-uso">🎯 <b>Para qué sirve:</b> ${esc(sm.uso)}</div>`:''}</section>
     <div class="ls-act">${GEN[id]?`<button class="btn" id="xpPrac">🧮 Practicar</button>`:''}${L?`<button class="btn" data-lesson="${esc(id)}">📖 Lección</button>`:''}${THEORY[id]?`<button class="btn" id="xpTheo">🧠 Teoría</button>`:''}${nx?`<button class="btn pri" data-exp="${esc(nx)}">Siguiente tema: ${esc(nx)} ›</button>`:''}</div></div>`;
@@ -3126,6 +3497,7 @@ function openExplain(id){
 function bindExplain(){
   const box=lessonBox(), $=s=>box.querySelector(s), id=XP.id;
   $('#xpX').onclick=()=>{ box.classList.remove('show'); XP=null; };
+  $('#xpDeep').onclick=()=>{ DEEPON=!DEEPON; try{ localStorage.setItem('arbolAli.deep',DEEPON?'1':'0'); }catch(e){} buzz(8); const y=box.scrollTop; XP.keep=true; openExplain(id); box.scrollTop=y; toast(DEEPON?'🔬 Modo profundo activado':'Modo profundo desactivado'); };
   if($('#xpPrac')) $('#xpPrac').onclick=()=>{ box.classList.remove('show'); XP=null; goPractice(id); };
   if($('#xpTheo')) $('#xpTheo').onclick=()=>{ box.classList.remove('show'); XP=null; goTheory(id); };
   box.querySelectorAll('[data-xgo]').forEach(b=>b.onclick=()=>{ const t=box.querySelector('#'+b.dataset.xgo); if(t) box.scrollTo({top:t.offsetTop-62, behavior:RM()?'auto':'smooth'}); });
@@ -3133,14 +3505,14 @@ function bindExplain(){
 function xpReveal(k, all){
   if(!XP) return; const e=explainExamples(XP.id)[k]; if(!e) return; const box=lessonBox(), ol=box.querySelector('#xpS'+k); const from=XP.st[k];
   XP.st[k]= all ? e.s.length : Math.min(e.s.length, from+1); buzz(6);
-  ol.insertAdjacentHTML('beforeend', e.s.slice(from, XP.st[k]).map((s,i)=>lessonStep(s,from+i,true)).join(''));
+  ol.insertAdjacentHTML('beforeend', e.s.slice(from, XP.st[k]).map((s,i)=>xpStep(s,from+i,true,k)).join(''));
   const card=ol.parentNode, tail=card.querySelector('.xp-btns'); if(tail) tail.remove();
   card.insertAdjacentHTML('beforeend', XP.st[k]<e.s.length?`<div class="xp-btns"><button class="btn pri sm" data-xstep="${k}">Siguiente paso ›</button><button class="btn sm" data-xall="${k}">Ver todo</button></div>`:`<div class="ls-res">✅ Resultado: <b>${mth(e.r)}</b></div>`);
   setTimeout(()=>{ const last=card.lastElementChild; if(last) last.scrollIntoView({behavior:RM()?'auto':'smooth', block:'nearest'}); },30);
 }
 function explainCard(){
   const B=byId(), ids=Object.keys(EXPLAIN).filter(id=>B[id]).sort((a,b)=>((B[a].week||30)-(B[b].week||30))||a.localeCompare(b,'es',{numeric:true})), cw=curWeek();
-  return `<div class="card" id="explainCard"><h2>📘 Explicaciones extensas</h2><p class="muted" style="margin-top:0">Cada tema desde cero: la intuición, conceptos clave, fórmulas explicadas, 3 ejemplos de menos a más, errores comunes y con qué temas se conecta.</p>
+  return `<div class="card" id="explainCard"><h2>📘 Explicaciones extensas</h2><p class="muted" style="margin-top:0">Cada tema desde cero: la intuición, conceptos clave, fórmulas explicadas, 3 ejemplos de menos a más, errores comunes y conexiones. Con el <b style="color:var(--tx)">🔬 Modo profundo</b> verás además el porqué de cada fórmula y de cada paso.</p>
     <div class="ls-grid">${ids.map(id=>{ const n=B[id]; return `<button class="ls-chip ${n.week===cw?'cur':''}" data-exp="${esc(id)}" style="--c:${col(n)}"><span class="lc-top"><b>${esc(id)}</b>${n.week===cw?'<em>Esta semana</em>':''}</span><span class="lc-t">${esc(n.title)}</span></button>`; }).join('')}</div></div>`;
 }
 document.addEventListener('click', e=>{
