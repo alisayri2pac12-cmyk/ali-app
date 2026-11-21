@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0e0c0a">
+<meta name="theme-color" content="#08090b">
 <title>Árbol de Matemática</title>
 <script>
-try{ const t=localStorage.getItem('arbolAli.theme'); if(t==='noche'||t==='verde'||t==='oscuro') document.documentElement.dataset.theme=t; }catch(e){}
+try{ const t=localStorage.getItem('arbolAli.theme'); if(t==='noche'||t==='verde'||t==='oscuro'||t==='calido') document.documentElement.dataset.theme=t; }catch(e){}
 if(/^https?:$/.test(location.protocol)){
   document.write('<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">');
   if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -18,30 +18,32 @@ if(/^https?:$/.test(location.protocol)){
 <meta name="apple-mobile-web-app-title" content="Árbol Ali">
 <style>
 :root{
-  /* Cálido (por defecto): negro cálido con acentos ámbar y cobre */
-  --bg:#0e0c0a; --bg2:#171411; --bg3:#221d18; --line:#342c24; --line2:#4a3f34; --tx:#f4ede4; --tx2:#bfb1a1; --tx3:#8a7c6c;
-  --ok:#4ade80; --mid:#facc15; --bad:#f87171; --acc:#f2a65a; --accG:linear-gradient(180deg,#f7b878,#e88f45); --onAcc:#1d1207;
-  --glass:#171411e8; --bg0:#0a0807; --card-hi:#1d1915; --hl:#ffffff0d; --shadow:0 10px 28px -14px #000;
-  --node:#1b1612; --nodeL:#14110e; --nodeLs:#4d4237; --nodeLt:#8f8170; --dot:#2b231b; --edge:#5c4d3f;
-  --cur:#2b2016; --info:#36250f; --infoTx:#fcd9a8; --link:#f5b97a;
-  --glow1:#7a3f1424; --glow2:#5a2d1018;
+  /* Medianoche (por defecto): casi negro neutro, superficies escalonadas y un solo acento violeta */
+  --bg:#08090b; --bg2:#111215; --bg3:#1a1b20; --line:#24252b; --line2:#33353d; --tx:#ededf0; --tx2:#a2a3ad; --tx3:#6f717c;
+  --ok:#4ade80; --mid:#facc15; --bad:#f87171; --acc:#8b7cff; --accG:linear-gradient(180deg,#9d90ff,#7563f5); --onAcc:#0c0920;
+  --glass:#111215e6; --bg0:#060709; --card-hi:#15161a; --hl:#ffffff0b; --shadow:0 12px 30px -16px #000;
+  --node:#141519; --nodeL:#0f1013; --nodeLs:#3a3c44; --nodeLt:#7b7d88; --dot:#1c1d22; --edge:#43454e;
+  --cur:#1c1a33; --info:#1d1938; --infoTx:#d3ccff; --link:#ab9fff;
+  --au1:#6d5cff47; --au2:#2f8bff33; --au3:#c04bff2b;
 }
-:root[data-theme="oscuro"]{--bg:#0d1017;--bg2:#151a23;--bg3:#1d2330;--line:#2a3242;--line2:#3a4252;--tx:#e6e8ee;--tx2:#9aa3b2;--tx3:#6b7383;--acc:var(--acc);--accG:var(--acc);--onAcc:#0b1020;--glass:#151a23e6;--bg0:#090c12;--card-hi:var(--bg2);--hl:#ffffff08;--node:#141925;--nodeL:#161a22;--nodeLs:#4a5160;--nodeLt:#7d8595;--dot:#1c2230;--edge:#465064;--cur:#1a2338;--info:#172443;--infoTx:#bfd0ff;--link:#9ab8ff;--glow1:transparent;--glow2:transparent}
-:root[data-theme="noche"]{--line2:#33467a;--accG:var(--acc);--onAcc:#0b1020;--card-hi:#131f3b;--hl:#ffffff0a;--node:#121b34;--nodeL:#0f172b;--nodeLs:#3d4d78;--nodeLt:#7f8cb3;--dot:#16213f;--edge:#41548a;--cur:#18264d;--info:#172443;--infoTx:#bfd0ff;--link:#9ab8ff;--glow1:#2a4a9a1f;--glow2:transparent;--bg:#0a1020;--bg2:#101a33;--bg3:#18254a;--line:#24345f;--tx:#e8edff;--tx2:#a3b0d6;--tx3:#6f7ca3;--acc:#8fb4ff;--glass:#101a33e6;--bg0:#070c19}
-:root[data-theme="verde"]{--line2:#2f5440;--accG:var(--acc);--onAcc:#052019;--card-hi:#13221c;--hl:#ffffff0a;--node:#12201a;--nodeL:#0e1814;--nodeLs:#3b5a4a;--nodeLt:#7f9a8c;--dot:#15261e;--edge:#3f6352;--cur:#173026;--info:#0f2e26;--infoTx:#b5f5e4;--link:#7ee8d3;--glow1:#1f7a5a1c;--glow2:transparent;--bg:#0a120f;--bg2:#101c17;--bg3:#172a22;--line:#23402f;--tx:#e6f2ec;--tx2:#9db8aa;--tx3:#6a8577;--acc:#5eead4;--glass:#101c17e6;--bg0:#07100c}
+:root[data-theme="calido"]{--bg:#0e0c0a; --bg2:#171411; --bg3:#221d18; --line:#342c24; --line2:#4a3f34; --tx:#f4ede4; --tx2:#bfb1a1; --tx3:#8a7c6c;   --ok:#4ade80; --mid:#facc15; --bad:#f87171; --acc:#f2a65a; --accG:linear-gradient(180deg,#f7b878,#e88f45); --onAcc:#1d1207;   --glass:#171411e8; --bg0:#0a0807; --card-hi:#1d1915; --hl:#ffffff0d; --shadow:0 10px 28px -14px #000;   --node:#1b1612; --nodeL:#14110e; --nodeLs:#4d4237; --nodeLt:#8f8170; --dot:#2b231b; --edge:#5c4d3f;   --cur:#2b2016; --info:#36250f; --infoTx:#fcd9a8; --link:#f5b97a; --au1:#c2621a3d; --au2:#8a3d122e; --au3:#f2a65a24;}
+:root[data-theme="oscuro"]{--au1:#3b5bdb2e;--au2:#1c7ed624;--au3:transparent;--bg:#0d1017;--bg2:#151a23;--bg3:#1d2330;--line:#2a3242;--line2:#3a4252;--tx:#e6e8ee;--tx2:#9aa3b2;--tx3:#6b7383;--acc:#7aa2ff;--accG:var(--acc);--onAcc:#0b1020;--glass:#151a23e6;--bg0:#090c12;--card-hi:var(--bg2);--hl:#ffffff08;--node:#141925;--nodeL:#161a22;--nodeLs:#4a5160;--nodeLt:#7d8595;--dot:#1c2230;--edge:#465064;--cur:#1a2338;--info:#172443;--infoTx:#bfd0ff;--link:#9ab8ff}
+:root[data-theme="noche"]{--au1:#3b6cff38;--au2:#5b8cff26;--au3:#7a5cff1f;--line2:#33467a;--accG:var(--acc);--onAcc:#0b1020;--card-hi:#131f3b;--hl:#ffffff0a;--node:#121b34;--nodeL:#0f172b;--nodeLs:#3d4d78;--nodeLt:#7f8cb3;--dot:#16213f;--edge:#41548a;--cur:#18264d;--info:#172443;--infoTx:#bfd0ff;--link:#9ab8ff;--bg:#0a1020;--bg2:#101a33;--bg3:#18254a;--line:#24345f;--tx:#e8edff;--tx2:#a3b0d6;--tx3:#6f7ca3;--acc:#8fb4ff;--glass:#101a33e6;--bg0:#070c19}
+:root[data-theme="verde"]{--au1:#1fae7a33;--au2:#2dd4bf24;--au3:#0e7a5a1f;--line2:#2f5440;--accG:var(--acc);--onAcc:#052019;--card-hi:#13221c;--hl:#ffffff0a;--node:#12201a;--nodeL:#0e1814;--nodeLs:#3b5a4a;--nodeLt:#7f9a8c;--dot:#15261e;--edge:#3f6352;--cur:#173026;--info:#0f2e26;--infoTx:#b5f5e4;--link:#7ee8d3;--bg:#0a120f;--bg2:#101c17;--bg3:#172a22;--line:#23402f;--tx:#e6f2ec;--tx2:#9db8aa;--tx3:#6a8577;--acc:#5eead4;--glass:#101c17e6;--bg0:#07100c}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:radial-gradient(120% 55% at 50% -12%,var(--glow1),transparent 62%),radial-gradient(90% 45% at 100% 108%,var(--glow2),transparent 60%),var(--bg);background-attachment:fixed;color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,"Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;font-feature-settings:"tnum" 0}
+html{background:var(--bg)}
+html,body{margin:0;height:100%;}
+body{background:transparent;color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,"Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;font-feature-settings:"tnum" 0}
 h1,h2,h3,.big{letter-spacing:-.01em}.big{font-variant-numeric:tabular-nums}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
-#app{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto;height:calc(100vh - 44px);height:calc(100dvh - 44px - env(safe-area-inset-top))}
-#appSw{display:flex;gap:6px;padding:6px 10px;padding-top:max(6px,env(safe-area-inset-top));background:var(--bg0);border-bottom:1px solid var(--line);height:calc(44px + env(safe-area-inset-top))}
-#appSw button{flex:1;border:1px solid var(--line);background:var(--bg2);color:var(--tx2);border-radius:10px;font-size:14px;font-weight:700}
-#appSw button.on{background:var(--accG);border-color:var(--acc);color:var(--onAcc)}
-#mallaFrame{display:none;width:100%;border:0;height:calc(100vh - 44px);height:calc(100dvh - 44px - env(safe-area-inset-top));background:var(--bg)}
-body.malla #app{display:none} body.malla #mallaFrame{display:block}
+#app{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;height:100vh;height:100dvh;height:var(--appH,100dvh);overflow:hidden}
+#mallaFrame{display:block;width:100%;height:100%;border:0;background:var(--bg)}
+#vMalla{padding:0;overflow:hidden}
+body.malla header{display:none}
+header{grid-row:1} main{grid-row:2} nav{grid-row:3}
 /* Cabecera */
-header{display:flex;gap:10px;align-items:center;padding:8px 12px;background:linear-gradient(180deg,var(--card-hi),var(--bg2));border-bottom:1px solid var(--line);box-shadow:0 6px 18px -12px #000}
+header{display:flex;gap:10px;align-items:center;padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top));background:color-mix(in srgb,var(--bg2) 82%,transparent);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);position:relative;z-index:3;border-bottom:1px solid var(--line);box-shadow:0 6px 18px -12px #000}
 #rankIcon{flex:0 0 auto;width:44px;height:50px}
 .hd-txt{min-width:0;flex:1}
 .hd-rank{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -56,14 +58,16 @@ main{position:relative;overflow:hidden}
 .view.active{display:block}
 #vTree{padding:0;overflow:hidden}
 /* Navegación */
-nav{display:grid;grid-template-columns:repeat(5,1fr);background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-nav button{background:none;border:0;padding:8px 2px 9px;color:var(--tx3);font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:2px}
-nav button .ic{font-size:19px;line-height:1}
-nav button.active{color:var(--acc);font-weight:650}
+nav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:color-mix(in srgb,var(--bg2) 86%,transparent);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom));position:relative;z-index:6;min-height:62px}
+nav button{background:none;border:0;padding:5px 0 4px;color:var(--tx2);font-size:10.5px;font-weight:600;letter-spacing:.01em;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+nav button>span:not(.badge){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+nav .ic{width:46px;height:28px;padding:3px 12px;border-radius:999px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:background-color .25s,color .25s,transform .25s var(--ez)}
+nav button.active{color:var(--tx)}
+nav button.active .ic{background:color-mix(in srgb,var(--acc) 22%,transparent);color:var(--acc)}
 nav button{position:relative}
-nav .badge{position:absolute;top:4px;left:calc(50% + 6px);background:#f87171;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 5px;line-height:1.3}
+nav .badge{position:absolute;top:2px;left:calc(50% + 8px);background:#f87171;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 5px;line-height:1.3}
 .hd-days .stk{display:block;font-size:11px;color:#fbd3ab;margin-top:2px}
-nav button.active .ic{filter:drop-shadow(0 0 6px var(--acc))}
+
 /* Árbol */
 #tree{width:100%;height:100%;touch-action:none;display:block;user-select:none;-webkit-user-select:none;background:
  radial-gradient(circle at 1px 1px,var(--dot) 1px,transparent 1.5px) 0 0/22px 22px}
@@ -218,7 +222,7 @@ label.sub{font-size:13.5px;align-items:flex-start;padding:4px 0}
 label.sub input{width:18px;height:18px;margin-top:1px;flex:0 0 auto}
 label.sub input:checked+span{text-decoration:line-through;opacity:.6}
 .tl details{margin-top:4px}.tl summary{font-size:12px;color:var(--tx2);cursor:pointer}
-#updBar{position:fixed;left:10px;right:10px;top:calc(52px + env(safe-area-inset-top));z-index:25;background:var(--info);border:1px solid var(--acc);color:var(--infoTx);border-radius:12px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;box-shadow:0 6px 20px #0008}
+#updBar{position:fixed;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top));z-index:25;background:var(--info);border:1px solid var(--acc);color:var(--infoTx);border-radius:12px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;box-shadow:0 6px 20px #0008}
 
 /* ---------- Fórmulas ---------- */
 .fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.92em;line-height:1.15;margin:0 2px}
@@ -260,8 +264,7 @@ sup{font-size:.72em;line-height:0}
 #toast{transition:opacity .25s,transform .35s var(--ez)}
 button,.btn,.chip,.nchip,.zbtn{transition:transform .12s,background-color .2s,border-color .2s,opacity .2s}
 button:active:not(:disabled),.btn:active,.nchip:active,.zbtn:active{transform:scale(.95)}
-nav button .ic{transition:transform .25s var(--ez),filter .25s}
-nav button.active .ic{transform:translateY(-2px) scale(1.12)}
+nav button:active .ic{transform:scale(.9)}
 .intro .node{animation:nodeIn .5s ease-out both}
 .intro .edge:not(.dash){stroke-dasharray:3000;animation:draw .9s var(--ez) .15s both}
 .anim-in .node.dim{animation:dimIn .3s both}.anim-in .edge.dim{animation:edgeDim .3s both}
@@ -309,7 +312,7 @@ nav button.active .ic{transform:translateY(-2px) scale(1.12)}
 .theme-b{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--bg3);border:2px solid var(--line);border-radius:12px;padding:10px 6px;font-size:13px;font-weight:600}
 .theme-b.on{border-color:var(--acc)}
 .theme-b .sw{width:100%;height:30px;border-radius:8px}
-.sw-calido{background:linear-gradient(135deg,#0e0c0a 50%,#f2a65a 50%)}.sw-oscuro{background:linear-gradient(135deg,#0d1017 50%,#7aa2ff 50%)}.sw-noche{background:linear-gradient(135deg,#0a1020 50%,#8fb4ff 50%)}.sw-verde{background:linear-gradient(135deg,#0a120f 50%,#5eead4 50%)}
+.sw-medianoche{background:linear-gradient(135deg,#08090b 50%,#8b7cff 50%)}.sw-calido{background:linear-gradient(135deg,#0e0c0a 50%,#f2a65a 50%)}.sw-oscuro{background:linear-gradient(135deg,#0d1017 50%,#7aa2ff 50%)}.sw-noche{background:linear-gradient(135deg,#0a1020 50%,#8fb4ff 50%)}.sw-verde{background:linear-gradient(135deg,#0a120f 50%,#5eead4 50%)}
 .gw{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}
 .gw-eq{font-size:16px;font-weight:700;margin-bottom:6px;text-align:center}
 .gsvg{width:100%;max-width:340px;display:block;margin:0 auto;background:var(--bg2);border-radius:10px}
@@ -318,6 +321,15 @@ nav button.active .ic{transform:translateY(-2px) scale(1.12)}
 @keyframes ptIn{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
 .g-new{animation:fadeIn .4s both}.g-pt.g-new circle{transform-box:fill-box;transform-origin:center;animation:ptIn .45s var(--ez) both}
 .g-curve{stroke-dasharray:3000;animation:draw 1.6s ease-in-out both}
+/* ---------- Aurora de fondo ---------- */
+#aurora{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#aurora i{position:absolute;width:75vmax;height:75vmax;border-radius:50%;opacity:0;will-change:transform,opacity}
+#aurora i:nth-child(1){left:-30vmax;top:-34vmax;background:radial-gradient(closest-side,var(--au1),transparent);animation:auIn 2.6s var(--ez) .1s forwards,au1 26s ease-in-out 2.7s infinite alternate}
+#aurora i:nth-child(2){right:-34vmax;top:6vh;background:radial-gradient(closest-side,var(--au2),transparent);animation:auIn 2.6s var(--ez) .35s forwards,au2 32s ease-in-out 2.9s infinite alternate}
+#aurora i:nth-child(3){left:-10vmax;bottom:-46vmax;background:radial-gradient(closest-side,var(--au3),transparent);animation:auIn 2.6s var(--ez) .6s forwards,au3 38s ease-in-out 3.2s infinite alternate}
+@keyframes auIn{0%{opacity:0;scale:.45}55%{opacity:1;scale:1.12}100%{opacity:.8;scale:1}}
+@keyframes au1{to{translate:18vmax 14vmax}}@keyframes au2{to{translate:-16vmax 18vmax}}@keyframes au3{to{translate:14vmax -16vmax}}
+@media (prefers-reduced-motion:reduce){#aurora i{opacity:.8!important;animation:none!important}}
 #toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);background:var(--tx);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%)}
 @media (min-width:900px){
@@ -330,8 +342,7 @@ nav button.active .ic{transform:translateY(-2px) scale(1.12)}
 </style>
 </head>
 <body>
-<div id="appSw"><button class="on" data-app="mat">🧮 Matemática</button><button data-app="malla">🎓 Malla</button></div>
-<iframe id="mallaFrame" title="Malla de la carrera"></iframe>
+<div id="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 <div id="app">
   <header>
     <svg id="rankIcon" viewBox="0 0 44 50" aria-hidden="true"></svg>
@@ -371,13 +382,15 @@ nav button.active .ic{transform:translateY(-2px) scale(1.12)}
     <section class="view" id="vStudy"><div class="wrap" id="studyWrap"></div></section>
     <section class="view" id="vEval"><div class="wrap" id="evalWrap"></div></section>
     <section class="view" id="vEdit"><div class="wrap" id="editWrap"></div></section>
+    <section class="view" id="vMalla"><iframe id="mallaFrame" title="Malla de la carrera"></iframe></section>
   </main>
   <nav>
-    <button data-v="vTree" class="active"><span class="ic">🌳</span>Árbol</button>
-    <button data-v="vProg"><span class="ic">📈</span>Progreso</button>
-    <button data-v="vStudy"><span class="ic">🔥</span>Estudio<span class="badge" id="dueBadge" hidden></span></button>
-    <button data-v="vEval"><span class="ic">📝</span>Pruebas</button>
-    <button data-v="vEdit"><span class="ic">⚙️</span>Editar</button>
+    <button data-v="vTree" class="active"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.4"/><circle cx="5.5" cy="18.5" r="2.4"/><circle cx="18.5" cy="18.5" r="2.4"/><path d="M12 7.4v4.1M12 11.5 6.8 16.3M12 11.5l5.2 4.8"/></svg><span>Árbol</span></button>
+    <button data-v="vProg"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20.5h18"/><path d="M6.5 16.5v-4M11 16.5V7M15.5 16.5v-6.5M20 16.5V4.5"/></svg><span>Progreso</span></button>
+    <button data-v="vStudy"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 5.5h6a3.5 3.5 0 0 1 3.5 3.5v11a2.8 2.8 0 0 0-2.8-2.8H2.5z"/><path d="M21.5 5.5h-6A3.5 3.5 0 0 0 12 9v11a2.8 2.8 0 0 1 2.8-2.8h6.7z"/></svg><span>Estudio</span><span class="badge" id="dueBadge" hidden></span></button>
+    <button data-v="vEval"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V2.8h6V4M8.8 12.5l2.2 2.2 4.2-4.4"/></svg><span>Pruebas</span></button>
+    <button data-v="vMalla"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M1.8 9 12 4l10.2 5L12 14z"/><path d="M6 11v5.2c3.3 2.3 8.7 2.3 12 0V11M22.2 9v6"/></svg><span>Malla</span></button>
+    <button data-v="vEdit"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h9M18.5 6.5H20M4 12h3.5M12 12h8M4 17.5h11M19.5 17.5h.5"/><circle cx="16" cy="6.5" r="2.2"/><circle cx="9.8" cy="12" r="2.2"/><circle cx="17.6" cy="17.5" r="2.2"/></svg><span>Editar</span></button>
   </nav>
 </div>
 <div id="exam" role="dialog" aria-label="Modo examen"></div>
@@ -1035,17 +1048,14 @@ const mallaFrame = document.getElementById('mallaFrame');
 let mallaReady = null;
 function mallaHtml(){ const b=atob(document.getElementById('mallaSrc').textContent.trim()); const u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return new TextDecoder().decode(u); }
 function ensureMalla(){
-  if(!mallaReady) mallaReady = new Promise(res=>{ mallaFrame.onload=()=>res(mallaFrame.contentWindow); mallaFrame.srcdoc = mallaHtml(); });
+  if(!mallaReady) mallaReady = new Promise(res=>{ mallaFrame.onload=()=>{ syncMallaTheme(); res(mallaFrame.contentWindow); }; mallaFrame.srcdoc = mallaHtml(); });
   return mallaReady;
 }
+function syncMallaTheme(){ try{ const d=mallaFrame.contentDocument; if(!d||!d.head) return; let st=d.getElementById('parentTheme'); if(!st){ st=d.createElement('style'); st.id='parentTheme'; d.head.appendChild(st); }
+  const cs=getComputedStyle(document.documentElement), V=['--bg','--bg2','--bg3','--line','--tx','--tx2','--tx3','--acc'];
+  st.textContent=`:root{${V.map(v=>v+':'+cs.getPropertyValue(v).trim()+' !important').join(';')}} html,body{background:var(--bg)!important} nav{background:var(--bg2)!important}`; }catch(e){} }
 function reloadMalla(){ if(mallaReady){ mallaReady=null; if(document.body.classList.contains('malla')) ensureMalla(); } }
-function showApp(which){
-  document.querySelectorAll('#appSw button').forEach(b=>b.classList.toggle('on', b.dataset.app===which));
-  document.body.classList.toggle('malla', which==='malla');
-  if(which==='malla') ensureMalla(); else { renderHeader(); renderTree(); renderCurrent(); if(typeof firstFit!=='undefined' && !firstFit) requestAnimationFrame(()=>{ fitView(); firstFit=!!svg.getBoundingClientRect().width; }); }
-  try{ localStorage.setItem('arbolAli.app', which); }catch(e){}
-}
-document.querySelectorAll('#appSw button').forEach(b=>b.onclick=()=>showApp(b.dataset.app));
+function showApp(which){ const b=document.querySelector(`nav button[data-v="${which==='malla'?'vMalla':'vTree'}"]`); if(b) b.click(); }
 window.addEventListener('storage', e=>{ if(e.key===KEY){ const d=load(); S=d; refreshAll(); } });
 
 /* ===================== Estudio: racha y minutos ===================== */
@@ -1812,10 +1822,10 @@ function rankUp(k){
 }
 
 /* ===================== Temas de color ===================== */
-const THEMES = {calido:{n:'Cálido', c:'#0e0c0a'}, oscuro:{n:'Grafito', c:'#0d1017'}, noche:{n:'Azul noche', c:'#0a1020'}, verde:{n:'Verde', c:'#0b1310'}};
-function curTheme(){ try{ const t=localStorage.getItem('arbolAli.theme'); return THEMES[t]?t:'calido'; }catch(e){ return 'calido'; } }
-function applyTheme(t){ if(t==='calido') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme=t; const m=document.querySelector('meta[name="theme-color"]'); if(m) m.content=THEMES[t].c; }
-function setTheme(t){ try{ localStorage.setItem('arbolAli.theme',t); }catch(e){} applyTheme(t); }
+const THEMES = {medianoche:{n:'Medianoche', c:'#08090b'}, calido:{n:'Cálido', c:'#0e0c0a'}, oscuro:{n:'Grafito', c:'#0d1017'}, noche:{n:'Azul noche', c:'#0a1020'}, verde:{n:'Verde', c:'#0b1310'}};
+function curTheme(){ try{ const t=localStorage.getItem('arbolAli.theme'); return THEMES[t]?t:'medianoche'; }catch(e){ return 'medianoche'; } }
+function applyTheme(t){ if(t==='medianoche') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme=t; const m=document.querySelector('meta[name="theme-color"]'); if(m) m.content=THEMES[t].c; }
+function setTheme(t){ try{ localStorage.setItem('arbolAli.theme',t); }catch(e){} applyTheme(t); syncMallaTheme(); }
 applyTheme(curTheme());
 function themeCard(){ const t=curTheme(); return `<div class="card"><h2>🎨 Apariencia</h2><div class="themes">${Object.entries(THEMES).map(([k,v])=>`<button class="theme-b ${k===t?'on':''}" data-theme-b="${k}"><span class="sw sw-${k}"></span>${esc(v.n)}</button>`).join('')}</div><div class="muted" style="margin-top:6px">El tema se guarda en este celular.</div></div>`; }
 function bindTheme(w){ w.querySelectorAll('[data-theme-b]').forEach(b=>b.onclick=()=>{ setTheme(b.dataset.themeB); w.querySelectorAll('[data-theme-b]').forEach(x=>x.classList.toggle('on',x===b)); renderHeader(); renderTree(); }); }
@@ -1976,7 +1986,10 @@ function bindGraphs(w){
 let toastT; function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
 let curView='vTree';
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
-  curView=b.dataset.v; document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));
+  curView=b.dataset.v; document.querySelectorAll('nav button').forEach(x=>{ x.classList.toggle('active',x===b); if(x===b) x.setAttribute('aria-current','page'); else x.removeAttribute('aria-current'); });
+  document.body.classList.toggle('malla', curView==='vMalla'); if(curView==='vMalla') ensureMalla();
+  try{ localStorage.setItem('arbolAli.app', curView==='vMalla'?'malla':'mat'); }catch(e){}
+  if(curView==='vTree'){ renderHeader(); renderTree(); if(!firstFit) requestAnimationFrame(()=>{ fitView(); firstFit=!!svg.getBoundingClientRect().width; }); }
   document.querySelectorAll('.view').forEach(v=>{ v.classList.toggle('active',v.id===curView); v.classList.remove('enter'); });
   const cv=document.getElementById(curView); void cv.offsetWidth; cv.classList.add('enter'); clearTimeout(cv._et); cv._et=setTimeout(()=>cv.classList.remove('enter'),900);
   renderCurrent();
@@ -1984,6 +1997,8 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 function renderCurrent(){ if(curView==='vStudy') renderStudy(); else if(curView==='vProg') renderProgress(); else if(curView==='vEval') renderEvals(); else if(curView==='vEdit') renderEditor(); }
 function refreshAll(){ renderHeader(); renderTree(); renderCurrent(); }
 let firstFit=false;
+function setAppH(){ const h=(window.visualViewport&&!/input|textarea|select/i.test((document.activeElement||{}).tagName||''))?Math.round(visualViewport.height):innerHeight; document.documentElement.style.setProperty('--appH', Math.max(h,innerHeight*0.6)+'px'); }
+setAppH(); addEventListener('resize',setAppH); addEventListener('orientationchange',()=>setTimeout(setAppH,250)); if(window.visualViewport) visualViewport.addEventListener('resize',setAppH);
 window.addEventListener('resize', ()=>{ if(!firstFit){ fitView(); } });
 meta(); save(); autoSnapshot();
 renderHeader(); renderTree(); try{ if(localStorage.getItem('arbolAli.app')==='malla') showApp('malla'); }catch(e){}
