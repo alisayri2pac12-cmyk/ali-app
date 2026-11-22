@@ -555,6 +555,17 @@ nav button.active .ic{animation:navPop .4s var(--ez)}
 .sk-bar{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sk-bar .on{border-color:var(--acc);color:var(--acc)}
 .pi-man{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--tx3)}.pi-man span{flex:1 1 100%}.pi-man .btn{padding:4px 9px;font-size:12px}
 /* Modo profundo */
+.why-s{margin-top:4px;padding:5px 9px;border-radius:9px;background:color-mix(in srgb,var(--acc) 9%,transparent);border-left:2px solid var(--acc);font-size:12.8px;line-height:1.45;color:var(--tx2)}
+.stp li{margin-bottom:6px}
+.rule-box{margin-top:7px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,#38bdf8 12%,var(--bg3));border-left:3px solid #38bdf8;font-size:14px;line-height:1.45;animation:cardIn .35s var(--ez) both}.rule-box b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#38bdf8;margin-bottom:2px}
+.dg{display:block;margin-top:6px;padding:7px 10px;border-radius:10px;background:color-mix(in srgb,#f472b6 12%,var(--bg3));font-size:13.5px;line-height:1.45;color:var(--tx)}
+.cq{margin-top:10px;padding:11px 12px;border-radius:12px;background:color-mix(in srgb,#a78bfa 12%,var(--bg3));border:1px solid color-mix(in srgb,#a78bfa 40%,transparent);animation:cardIn .35s var(--ez) both}
+.cq-q{font-weight:650;font-size:14.5px;line-height:1.45;margin-bottom:8px}
+.cq-o{display:flex;flex-direction:column;gap:6px}.cq-o button{text-align:left;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--tx);font:inherit;font-size:14px;line-height:1.35;cursor:pointer}
+.cq-o button.ok{border-color:#4ade80;background:color-mix(in srgb,#4ade80 16%,var(--bg2))}.cq-o button.no{border-color:#f87171;background:color-mix(in srgb,#f87171 14%,var(--bg2))}.cq-o button:disabled{cursor:default}
+.cq-e{margin-top:8px;font-size:13.5px;line-height:1.5;color:var(--tx2)}
+.xg-btn{margin-top:8px}
+.src{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}.src a{display:block;padding:9px 11px;border-radius:11px;background:var(--bg3);color:var(--tx);text-decoration:none;font-size:14px;line-height:1.35}.src a b{display:block;font-size:13px;color:var(--acc)}.src a span{color:var(--tx2);font-size:13px}
 .deep-tg{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 13px;margin:0 0 10px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(135deg,color-mix(in srgb,var(--c,var(--acc)) 14%,var(--bg3)),var(--bg2));color:var(--tx)}
 .deep-tg span{flex:1;min-width:0}.deep-tg b{display:block;font-size:14.5px}.deep-tg small{display:block;font-size:12px;color:var(--tx2);margin-top:1px}
 .deep-tg i{flex:0 0 auto;width:42px;height:24px;border-radius:99px;background:var(--line);position:relative;transition:background .25s}
@@ -1724,12 +1735,12 @@ function propSig(a,b){ if(!a||!b) return false; let r=null; for(let i=0;i<a.leng
 const noAcc=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 function checkAnswer(user, expected, q){
   const u=String(user||'').trim(); if(!u) return null; const e=String(expected);
-  const yn=noAcc(e).match(/^(si|no)\b/); if(yn){ const uy=noAcc(u).match(/^(si|no)\b/); return !!uy && uy[1]===yn[1]; }
+  const yn=noAcc(e).match(/^(si|no)\b/); if(yn){ const uy=noAcc(u).match(/^(si|no)\b/); if(!uy || uy[1]!==yn[1]) return false; const un=numChunks(ansClean(u.replace(/^\s*\S+/,''))); if(!un.length) return true; const en=numChunks(ansClean(e)).concat(numChunks(String(q||''))); return un.every(x=>en.includes(x)); }
   if(/^factoriza/i.test(q||'') && /\(/.test(e) && !/\(/.test(u)) return false;
   const ce=ansClean(e), ee=/[xy]/.test(ce)&&!/;| o /.test(ce)&&stripLabel(ce)===ce?eqSig(ce):null; if(ee) return propSig(ee, eqSig(ansClean(u)));
   const dc=/\d,\d/.test(e), E=ansSigs(e,dc,false), U=ansSigs(u,dc,true);
   if(!E.list.length){ if(/∅/.test(e)) return /∅|vac/.test(noAcc(u)) || /^\{\s*\}$/.test(u); const w=noAcc(ansClean(e)).match(/[a-zñ]+/)||noAcc(e).match(/[a-zñ]+/); return !!w && noAcc(u).includes(w[0]); }
-  if(/[∞∪∈]/.test(e)){ const sh=x=>(ansClean(x).match(/[\[\]()]/g)||[]).join(''); const se=sh(e).replace(/^\(\)/,''), su=sh(u); if(se && su && se!==su && sh(e)!==su) return false; }
+  if(/[∞∪∈]/.test(e)){ const sh=x=>(ansClean(x).match(/[\[\]()]/g)||[]).join(''), sh2=x=>(ansClean(x).replace(/^[^\[(]*?(?:∈|=)\s*/,'').match(/[\[\]()]/g)||[]).join(''); const se=sh(e).replace(/^\(\)/,''), su=sh(u); if(se && su && se!==su && sh(e)!==su) return false; const e2=sh2(e), u2=sh2(u); if(e2 && u2 && /^[\[(]/.test(e2) && e2!==u2) return false; }
   const key=v=>Array.isArray(v)?'f'+v.map(y=>y===null?'n':y.toPrecision(7)).join('|'):v;
   if(E.list.length!==U.list.length) return false;
   const ordered=!/ o |°/.test(e) && !/^[−\-\d\/√]+ y [−\-\d\/√]+$/.test(e.trim());
@@ -1755,10 +1766,11 @@ function practiceItem(it,i){
   return `<li class="pi" id="pi${i}"><div class="pi-q">${it.l?`<span class="lvt l${it.l}">${LVN[it.l]}</span>`:''}${mth(it.q)}</div>
     <div class="ans-row"><input class="ans-in" id="in${i}" data-in="${i}" value="${esc(it.u||'')}" placeholder="Escribe tu respuesta" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" ${done?'disabled':''}><button class="btn pri sm" data-chk="${i}" ${done?'disabled':''}>Comprobar</button></div>
     ${done?'':kbRow(i)}<div class="fb ${it.fbc||''}" id="fb${i}">${it.fb||''}</div>
-    <div class="hints" id="hn${i}">${hs.slice(0,hn).map((x,k)=>`<div class="hint"><b>Pista ${k+1}</b>${mth(x)}</div>`).join('')}</div>
-    <div class="pi-tools">${hs.length&&!done?`<button class="btn sm" data-hint="${i}" ${hn>=hs.length?'disabled':''}>💡 Pista ${Math.min(hn+1,hs.length)}/${hs.length}</button>`:''}<button class="btn sm" data-ans="${i}">${hs.length?'Ver solución':'Ver respuesta'}</button><button class="btn sm" data-skt="${i}">📝 Hoja</button>${it.g?`<button class="btn sm" data-gshow="${i}">📈 Gráfica</button>`:''}</div>
+    <div id="rl${i}">${it.rl?`<div class="rule-box"><b>🧭 Regla que se usa</b>${mth(ruleFor(practice.topic,it.q))}</div>`:''}</div>
+    <div class="hints" id="hn${i}">${hs.slice(0,hn).map((x,k)=>`<div class="hint"><b>Pista ${k+1}</b>${mth(x)}${stepWhy(x)}</div>`).join('')}</div>
+    <div class="pi-tools">${!done&&!it.rl&&ruleFor(practice.topic,it.q)?`<button class="btn sm" data-rule="${i}">🧭 ¿Qué regla uso?</button>`:''}${hs.length&&!done?`<button class="btn sm" data-hint="${i}" ${hn>=hs.length?'disabled':''}>💡 Pista ${Math.min(hn+1,hs.length)}/${hs.length}</button>`:''}<button class="btn sm" data-ans="${i}">${hs.length?'Ver solución':'Ver respuesta'}</button><button class="btn sm" data-skt="${i}">📝 Hoja</button>${it.g?`<button class="btn sm" data-gshow="${i}">📈 Gráfica</button>`:''}</div>
     <div id="skb${i}">${it.skOpen?sketchPad(i):''}</div>
-    <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${hs.length?`<ol class="stp">${hs.map(x=>`<li>${mth(x)}</li>`).join('')}</ol><b>Respuesta:</b> `:''}${mth(it.a)}</div><div id="gbox${i}">${it.g&&it.gopen?graphWidget(it.g,it.s||0,String(i)):''}</div>
+    <div class="goal" id="ans${i}" style="display:${it.show?'block':'none'};margin-top:6px">${hs.length?`<ol class="stp">${hs.map(x=>`<li>${mth(x)}${stepWhy(x)}</li>`).join('')}</ol><b>Respuesta:</b> `:''}${mth(it.a)}</div><div id="gbox${i}">${it.g&&it.gopen?graphWidget(it.g,it.s||0,String(i)):''}</div>
     <div class="pi-man"><span>¿El corrector no entendió tu forma de escribir? Marca a mano:</span><button class="btn sm" data-ok="${i}" ${done?'disabled':''}>${it.ok?'✓ Sumado':'✓ Lo hice bien'}</button><button class="btn sm" data-bad="${i}" ${done?'disabled':''}>${it.bad?'📒 Anotado':'✗ Me equivoqué'}</button></div></li>`;
 }
 function bindSolve(w){
@@ -1779,11 +1791,12 @@ function bindSolve(w){
       buzz(14); rer(); return; }
     it.tries=(it.tries||0)+1; buzz([30,40,30]);
     if(it.tries===1){ addAcc(false); addError(practice.topic, it.q, it.a); renderHeader(); }
-    it.fbc='bad'; it.fb=`❌ Todavía no${it.tries>1?' (intento '+it.tries+')':''}. Revisa tu desarrollo${(it.st||[]).length?' o pide una pista':''}. ${it.tries===1?'<small>Lo guardé en tu cuaderno de errores.</small>':''}`; fb.className='fb bad'; fb.innerHTML=it.fb;
+    const dg=diagnose(it.u,it.a,it.q); it.fbc='bad'; it.fb=`❌ Todavía no${it.tries>1?' (intento '+it.tries+')':''}. ${dg?'':'Revisa tu desarrollo'+((it.st||[]).length?' o pide una pista':'')+'. '}${it.tries===1?'<small>Lo guardé en tu cuaderno de errores.</small>':''}${dg?`<span class="dg">🔎 ${dg}</span>`:''}`; fb.className='fb bad'; fb.innerHTML=it.fb;
     fb.classList.remove('shake'); void fb.offsetWidth; fb.classList.add('shake'); });
+  card.querySelectorAll('[data-rule]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.rule, it=practice.items[i]; it.rl=true; buzz(6); card.querySelector('#rl'+i).innerHTML=`<div class="rule-box"><b>🧭 Regla que se usa</b>${mth(ruleFor(practice.topic,it.q))}</div>`; b.remove(); });
   card.querySelectorAll('[data-hint]').forEach(b=>b.onclick=()=>{
     const i=+b.dataset.hint, it=practice.items[i], hs=it.st||[]; if((it.h||0)>=hs.length) return; it.h=(it.h||0)+1; buzz(6);
-    card.querySelector('#hn'+i).insertAdjacentHTML('beforeend',`<div class="hint new"><b>Pista ${it.h}</b>${mth(hs[it.h-1])}</div>`);
+    card.querySelector('#hn'+i).insertAdjacentHTML('beforeend',`<div class="hint new"><b>Pista ${it.h}</b>${mth(hs[it.h-1])}${stepWhy(hs[it.h-1])}</div>`);
     if(it.h>=hs.length){ b.disabled=true; b.textContent='💡 Sin más pistas'; } else b.textContent=`💡 Pista ${it.h+1}/${hs.length}`; });
   const initPad=i=>{ const box=card.querySelector('#skb'+i), cv=box&&box.querySelector('canvas'); if(!cv) return; const it=practice.items[i], ctl=initSketch(cv,it);
     box.querySelector('[data-skpen]').onclick=e=>{ ctl.pen(); e.target.classList.add('on'); box.querySelector('[data-sker]').classList.remove('on'); };
@@ -1792,6 +1805,511 @@ function bindSolve(w){
   practice.items.forEach((it,i)=>{ if(it.skOpen) initPad(i); });
   card.querySelectorAll('[data-skt]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.skt, it=practice.items[i], box=card.querySelector('#skb'+i); it.skOpen=!it.skOpen; box.innerHTML=it.skOpen?sketchPad(i):''; if(it.skOpen){ initPad(i); box.scrollIntoView({behavior:RM()?'auto':'smooth',block:'nearest'}); } });
 }
+
+/* ---------- Ronda 14: reglas, diagnóstico, porqués, mini preguntas, fuentes ---------- */
+const RULES={
+  T1:[[/./,'Jerarquía: paréntesis → potencias → × y ÷ (de izquierda a derecha) → + y −. Fracciones: para sumar o restar necesitas denominador común; para multiplicar, arriba por arriba y abajo por abajo; dividir es multiplicar por el inverso.']],
+  T2:[[/%/,'Porcentaje: p % de N = (p/100)·N. Subir p % es multiplicar por (1 + p/100) y bajar p %, por (1 − p/100).'],
+      [/fracción simplificada/,'Un decimal con n cifras decimales es ese número sobre 10ⁿ (0,25 = 25/100). Luego simplifica dividiendo entre el MCD.'],
+      [/\^\(−|\^\(-/,'Exponente negativo: a⁻ⁿ = 1/aⁿ. Le das la vuelta a la base y el exponente queda positivo.'],
+      [/como fracción/,'(a/b)ⁿ = aⁿ/bⁿ. Una base negativa con exponente par da positivo; con exponente impar, negativo.'],
+      [/\)²|\)³|\)⁴/,'Potencia de potencia: (aᵐ)ⁿ = aᵐ·ⁿ, y se aplica a cada factor: (ab)ⁿ = aⁿbⁿ. Luego divide restando exponentes.'],
+      [/./,'Leyes de exponentes con la misma base: aᵐ·aⁿ = aᵐ⁺ⁿ y aᵐ ÷ aⁿ = aᵐ⁻ⁿ.']],
+  T3:[[/Racionaliza.*[+−]/,'Conjugado: multiplica arriba y abajo por (a − b) si abajo hay (a + b), y al revés. Así (a + b)(a − b) = a² − b² elimina la raíz.'],
+      [/Racionaliza/,'Multiplica arriba y abajo por la misma raíz: √a·√a = a, y el denominador queda sin raíz.'],
+      [/\(.*√.*\)\(.*√/,'Suma por diferencia: (a + b)(a − b) = a² − b², y (√n)² = n.'],
+      [/Multiplica/,'a√b · c√d = (a·c)√(b·d). Después simplifica la raíz que resulte.'],
+      [/./,'√(a·b) = √a·√b: saca el mayor cuadrado perfecto. Solo se suman raíces semejantes (mismo número dentro).']],
+  T4:[[/calcula P\(/,'Valor numérico: reemplaza x por el número entre paréntesis y respeta la jerarquía.'],
+      [/\)³/,'Cubo de un binomio: (a ± b)³ = a³ ± 3a²b + 3ab² ± b³.'],
+      [/\)² − \(/,'Desarrolla cada cuadrado con (a ± b)² = a² ± 2ab + b², y al restar el segundo cambia todos sus signos.'],
+      [/\)²/,'Binomio al cuadrado: (a ± b)² = a² ± 2ab + b². No olvides el doble producto 2ab.'],
+      [/\(([^()]+) \+ ([^()]+)\)\(\1 − \2\)/,'Suma por diferencia: (a + b)(a − b) = a² − b².'],
+      [/Multiplica: −?\d*x\(/,'Distributiva: a(b + c) = ab + ac, y xᵐ·xⁿ = xᵐ⁺ⁿ.'],
+      [/./,'Cada término del primero por cada término del segundo; al final junta los términos semejantes.']],
+  T5:[[/agrupación/,'Agrupación: forma grupos de dos, saca factor común en cada uno y luego saca el paréntesis que se repite.'],
+      [/completamente/,'Primero el factor común; después mira si lo que queda es diferencia de cuadrados o un trinomio.'],
+      [/Factoriza: −?\d*x² − \d+$/,'Si hay factor común, sácalo primero. Luego diferencia de cuadrados: a² − b² = (a + b)(a − b).'],
+      [/Factoriza: \d+x² [+−] \d*x [+−] \d+$/,'Trinomio ax² + bx + c con a ≠ 1: aspa (descompón ax² y c, y comprueba que los productos cruzados sumen bx).'],
+      [/Factoriza: x² [+−] \d*x [+−] \d+$/,'Trinomio x² + bx + c: busca dos números que multiplicados den c y sumados den b.'],
+      [/./,'Factor común: saca lo que se repite en todos los términos (el MCD de los números y la menor potencia de x).']],
+  X1:[[/residuo/,'Teorema del resto: el residuo de P(x) ÷ (x − r) es P(r). Reemplaza x por r.'],
+      [/un factor/,'Teorema del factor: (x − r) es factor de P(x) si y solo si P(r) = 0.'],
+      [/Ruffini/,'Ruffini con r (el valor que anula el divisor): baja el primer coeficiente, multiplica por r y suma al siguiente. Pon 0 en los grados que falten.'],
+      [/./,'Prueba divisores del término independiente; si P(r) = 0, divide con Ruffini entre (x − r) y factoriza el cociente.']],
+  T7:[[/perímetro|años|edad|rectángulo|números/,'Problema: llama x a lo que no conoces, traduce cada dato a una ecuación y resuelve. Al final comprueba con el enunciado.'],
+      [/x\/\d|\/\d/,'Multiplica todos los términos (de los dos lados) por el MCM de los denominadores para eliminar las fracciones.'],
+      [/\d\(/,'Distribuye primero; luego deja las x a un lado y los números al otro.'],
+      [/./,'Deja las x a un lado y los números al otro haciendo la operación contraria en ambos lados.']],
+  T8:[[/Resuelve/,'Anota las restricciones (denominador ≠ 0), multiplica todo por el MCM de los denominadores y descarta las soluciones prohibidas.'],
+      [/Suma|Resta/,'Factoriza los denominadores, busca el denominador común y suma los numeradores.'],
+      [/Multiplica/,'Factoriza todo, multiplica y cancela factores iguales (nunca términos que se suman).'],
+      [/./,'Factoriza numerador y denominador, cancela factores iguales y anota los valores prohibidos.']],
+  T9:[[/Cuántas raíces|discriminante/,'Discriminante Δ = b² − 4ac: Δ > 0 dos raíces reales, Δ = 0 una, Δ < 0 ninguna real.'],
+      [/suman.*producto|producto es/,'Si dos números suman S y multiplican P, son las raíces de x² − Sx + P = 0.'],
+      [/fórmula general/,'Fórmula general: x = (−b ± √(b² − 4ac)) / (2a).'],
+      [/Resuelve: −?\d*x² [+−] \d+ = /,'Sin término en x: despeja x² y saca raíz cuadrada con ± (dos soluciones).'],
+      [/x² [+−] \d*x = 0/,'Sin término independiente: saca factor común x y usa producto cero.'],
+      [/./,'Iguala a 0 y factoriza (si a·b = 0, a = 0 o b = 0). Si no se puede, usa la fórmula general.']],
+  T10:[[/z/,'Tres ecuaciones: suma o resta pares de ecuaciones para eliminar la misma variable y quedarte con un sistema 2×2.'],
+      [/Entrada|entradas|S\//,'Plantea una ecuación por cada dato (cantidad total y dinero total) y resuelve el sistema.'],
+      [/^Resuelve: y = /,'Sustitución: y ya está despejada; reemplázala en la otra ecuación.'],
+      [/./,'Reducción: multiplica una ecuación para que una variable tenga coeficientes opuestos y suma las ecuaciones.']],
+  T11:[[/\|[^|]+\| [<≤]/,'|A| < k significa −k < A < k (A está a menos de k del 0).'],
+      [/\|[^|]+\| [>≥]/,'|A| > k significa A > k o A < −k: dos intervalos unidos con ∪.'],
+      [/x²/,'Inecuación cuadrática: halla las raíces, ubícalas en la recta y mira el signo en cada zona.'],
+      [/[<≤].*[<≤]/,'Doble desigualdad: haz la misma operación en las tres partes.'],
+      [/./,'Se resuelve como una ecuación, pero si multiplicas o divides entre un negativo se invierte el signo.']],
+  T12:[[/Pendiente/,'Pendiente: m = (y₂ − y₁)/(x₂ − x₁).'],
+      [/Punto medio/,'Punto medio: M = ((x₁ + x₂)/2, (y₁ + y₂)/2).'],
+      [/Distancia del punto/,'Distancia punto-recta: d = |Ax₀ + By₀ + C| / √(A² + B²).'],
+      [/Distancia/,'Distancia: d = √((x₂ − x₁)² + (y₂ − y₁)²), que es Pitágoras.'],
+      [/paralela/,'Paralelas: misma pendiente. Luego usa punto-pendiente y − y₁ = m(x − x₁).'],
+      [/perpendicular/,'Perpendiculares: m₁·m₂ = −1 (pendiente inversa y con el signo cambiado).'],
+      [/Grafica/,'Corte con el eje y: pon x = 0. Corte con el eje x: pon y = 0.'],
+      [/./,'Calcula la pendiente con los dos puntos y usa punto-pendiente y − y₁ = m(x − x₁).']],
+  T13:[[/calcula f\(/,'Valor numérico: reemplaza x entre paréntesis (ojo: −x² con x = −2 da −4).'],
+      [/√.*÷|√.*\/\(/,'Raíz: lo de adentro ≥ 0. Denominador: ≠ 0. Deben cumplirse las dos.'],
+      [/Dominio.*√/,'Raíz cuadrada: lo de adentro debe ser ≥ 0.'],
+      [/Dominio.*\//,'Fracción: el denominador no puede valer 0. Quita sus raíces del dominio.'],
+      [/./,'Vértice: x = −b/(2a) y y = f(x). Si a > 0 abre hacia arriba (rango [k, +∞)); si a < 0, hacia abajo.']],
+  X10:[[/a trozos|como función/,'|A| = A si A ≥ 0, y −A si A < 0.'],
+      [/valor de b|continua/,'Continua: los dos trozos deben dar el mismo valor en la frontera.'],
+      [/refl/,'−f(x) refleja sobre el eje x; f(x − h) mueve h a la derecha; f(x) + k sube k.'],
+      [/si x </,'Evalúa con el trozo cuya condición cumple el x que te dan.'],
+      [/./,'Transformaciones: f(x − h) + k mueve la gráfica h a la derecha y k hacia arriba; un signo menos afuera la refleja.']],
+  T14:[[/dentro, fuera/,'Compara (x − h)² + (y − k)² del punto con r²: menor = dentro, igual = sobre, mayor = fuera.'],
+      [/diámetro/,'El centro es el punto medio del diámetro y el radio, la mitad de su longitud.'],
+      [/foco|Foco/,'Parábola: cada punto está a la misma distancia del foco y de la directriz. (x − h)² = 4p(y − k) o (y − k)² = 4p(x − h).'],
+      [/x² \+ y²|Centro y radio/,'Completa cuadrados para llegar a (x − h)² + (y − k)² = r².'],
+      [/./,'Circunferencia: (x − h)² + (y − k)² = r², con centro (h, k) y radio r.']],
+  T15:[[/Suma/,'Suma de matrices: posición por posición (mismo tamaño).'],
+       [/Calcula −?\d+·\[/,'Escalar por matriz: multiplica cada elemento.'],
+       [/Transpuesta/,'Transpuesta: las filas pasan a ser columnas.'],
+       [/Determinante/,'det [a b; c d] = ad − bc.'],
+       [/./,'Producto de matrices: cada elemento es fila de la primera por columna de la segunda (suma de productos).']],
+  X9:[[/Cramer/,'Cramer: x = det Aₓ / det A y y = det Aᵧ / det A (cambia la columna de la incógnita por los resultados).'],
+      [/inversa/,'Inversa 2×2: A⁻¹ = (1/det)·[d −b; −c a]. Solo existe si det ≠ 0.'],
+      [/;.*;/,'Determinante 3×3 (Sarrus): diagonales hacia abajo menos diagonales hacia arriba.'],
+      [/./,'det [a b; c d] = ad − bc.']],
+  T16:[[/forma de logaritmo/,'bʸ = x es lo mismo que log_b(x) = y.'],
+       [/Calcula:.*log.*[+−].*log/,'log(a) + log(b) = log(ab) y log(a) − log(b) = log(a/b).'],
+       [/Calcula: log/,'log_b(x) es el exponente al que elevas b para obtener x.'],
+       [/Resuelve:.*log.*\+.*log|log\(x\) \+ log/,'Junta en un solo log, pasa a forma exponencial y descarta soluciones con argumento ≤ 0.'],
+       [/Resuelve: log/,'log_b(A) = c es lo mismo que A = bᶜ. Verifica que A > 0.'],
+       [/Grafica.*log/,'Logaritmo: asíntota vertical x = 0 y pasa por (1, 0).'],
+       [/Grafica/,'Exponencial bˣ + k: asíntota horizontal y = k y pasa por (0, 1 + k).'],
+       [/./,'Escribe ambos lados como potencias de la misma base e iguala los exponentes.']],
+  T17:[[/x→∞/,'Límite al infinito: divide entre la mayor potencia del denominador; con igual grado, cociente de coeficientes principales.'],
+       [/si x </,'El límite existe solo si los límites por la izquierda y por la derecha coinciden.'],
+       [/√/,'Si reemplazar da 0/0 con raíces, multiplica arriba y abajo por el conjugado.'],
+       [/\/|÷/,'Reemplaza primero. Si da 0/0, factoriza y cancela el factor que causa el 0.'],
+       [/./,'Polinomio: es continuo, así que el límite es reemplazar directo.']],
+  T18:[[/tangente/,'Tangente en x = a: punto (a, f(a)), pendiente m = f′(a), y − f(a) = m(x − a).'],
+       [/críticos/,'Puntos críticos: f′(x) = 0. Si f′ pasa de + a − es máximo; de − a +, mínimo.'],
+       [/producto/,'Regla del producto: (fg)′ = f′g + fg′.'],
+       [/cadena/,'Regla de la cadena: (f(g(x)))′ = f′(g(x))·g′(x): deriva afuera y multiplica por la derivada de adentro.'],
+       [/\)\/\(/,'Regla del cociente: (f/g)′ = (f′g − fg′)/g².'],
+       [/e\^/,'(eᵏˣ)′ = k·eᵏˣ.'],
+       [/√|\/x/,'Escríbelo como potencia (√x = x^(1/2), 1/x² = x⁻²) y usa la regla de la potencia.'],
+       [/./,'Regla de la potencia: (xⁿ)′ = n·xⁿ⁻¹. La derivada de una constante es 0.']],
+  X2:[[/(75|15|105|165)°/,'Escribe el ángulo como suma o resta de notables (75° = 45° + 30°) y usa las fórmulas de suma de ángulos.'],
+      [/radianes/,'Grados a radianes: multiplica por π/180.'],
+      [/Resuelve/,'Usa el ángulo de referencia y los cuadrantes donde la función tiene ese signo.'],
+      [/Valor exacto/,'Usa los triángulos notables 30°-60°-90° y 45°-45°-90°.'],
+      [/forman un ángulo/,'Ley de cosenos: c² = a² + b² − 2ab·cos C.'],
+      [/elevación/,'tan θ = opuesto / adyacente.'],
+      [/./,'Pitágoras: hipotenusa² = cateto² + cateto². Seno = opuesto/hipotenusa, coseno = adyacente/hipotenusa.']],
+  X3:[[/Centro/,'El centro (h, k) se lee de (x − h) y (y − k). Luego c² = a² − b² y los focos están a c del centro sobre el eje mayor.'],
+      [/Asíntotas/,'Hipérbola x²/a² − y²/b² = 1: asíntotas y = ±(b/a)x.'],
+      [/Excentricidad/,'Excentricidad e = c/a; en la elipse c² = a² − b².'],
+      [/[Hh]ipérbola/,'Hipérbola: c² = a² + b².'],
+      [/./,'Elipse: a² es el denominador mayor y c² = a² − b².']],
+  X4:[[/perpendiculares/,'Perpendiculares: producto escalar u·v = 0.'],
+      [/unitario/,'Unitario: u/|u|, dividiendo cada componente entre la magnitud.'],
+      [/Ángulo/,'cos θ = (u·v) / (|u|·|v|).'],
+      [/./,'Operaciones componente a componente: k(a, b) = (ka, kb) y (a, b) + (c, d) = (a + c, b + d).']],
+  X5:[[/complemento/,'Complemento: A′ = todo lo del universo U que no está en A.'],
+      [/tabla de verdad/,'Con n proposiciones simples la tabla tiene 2ⁿ filas.'],
+      [/Niega/,'La negación de “algún… es” es “ningún… es” (todos no son).'],
+      [/ambos|ambas/,'n(A ∪ B) = n(A) + n(B) − n(A ∩ B): los de ambos no se cuentan dos veces.'],
+      [/p = /,'∧ es V solo si ambas son V; ∨ es F solo si ambas son F; p → q es F solo si V → F.'],
+      [/./,'Unión: todo sin repetir; intersección: lo común; diferencia A − B: lo de A que no está en B.']],
+  X6:[[/inversa/,'Inversa: escribe y = f(x), despeja x y al final intercambia x e y.'],
+      [/./,'Composición: (f ∘ g)(x) = f(g(x)). Primero aplicas g y el resultado entra en f.']],
+  X7:[[/Σ/,'Reemplaza i desde el inicio hasta el final y suma; o usa Σ i = n(n + 1)/2 y Σ i² = n(n + 1)(2n + 1)/6.'],
+      [/geométrica/,'Geométrica: aₙ = a₁·rⁿ⁻¹ y Sₙ = a₁(rⁿ − 1)/(r − 1).'],
+      [/aritmética/,'Aritmética: aₙ = a₁ + (n − 1)d y Sₙ = n(a₁ + aₙ)/2.'],
+      [/Sucesión|Suma|primeros/,'Primero mira el tipo: si se suma siempre lo mismo es aritmética (aₙ = a₁ + (n − 1)d, Sₙ = n(a₁ + aₙ)/2); si se multiplica siempre por lo mismo es geométrica (aₙ = a₁·rⁿ⁻¹, Sₙ = a₁(rⁿ − 1)/(r − 1)).'],
+      [/./,'Aritmética: aₙ = a₁ + (n − 1)d.']],
+  X8:[[/!\//,'n!/k!: escribe el factorial mayor hasta llegar al menor y cancela.'],
+      [/al menos/,'P(al menos uno) = 1 − P(ninguno).'],
+      [/sin devolver/,'Sin devolver: multiplica probabilidades, y en cada extracción hay una bola menos.'],
+      [/palabras/,'Permutaciones con repetición: n!/(a!·b!·…), dividiendo entre las letras repetidas.'],
+      [/equipo|comité|elige|elegir/,'Si el orden no importa: combinaciones C(n, k) = n!/(k!(n − k)!).'],
+      [/dado|bola|Probabilidad/,'Probabilidad = casos favorables / casos posibles.'],
+      [/./,'¿Importa el orden? Sí: permutación. No: combinación.']],
+  X11:[[/(75|15|105|165)°/,'Escribe el ángulo como suma o resta de notables (75° = 45° + 30°) y usa sen(a ± b) = sen a·cos b ± cos a·sen b, cos(a ± b) = cos a·cos b ∓ sen a·sen b.'],
+       [/Valor exacto/,'Usa los triángulos notables y el signo según el cuadrante.'],
+       [/cuadrante/,'sen²θ + cos²θ = 1 para hallar la otra razón; el signo lo da el cuadrante.'],
+       [/Resuelve.*sen²/,'Es una cuadrática en sen x: llama u = sen x, resuelve y busca los ángulos.'],
+       [/sen 2x/,'Usa sen 2x = 2 sen x cos x, pasa todo a un lado, saca factor común y usa producto cero.'],
+       [/Resuelve/,'Despeja la función trigonométrica y usa el ángulo de referencia y los cuadrantes.'],
+       [/./,'Pasa todo a senos y cosenos y usa sen²x + cos²x = 1.']]
+};
+function ruleFor(topic,q){ const R=RULES[topic]||[]; for(const [re,t] of R) if(re.test(q)) return t; const D=DEEP[topic]; return D&&D.rec?D.rec[0]:''; }
+
+const WHYP=[
+ [/^\d+(?:,\d+)? % de/,'p % significa p de cada 100: se multiplica por p/100.'],
+ [/^Atajo/,'Subir p % es quedarte con el 100 % más el p %: multiplicar por (1 + p/100) en un solo paso.'],
+ [/^Primeros|^Últimos/,'Cada término del primer paréntesis multiplica a cada término del segundo (primeros, externos, internos, últimos).'],
+ [/^√Δ/,'La raíz del discriminante es lo que va después del ± en la fórmula general.'],
+ [/^Signos/,'La expresión solo cambia de signo en sus raíces: basta probar un número en cada zona.'],
+ [/^Raíz:/,'No existe raíz cuadrada real de un negativo: lo de adentro debe ser ≥ 0.'],
+ [/^Numerador:|^Denominador:/,'Conviene trabajar arriba y abajo por separado y al final juntar.'],
+ [/^Factoriza(?! el cociente)/,'Factorizar convierte sumas en productos; solo los productos se pueden cancelar o igualar a 0.'],
+ [/^El vértice \(/,'Una traslación mueve todos los puntos por igual: basta seguir al vértice.'],
+ [/^Izquierda|^Derecha/,'Cambiar x por (x − h) mueve la gráfica h a la derecha; por (x + h), h a la izquierda.'],
+ [/^Los dos trozos deben valer lo mismo/,'Si los trozos no coinciden en la frontera, la gráfica tendría un salto.'],
+ [/^h = .*r = /,'En (x − h)² + (y − k)² = r² el centro es (h, k) y r es el radio.'],
+ [/^p = distancia/,'p es la distancia del vértice al foco; su signo dice hacia dónde abre la parábola.'],
+ [/^A² = A·A/,'Elevar una matriz al cuadrado es multiplicarla por sí misma, no elevar cada elemento.'],
+ [/^bʸ = x/,'Potencia y logaritmo son la misma relación escrita de dos formas.'],
+ [/^Base \d/,'El logaritmo pregunta por el exponente: la base va abajo y el resultado va adentro.'],
+ [/^Producto: log/,'log(a) + log(b) = log(ab): al multiplicar potencias se suman los exponentes.'],
+ [/^Es un polinomio/,'Los polinomios no tienen saltos ni huecos: el límite es su valor en ese punto.'],
+ [/^Afuera/,'Regla de la cadena: primero se deriva la función de afuera sin tocar lo de adentro.'],
+ [/^Adentro/,'Después se multiplica por la derivada de lo de adentro.'],
+ [/^Simplifica \d+\/180/,'Se simplifica la fracción que acompaña a π.'],
+ [/^c² = a² − b²/,'En la elipse los focos están dentro: c² = a² − b².'],
+ [/^c² = a² \+ b²/,'En la hipérbola los focos están más lejos que los vértices: c² = a² + b².'],
+ [/^A′/,'El complemento es lo del universo que no está en A.'],
+ [/^Ley que se usa/,'Negar bien exige la ley correcta: De Morgan cambia ∧ por ∨, y ¬(p → q) es p ∧ ¬q.'],
+ [/^P\(ningún/,'Es la probabilidad del caso contrario; luego se resta de 1.'],
+ [/^m = \(y/,'La pendiente es cuánto cambia y por cada unidad que cambia x.'],
+ [/^d = \|A/,'Es la fórmula de la distancia más corta (perpendicular) de un punto a una recta.'],
+ [/^En \(\d\)/,'Reemplazar lo que ya hallaste en una ecuación da la variable que falta.'],
+ [/^P\(−?\d/,'Por el teorema del resto, P(r) es el residuo.'],
+ [/^Factor común en cada grupo/,'Así aparece el mismo paréntesis en los dos grupos y se puede sacar.'],
+ [/^Factor común/,'Lo que se repite en todos los términos se saca una vez: es la propiedad distributiva al revés.'],
+ [/^Agrupa de a dos/,'Con 4 términos, se agrupan pares para encontrar un binomio común.'],
+ [/^Aspa/,'Los productos cruzados deben sumar el término del medio: así se comprueba que los factores son correctos.'],
+ [/^Diferencia de cuadrados/,'a² − b² = (a + b)(a − b): al multiplicar, los términos +ab y −ab se cancelan.'],
+ [/^Suma por diferencia/,'(a + b)(a − b) = a² − b²: los productos cruzados se anulan.'],
+ [/^Trinomio ax²/,'Con a ≠ 1 se buscan factores de a y de c que, cruzados, den el término del medio.'],
+ [/conjugado/,'El conjugado forma una suma por diferencia que elimina la raíz; se multiplica arriba y abajo para no cambiar el valor.'],
+ [/^Busca el mayor cuadrado perfecto/,'√(a·b) = √a·√b, y la raíz de un cuadrado perfecto sale exacta.'],
+ [/^Potencia de potencia/,'(aᵐ)ⁿ son n grupos de m factores: en total m·n factores.'],
+ [/^División de igual base/,'Dividir cancela factores iguales arriba y abajo: por eso se restan los exponentes.'],
+ [/^Exponente negativo/,'a⁻ⁿ = 1/aⁿ porque aᵐ ÷ aᵐ⁺ⁿ deja n factores abajo.'],
+ [/^Sin exponentes negativos/,'Un factor con exponente negativo pasa al otro lado de la fracción con exponente positivo.'],
+ [/^Escribe como potencia|^Escribe todo en base/,'Con la misma base se pueden comparar o igualar los exponentes.'],
+ [/^Iguala exponentes/,'bˣ nunca repite valores: si dos potencias de la misma base son iguales, sus exponentes también.'],
+ [/^Suma de logaritmos/,'log(a) + log(b) = log(ab), porque al multiplicar potencias se suman exponentes.'],
+ [/^Definición/,'Un logaritmo es un exponente: log_b(x) = y significa bʸ = x.'],
+ [/^Primero la potencia/,'En la jerarquía, las potencias van antes que × y ÷.'],
+ [/^Primero multiplicación y división/,'Jerarquía: × y ÷ antes que + y −, de izquierda a derecha.'],
+ [/^Luego la multiplicación/,'Después de las potencias vienen × y ÷.'],
+ [/^Al final la/,'La suma y la resta son lo último en la jerarquía.'],
+ [/^Dividir es multiplicar por el inverso/,'Dividir entre a/b es multiplicar por b/a: así se deshace la división.'],
+ [/^Denominador común/,'Solo se suman partes del mismo tamaño: por eso se iguala el denominador.'],
+ [/^Suma los numeradores|^Numeradores/,'Con el mismo denominador, se suman las partes y el tamaño de cada parte no cambia.'],
+ [/^Propiedad distributiva|^Distribuye/,'a(b + c) = ab + ac: el factor multiplica a cada término del paréntesis.'],
+ [/^Resta cambiando todos los signos/,'Restar un paréntesis es sumar su opuesto: cada término cambia de signo.'],
+ [/^Externos \+ internos/,'Esa suma es el término del medio al multiplicar dos binomios.'],
+ [/^Junta|^Ordena y simplifica/,'Solo se suman términos semejantes: misma letra con el mismo exponente.'],
+ [/^Agrupa las x/,'Sumar o restar lo mismo en ambos lados mantiene la igualdad.'],
+ [/^Pasa el/,'Pasar al otro lado es hacer la operación contraria en ambos lados.'],
+ [/^Despeja/,'Se deshacen las operaciones en orden inverso para dejar sola a la incógnita.'],
+ [/^Divide entre/,'Dividir ambos lados entre el mismo número (distinto de 0) mantiene la igualdad.'],
+ [/^Multiplica todo por/,'Multiplicar ambos lados por lo mismo elimina denominadores sin cambiar las soluciones válidas.'],
+ [/^Restricci/,'Un denominador no puede valer 0: esos valores quedan fuera aunque después se cancelen.'],
+ [/^El denominador no puede ser/,'Dividir entre 0 no está definido.'],
+ [/^El radicando debe ser/,'No existe raíz cuadrada real de un número negativo.'],
+ [/^Cancela/,'Solo se cancelan factores (lo que multiplica a todo), nunca términos que se suman.'],
+ [/^Producto cero/,'Si a·b = 0, al menos uno de los factores vale 0.'],
+ [/^Saca raíz cuadrada con ±/,'Dos números tienen el mismo cuadrado: uno positivo y otro negativo.'],
+ [/^Δ/,'Δ es lo que va dentro de la raíz en la fórmula general: su signo dice cuántas soluciones reales hay.'],
+ [/^Si suman S y multiplican P/,'Porque (x − r₁)(x − r₂) = x² − (r₁ + r₂)x + r₁·r₂.'],
+ [/^Llama x|^Ancho x|^Dentro de \d+ años/,'Nombrar la incógnita convierte el enunciado en una ecuación.'],
+ [/^Perímetro/,'Perímetro = suma de los cuatro lados = 2·largo + 2·ancho.'],
+ [/^Teorema del resto/,'P(x) = (x − r)·Q(x) + R; con x = r el primer término vale 0 y queda R.'],
+ [/^Ruffini con r|^Coeficientes/,'Ruffini es la división larga abreviada entre x − r; si falta un grado se escribe 0.'],
+ [/^Prueba divisores/,'Si un entero r es raíz, r divide al término independiente.'],
+ [/^El residuo es 0|^Se anula en x/,'Residuo 0 significa división exacta: (x − r) es factor.'],
+ [/^El residuo no es/,'Si P(r) ≠ 0, la división no es exacta: (x − r) no es factor.'],
+ [/^Factoriza el cociente/,'El cociente tiene un grado menos y se factoriza con los casos conocidos.'],
+ [/^Reemplaza|^Reemplazar da/,'Evaluar es sustituir el valor en la expresión, siempre entre paréntesis.'],
+ [/^Comprueba/,'Si al reemplazar se cumple la igualdad, la respuesta es correcta.'],
+ [/^De la primera|^Despeja y/,'Despejar una variable permite sustituirla y quedarte con una sola incógnita.'],
+ [/^Sustituye/,'Sustituir reduce el sistema a una ecuación con una incógnita.'],
+ [/^Se pide [<>≤≥]/,'La parábola cambia de signo solo en sus raíces: entre ellas tiene un signo y afuera el otro.'],
+ [/^Es positivo afuera/,'Con a > 0 la parábola está sobre el eje x fuera de las raíces.'],
+ [/en las tres partes/,'Lo que se hace a una parte se hace a las tres para mantener el orden.'],
+ [/^Intervalo/,'[ ] incluye el extremo (≤, ≥); ( ) lo excluye (<, > y siempre en ∞).'],
+ [/^Pendiente dada|^Paralela/,'Rectas paralelas tienen la misma inclinación: la misma pendiente.'],
+ [/^Perpendiculares?\b(?! \()/,'Girar 90° invierte la pendiente y le cambia el signo: m₁·m₂ = −1.'],
+ [/^Promedia/,'El punto medio está a igual distancia de los extremos: promedio de las coordenadas.'],
+ [/^Pitágoras/,'La distancia es la hipotenusa de un triángulo con catetos Δx y Δy.'],
+ [/^Forma general/,'Ax + By + C = 0 es la forma que usa la fórmula de distancia punto-recta.'],
+ [/^x del vértice/,'x = −b/(2a) es el eje de simetría, a mitad de camino entre las raíces.'],
+ [/^El vértice está a mitad de camino/,'Cada punto de la parábola equidista del foco y la directriz; el vértice es el más cercano a ambos.'],
+ [/^Rango/,'El vértice es el punto más bajo si a > 0 o el más alto si a < 0: ahí empieza el rango.'],
+ [/^Dominio/,'El dominio son los x permitidos: sin raíces de negativos ni división entre 0.'],
+ [/^Centro/,'En (x − h)² + (y − k)² = r² el centro es (h, k): los signos se invierten al leerlos.'],
+ [/^Diámetro/,'El centro es el punto medio del diámetro y el radio es la mitad.'],
+ [/^Compara con r²/,'La distancia al centro decide si el punto está dentro, sobre o fuera.'],
+ [/^Focos/,'Elipse: c² = a² − b². Hipérbola: c² = a² + b².'],
+ [/^Asíntotas/,'Lejos del centro, la hipérbola se acerca a las rectas y = ±(b/a)x.'],
+ [/^Fila \d|^Cada fila por la columna/,'Cada elemento del producto es una fila por una columna: suma de productos.'],
+ [/^Se suma elemento a elemento/,'Matrices del mismo tamaño se suman posición por posición.'],
+ [/^Multiplica cada elemento/,'El número (escalar) multiplica a cada elemento de la matriz.'],
+ [/^Las filas pasan a ser columnas/,'Es la definición de transpuesta: el elemento (i, j) pasa a (j, i).'],
+ [/^det A[ₓᵧ]/,'Cramer: se cambia la columna de esa incógnita por los resultados y se divide entre det A.'],
+ [/^det ≠ 0/,'Solo las matrices con determinante distinto de 0 tienen inversa.'],
+ [/^det/,'det [a b; c d] = ad − bc: diagonal principal menos diagonal secundaria.'],
+ [/^Intercambia a y d/,'Es la fórmula A⁻¹ = (1/det)·[d −b; −c a]; funciona porque A·A⁻¹ = I.'],
+ [/^Intercambia x e y/,'La inversa deshace a f: entrada y salida cambian de papel.'],
+ [/^Primero g|^Luego f/,'(f ∘ g)(x) = f(g(x)): se aplica primero la función de adentro.'],
+ [/^Divide arriba y abajo entre|^Divide cada término entre/,'Dividir entre la mayor potencia hace que los términos pequeños tiendan a 0 cuando x → ∞.'],
+ [/^Compara grados|^Mismo grado/,'Con igual grado, el límite al infinito es el cociente de los coeficientes principales.'],
+ [/^El numerador crece más rápido/,'Si el numerador tiene mayor grado, el cociente crece sin límite.'],
+ [/^El denominador crece más rápido/,'Si el denominador tiene mayor grado, el cociente tiende a 0.'],
+ [/^Por la izquierda|^Por la derecha/,'Cada lado se mira por separado porque la función cambia de fórmula en la frontera.'],
+ [/^Los laterales coinciden/,'El límite existe solo si los dos laterales dan lo mismo.'],
+ [/^Los laterales son distintos/,'Si los laterales no coinciden, el límite no existe.'],
+ [/^Límite/,'Ya no hay indeterminación: se reemplaza el valor.'],
+ [/^Regla de la potencia/,'(xⁿ)′ = n·xⁿ⁻¹: el exponente baja multiplicando y se le resta 1.'],
+ [/^f′g − fg′/,'Regla del cociente: (f/g)′ = (f′g − fg′)/g².'],
+ [/^f′g|^fg′/,'Regla del producto: (fg)′ = f′g + fg′.'],
+ [/^Puntos críticos/,'En un máximo o mínimo la tangente es horizontal: f′(x) = 0.'],
+ [/^f′ cambia de \+ a −/,'Sube y luego baja: es un máximo.'],
+ [/^f′ cambia de − a \+/,'Baja y luego sube: es un mínimo.'],
+ [/^f′/,'f′(a) es la pendiente de la recta tangente en x = a.'],
+ [/^Multiplica por π\/180/,'180° equivalen a π radianes.'],
+ [/^Ángulo de referencia/,'Ángulos con el mismo ángulo de referencia tienen el mismo seno, coseno y tangente, salvo el signo.'],
+ [/^Segundo cuadrante/,'En el II cuadrante el seno es positivo y el coseno negativo.'],
+ [/^Ley de cosenos/,'Es Pitágoras corregido para un ángulo que no mide 90°.'],
+ [/^Es cuadrática en sen x/,'Si llamas u = sen x queda una ecuación de segundo grado.'],
+ [/^Unitario/,'Dividir entre la magnitud deja longitud 1 sin cambiar la dirección.'],
+ [/^Suma componente a componente/,'Los vectores se suman coordenada por coordenada.'],
+ [/^u·v/,'El producto escalar es la suma de productos de componentes.'],
+ [/^\|u\|/,'La magnitud es Pitágoras con las componentes.'],
+ [/^Quita de U/,'El complemento es lo que está en el universo pero no en A.'],
+ [/^Cada variable puede ser V o F|^Con \d+ variables/,'Cada variable duplica las combinaciones: 2ⁿ filas.'],
+ [/^Negación/,'Negar “algún” da “ningún”.'],
+ [/^Solo Python|^Ninguno/,'Se restan los de “ambos” para no contarlos dos veces.'],
+ [/^Al menos uno|^“Al menos uno”/,'Es más fácil contar lo contrario: P(al menos uno) = 1 − P(ninguno).'],
+ [/^Permutaciones con repetición/,'Las letras repetidas generan ordenamientos iguales: se divide entre sus factoriales.'],
+ [/^Se cancela/,'n! = n·(n − 1)!: los factores comunes se cancelan.'],
+ [/^Primera roja|^Segunda roja/,'Sin devolver, en la segunda extracción hay una bola menos.'],
+ [/^Ana ya está|^Elige \d+ de las/,'Si alguien ya está fijo, solo se eligen los lugares que faltan.'],
+ [/^Es aritmética/,'La diferencia entre términos seguidos es constante.'],
+ [/^Geométrica/,'El cociente entre términos seguidos es constante.'],
+ [/^a[₀₁₂₃₄₅₆₇₈₉]+|^aₙ/,'aₙ = a₁ + (n − 1)d: para llegar al término n se suma d (n − 1) veces.'],
+ [/^Sₙ/,'Sₙ = n(a₁ + aₙ)/2: emparejar el primero con el último da siempre la misma suma.'],
+ [/^Σ i²/,'Σ i² = n(n + 1)(2n + 1)/6 es la fórmula de la suma de cuadrados.'],
+ [/^Raíces/,'Las raíces son los cortes con el eje x: donde f(x) = 0.']
+];
+function whyFor(s){ const t=String(s).replace(/<[^>]+>/g,'').trim(); for(const [re,w] of WHYP) if(re.test(t)) return w; return ''; }
+function stepWhy(s){ const w=whyFor(s); return w?`<div class="why-s">💭 ${mth(w)}</div>`:''; }
+
+/* Diagnóstico de errores */
+function diagnose(u,e,q){
+  try{
+    u=String(u||''); e=String(e);
+    if(/^factoriza/i.test(q||'') && !/\(/.test(u)) return 'Te piden un <b>producto</b>: escribe los factores entre paréntesis, por ejemplo (x + 2)(x − 3).';
+    const yn=noAcc(e).match(/^(si|no)\b/); if(yn){ const uy=noAcc(u).match(/^(si|no)\b/); if(uy && uy[1]!==yn[1]) return 'Revisa la conclusión: compara tu cálculo con la condición que se pide.'; return ''; }
+    const dc=/\d,\d/.test(e), E=ansSigs(e,dc,false), U=ansSigs(u,dc,true);
+    if(!E.list.length||!U.list.length) return '';
+    const F=v=>Array.isArray(v), close=(a,b)=>Math.abs(a-b)<1e-6*Math.max(1,Math.abs(a));
+    const cst=L=>L.map(v=>{ if(!F(v)) return v; const w=v.filter(y=>y!==null); return w.length&&w.every(y=>Math.abs(y-w[0])<1e-9)?w[0].toPrecision(7):v; }); E.list=cst(E.list); U.list=cst(U.list);
+    if(E.list.length===1&&U.list.length===1&&F(E.list[0])&&F(U.list[0])){ const a=E.list[0], b=U.list[0]; const ix=a.map((v,i)=>i).filter(i=>a[i]!==null&&b[i]!==null); if(!ix.length) return '';
+      const d=ix.map(i=>b[i]-a[i]); if(d.every(v=>close(v,d[0]))&&Math.abs(d[0])>1e-6) return 'Casi: tu expresión solo difiere en un número constante. Revisa el <b>término independiente</b> (el que no tiene x).';
+      const r=ix.filter(i=>Math.abs(a[i])>1e-9).map(i=>b[i]/a[i]); if(r.length&&r.every(v=>close(v,r[0]))){ if(close(r[0],-1)) return 'Tienes el <b>signo cambiado</b> en toda la expresión.'; return 'Tu resultado es el correcto multiplicado por un número: revisa un <b>coeficiente</b> o el factor común.'; }
+      return ''; }
+    const ex=L=>{ const o=[]; L.forEach(v=>{ if(F(v)||/^inf/.test(v)) return; const n=parseFloat(String(v).replace('±','')); if(!Number.isFinite(n)) return; o.push(n); if(String(v)[0]==='±') o.push(-n); }); return o; };
+    const ev=ex(E.list), uv=ex(U.list); if(!ev.length||!uv.length) return '';
+    const sh=x=>(ansClean(x).match(/[\[\]()]/g)||[]).join('');
+    if(uv.length<ev.length && uv.every(x=>ev.some(y=>close(y,x)))) return /\bo\b|±|,|;| y /.test(e)?'Te falta <b>una solución</b>. ¿Olvidaste el ± al sacar raíz o el otro factor?':'Te falta <b>un valor</b> en tu respuesta.';
+    if(uv.length>ev.length && ev.every(y=>uv.some(x=>close(y,x)))) return 'Tienes <b>un valor de más</b>. ¿Revisaste las restricciones (denominador ≠ 0, log de positivos, longitudes positivas)?';
+    if(uv.length!==ev.length) return '';
+    const A=ev.slice(), B=uv.slice(); for(let i=A.length-1;i>=0;i--){ const j=B.findIndex(x=>close(A[i],x)); if(j>=0){ A.splice(i,1); B.splice(j,1); } }
+    if(!A.length){ if(/[∞∪]|^[\[(]|∈/.test(ansClean(e)) && !sh(u)) return 'Escríbelo como <b>intervalo</b>, con corchetes [ ] o paréntesis ( ).'; if(/[∞∪]|^[\[(]|∈/.test(ansClean(e)) && sh(e)!==sh(u)) return 'Los números están bien: revisa los <b>corchetes</b>. [ ] incluye el extremo (≤, ≥) y ( ) lo excluye (<, > y ∞).'; return 'Los valores están bien: revisa el <b>orden</b> en que los escribiste.'; }
+    for(let i=0;i<A.length;i++){ const a=A[i], b=B[i];
+      if(close(b,-a)) return 'Revisa el <b>signo</b>: obtuviste '+gnum(b)+' en vez de un valor con el signo contrario.';
+      if(Math.abs(a)>1e-9&&Math.abs(b)>1e-9&&close(a*b,1)) return 'Parece que <b>invertiste la fracción</b> (arriba y abajo cambiados).';
+      if(close(b,2*a)||close(2*b,a)) return 'Te sale el doble o la mitad: revisa un <b>factor 2</b> (por ejemplo el 2a de la fórmula o el 2ab del binomio).';
+      if(close(Math.abs(b),Math.abs(a)*Math.abs(a))||close(b*b,Math.abs(a))) return 'Revisa una <b>potencia o raíz</b>: tu valor es el cuadrado o la raíz del correcto.';
+      if(close(Math.abs(b-a),1)) return 'Estás a 1 de distancia: revisa una <b>suma o resta</b> pequeña.'; }
+    return '';
+  }catch(_){ return ''; }
+}
+
+/* Mini preguntas dentro de las explicaciones: [en un paso, ¿qué pasaría si…?] */
+const CHECKQ={
+ T1:[{k:1,at:0,q:'En 1/2 + 3/4 × 2/3, ¿qué se hace primero?',o:['1/2 + 3/4','3/4 × 2/3','Da igual el orden'],c:1,e:'La multiplicación va antes que la suma. Si sumas primero, sale 5/6 en vez de 1.'},
+     {q:'¿Qué pasaría si en 3/4 − 5/6 restas arriba con arriba y abajo con abajo: (3 − 5)/(4 − 6)?',o:['Da lo mismo','Da 1, que está mal','Da −1/12'],c:1,e:'(3 − 5)/(4 − 6) = −2/−2 = 1, pero lo correcto es −1/12. Solo se restan partes del mismo tamaño: primero el denominador común.'}],
+ T2:[{k:1,at:1,q:'¿Cuánto es x⁸ ÷ x⁴?',o:['x²','x⁴','x¹²'],c:1,e:'Misma base al dividir: se restan los exponentes, 8 − 4 = 4. Dividirlos (8 ÷ 4 = 2) es un error común.'},
+     {q:'¿Qué pasaría si un precio baja 50 % y luego sube 50 %?',o:['Vuelve al original','Queda en 75 %','Queda en 125 %'],c:1,e:'0,5 × 1,5 = 0,75: la subida se calcula sobre un precio que ya bajó.'}],
+ T3:[{k:1,at:3,q:'¿Cuánto es 5√2 + 3√2 − 2√2?',o:['6√2','6√6','√6'],c:0,e:'Son semejantes (mismo radicando): se operan los coeficientes 5 + 3 − 2 = 6 y la √2 se mantiene.'},
+     {q:'¿Qué pasaría si sumas √9 + √16 como si fuera √25?',o:['Da lo mismo','Da 5, pero lo correcto es 7','Da 7'],c:1,e:'√9 + √16 = 3 + 4 = 7, pero √25 = 5. La raíz no se reparte en una suma: √(a + b) ≠ √a + √b.'}],
+ T4:[{k:1,at:2,q:'En (2x − 3)², ¿cuál es el término del medio?',o:['−6x','−12x','No hay término del medio'],c:1,e:'Es −2·(2x)·3 = −12x. Si lo olvidas te queda 4x² + 9, el error más común.'},
+     {q:'¿(a + b)² es igual a a² + b²?',o:['Sí, siempre','No, falta 2ab','Solo si a = b'],c:1,e:'(a + b)² = a² + 2ab + b². Prueba con a = b = 1: (1 + 1)² = 4, pero 1² + 1² = 2.'}],
+ T5:[{k:1,at:1,q:'¿Qué dos números multiplican 6 y suman −5?',o:['2 y 3','−2 y −3','−6 y 1'],c:1,e:'(−2)(−3) = 6 y (−2) + (−3) = −5. Con 2 y 3 la suma sería +5.'},
+     {q:'¿Qué pasaría si en 2x³ − 8x olvidas el factor común y escribes solo (x + 2)(x − 2)?',o:['Está bien igual','Falta 2x: ya no es igual al original','Solo falta el 2'],c:1,e:'(x + 2)(x − 2) = x² − 4, no 2x³ − 8x. Factorizar completamente incluye el factor común 2x.'}],
+ X1:[{k:1,at:1,q:'En Ruffini con r = 1, después de bajar el 1, ¿qué haces?',o:['Multiplico 1·1 y lo sumo a −2','Le resto 1 a −2','Divido −2 entre 1'],c:0,e:'El ciclo siempre es: multiplicar por r y sumar al siguiente coeficiente.'},
+     {q:'¿Qué valor de r usas para dividir entre x + 2?',o:['2','−2','1/2'],c:1,e:'x + 2 = x − (−2), así que r = −2: es el valor que hace 0 al divisor.'}],
+ T7:[{k:1,at:0,q:'En x/2 + x/3 = 10, ¿por qué número multiplicas todo?',o:['5','6','10'],c:1,e:'6 es el MCM de 2 y 3: elimina los dos denominadores. El 10 también se multiplica.'},
+     {q:'¿Qué pasaría si multiplicas por 6 solo el lado izquierdo y no el 10?',o:['Nada, da igual','Cambia la ecuación y sale x = 2, que es incorrecto','Sale 12 igual'],c:1,e:'3x + 2x = 10 da x = 2, pero 2/2 + 2/3 no es 10. Lo que haces a un lado se hace al otro.'}],
+ T8:[{k:1,at:2,q:'¿Puedes cancelar x² arriba y abajo en (x² − 9)/(x² + 6x + 9)?',o:['Sí','No: solo se cancelan factores, no términos','Solo si x ≠ 0'],c:1,e:'x² es un término que se suma, no un factor de todo. Primero se factoriza y luego se cancela (x + 3).'},
+     {q:'En x/(x − 1) = 2 + 1/(x − 1) sale x = 1. ¿Qué pasaría si la aceptas?',o:['Sería una solución válida','Habría una división entre 0','Cambia el resultado a 2'],c:1,e:'Con x = 1 el denominador x − 1 vale 0, y eso está prohibido. La ecuación no tiene solución.'}],
+ T9:[{k:1,at:1,q:'Si el discriminante sale 25 (positivo), ¿cuántas soluciones reales hay?',o:['Ninguna','Una','Dos'],c:2,e:'Δ > 0 da dos soluciones porque ±√Δ produce dos valores distintos.'},
+     {q:'¿Qué pasaría si el discriminante fuera negativo?',o:['Dos soluciones negativas','No hay soluciones reales','Una sola solución'],c:1,e:'No existe raíz cuadrada real de un negativo: la parábola no toca el eje x.'}],
+ T10:[{k:1,at:0,q:'Si sumas 2x + y = 7 con x − y = 2, ¿qué pasa con la y?',o:['Se duplica','Se cancela','Queda −y'],c:1,e:'y + (−y) = 0: por eso conviene sumar. Queda 3x = 9.'},
+     {q:'¿Qué pasaría si las dos rectas del sistema fueran paralelas (distintas)?',o:['Infinitas soluciones','No habría solución','Una solución'],c:1,e:'Rectas paralelas nunca se cortan: no hay punto común. Si fueran la misma recta habría infinitas.'}],
+ T11:[{k:0,at:1,q:'En −2x ≤ 6, al dividir entre −2, ¿qué pasa con el ≤?',o:['Se mantiene','Se invierte a ≥','Se vuelve ='],c:1,e:'Multiplicar o dividir entre un negativo invierte el orden: 2 < 3 pero −2 > −3.'},
+     {q:'¿Qué pasaría con |x − 2| < −1?',o:['x ∈ (1, 3)','No tiene solución','Todo ℝ'],c:1,e:'Un valor absoluto nunca es negativo, así que nunca es menor que −1: conjunto vacío ∅.'}],
+ T12:[{k:1,at:0,q:'¿Cuál es la pendiente entre (1, 2) y (3, 8)?',o:['3','1/3','6'],c:0,e:'m = (8 − 2)/(3 − 1) = 6/2 = 3: cambio en y sobre cambio en x (no al revés).'},
+     {q:'¿Cómo es una recta con pendiente 0?',o:['Vertical','Horizontal','Pasa por el origen'],c:1,e:'Pendiente 0 significa que y no cambia: recta horizontal y = b. La vertical no tiene pendiente definida.'}],
+ T13:[{k:1,at:1,q:'En 1/(x − 5), ¿qué valor de x está prohibido?',o:['x = 0','x = 5','x = −5'],c:1,e:'Con x = 5 el denominador vale 0, y dividir entre 0 no está definido.'},
+     {q:'¿Qué pasaría si en x² − 4x + 1 el coeficiente de x² fuera −1?',o:['Abre hacia abajo y el vértice es un máximo','Nada cambia','Se mueve a la derecha'],c:0,e:'El signo de a decide la apertura: con a < 0 abre hacia abajo y el vértice es el punto más alto.'}],
+ X10:[{k:1,at:0,q:'En (x + 2)², ¿hacia dónde se mueve la parábola?',o:['2 a la derecha','2 a la izquierda','2 hacia arriba'],c:1,e:'El vértice queda donde x + 2 = 0, o sea en x = −2: a la izquierda.'},
+     {q:'¿Qué pasaría con y = x² si escribes y = x² − 5?',o:['Baja 5','Se mueve 5 a la derecha','Se hace más angosta'],c:0,e:'Lo que se suma o resta afuera mueve la gráfica en vertical: −5 la baja 5.'}],
+ T14:[{k:1,at:1,q:'Para completar el cuadrado en x² − 6x, ¿qué número sumas?',o:['6','9','36'],c:1,e:'La mitad de −6 es −3 y (−3)² = 9: x² − 6x + 9 = (x − 3)².'},
+     {q:'En (x − 3)² + (y + 2)² = 16, ¿cuál es el centro?',o:['(3, −2)','(−3, 2)','(3, 2)'],c:0,e:'La forma es (x − h)² + (y − k)²: h = 3 y k = −2, porque y + 2 = y − (−2).'}],
+ T15:[{k:1,at:0,q:'En A·B, el elemento de fila 1 y columna 1 se obtiene con…',o:['Fila 1 de A por columna 1 de B','Solo a₁₁·b₁₁','Fila 1 de A por fila 1 de B'],c:0,e:'Es la suma de productos de la fila 1 de A con la columna 1 de B: 1·0 + 2·1 = 2.'},
+     {q:'¿A·B es siempre igual a B·A?',o:['Sí','No, en general el orden importa','Solo en matrices 2×2'],c:1,e:'Con A = [1 2; 3 4] y B = [0 1; 1 0]: A·B = [2 1; 4 3], pero B·A = [3 4; 1 2].'}],
+ X9:[{k:1,at:0,q:'¿Por qué se calcula primero el determinante?',o:['Porque si es 0 no hay inversa','Por costumbre','Para saber el tamaño'],c:0,e:'La inversa divide entre det A; si det = 0, no existe.'},
+     {q:'¿Qué pasaría con Cramer si det A = 0?',o:['x = 0','No se puede usar: no hay solución única','Todo da infinito'],c:1,e:'Cramer divide entre det A. Si vale 0, el sistema no tiene solución o tiene infinitas.'}],
+ T16:[{k:1,at:1,q:'Si 2^(x+1) = 2⁵, ¿qué ecuación queda?',o:['x + 1 = 5','x = 5','2x + 2 = 10'],c:0,e:'Con la misma base, potencias iguales tienen exponentes iguales.'},
+     {q:'En log₂(x) + log₂(x − 2) = 3 también sale x = −2. ¿Qué pasaría si la aceptas?',o:['Es válida','Tendrías log de un negativo, que no existe','Da 3 igual'],c:1,e:'log₂(−2) no está definido: el argumento de un logaritmo debe ser positivo. Por eso se descarta.'}],
+ T17:[{k:1,at:2,q:'¿Por qué se puede cancelar (x − 3)?',o:['Porque x vale 3','Porque x se acerca a 3 sin ser 3, así que x − 3 ≠ 0','Porque 0/0 = 1'],c:1,e:'En el límite x nunca es exactamente 3, así que dividir entre x − 3 es válido.'},
+     {q:'Si al reemplazar sale 5/0 (y no 0/0), ¿qué indica?',o:['El límite es 0','El límite no es finito: tiende a ±∞ o no existe','Hay que factorizar'],c:1,e:'Un número distinto de 0 dividido entre algo cada vez más cercano a 0 crece sin límite. 0/0 es el caso que se arregla factorizando.'}],
+ T18:[{k:1,at:1,q:'¿Cuál es la derivada de 3x⁴?',o:['12x³','12x⁴','3x³'],c:0,e:'(xⁿ)′ = n·xⁿ⁻¹: 3·4x³ = 12x³.'},
+     {q:'¿Cuál es la derivada de una constante, como 7?',o:['7','0','1'],c:1,e:'Una constante no cambia, así que su razón de cambio (su pendiente) es 0.'}],
+ X2:[{k:1,at:1,q:'Con catetos 3 y 4 e hipotenusa 5, ¿cuánto es sen θ si θ está frente al 3?',o:['3/5','4/5','3/4'],c:0,e:'Seno = opuesto/hipotenusa = 3/5. 4/5 es el coseno y 3/4 la tangente.'},
+     {q:'¿Qué pasaría si calculas sen 30° con la calculadora en radianes?',o:['Da 0,5 igual','Da otro valor (sen de 30 radianes ≈ −0,99)','Da error'],c:1,e:'La calculadora entendería 30 radianes. Revisa siempre el modo DEG o RAD.'}],
+ X3:[{k:1,at:1,q:'En la hipérbola x²/16 − y²/9 = 1, ¿cuánto vale c²?',o:['16 − 9 = 7','16 + 9 = 25','9 − 16'],c:1,e:'En la hipérbola los focos están más lejos que los vértices: c² = a² + b². En la elipse se resta.'},
+     {q:'¿Qué pasaría en una elipse si a = b?',o:['Es una circunferencia','Es una hipérbola','No existe'],c:0,e:'Si a = b entonces c = 0: los focos coinciden en el centro y la elipse es una circunferencia.'}],
+ X4:[{k:1,at:1,q:'Si |u| = 10 para u = (6, 8), ¿cuál es el vector unitario?',o:['(6/10, 8/10)','(6, 8)/100','(10, 10)'],c:0,e:'Se divide cada componente entre la magnitud: (3/5, 4/5), que mide 1.'},
+     {q:'Si u·v = 0, ¿qué ángulo forman?',o:['0°','90°','180°'],c:1,e:'cos θ = 0, así que θ = 90°: son perpendiculares.'}],
+ X5:[{k:2,at:0,q:'Para contar a los que llevan al menos un curso, ¿por qué se resta 10?',o:['Porque los de ambos se contaron dos veces','Porque 10 no estudian','Por redondeo'],c:0,e:'Los 10 de “ambos” están dentro de los 25 y también de los 18: se restan una vez.'},
+     {q:'Si p es falsa, ¿qué valor tiene p → q?',o:['Siempre V','Siempre F','Depende de q'],c:0,e:'Un condicional solo es falso cuando va de V a F. Con p falsa, siempre es verdadero.'}],
+ X6:[{k:1,at:2,q:'Después de despejar x = (y + 5)/3, ¿qué falta?',o:['Nada','Intercambiar x e y','Multiplicar por 3'],c:1,e:'La inversa se escribe en función de x: f⁻¹(x) = (x + 5)/3.'},
+     {q:'¿(f ∘ g)(x) es igual a (g ∘ f)(x)?',o:['Siempre','En general no','Nunca'],c:1,e:'Con f = 2x + 1 y g = x²: f(g(x)) = 2x² + 1 y g(f(x)) = 4x² + 4x + 1. A veces coinciden, pero no en general.'}],
+ X7:[{k:1,at:0,q:'En 7, 12, 17, …, ¿cuántas veces se suma d para llegar a a₁₂?',o:['12','11','13'],c:1,e:'De a₁ a a₁₂ hay 11 saltos: aₙ = a₁ + (n − 1)d.'},
+     {q:'En una sucesión geométrica con r = 1/2 y a₁ = 8, ¿qué pasa con los términos?',o:['Crecen','Se hacen cada vez más pequeños','Se mantienen'],c:1,e:'Cada término es la mitad del anterior: 8, 4, 2, 1, …'}],
+ X8:[{k:1,at:0,q:'En un comité de 3 personas, ¿importa el orden?',o:['Sí: permutación','No: combinación','Depende de los nombres'],c:1,e:'Ana, Beto y Caro forman el mismo comité en cualquier orden: se usa C(n, k).'},
+     {q:'¿De cuántas formas se ordenan 4 libros si 2 son idénticos?',o:['24','12','6'],c:1,e:'4!/2! = 12: los órdenes que solo intercambian los libros iguales no son distintos.'}],
+ X11:[{k:1,at:2,q:'¿Por qué 1 − sen²x = cos²x?',o:['Por sen²x + cos²x = 1','Porque sen x = cos x','Por la definición de tangente'],c:0,e:'De la identidad pitagórica sen²x + cos²x = 1 se despeja cos²x.'},
+     {q:'Si sen x = √2/2, ¿cuántos ángulos entre 0° y 360° cumplen?',o:['Uno: 45°','Dos: 45° y 135°','Cuatro'],c:1,e:'El seno es positivo en los cuadrantes I y II: 45° y 180° − 45° = 135°.'}]
+};
+
+/* Fuentes por tema */
+const SRC_AT='https://espanol.libretexts.org/Bookshelves/Matematicas/Algebra/Libro%3A_Algebra_y_Trigonometria_(OpenStax)';
+const SRC_PC=n=>`https://openstax.org/books/prec%C3%A1lculo-2ed/pages/${n}-introduccion`;
+const SRC_CV=n=>`https://openstax.org/books/c%C3%A1lculo-volumen-1/pages/${n}-introduccion`;
+const SRC_LOG='https://espanol.libretexts.org/Bookshelves/Matematicas/Logica_Matematica_y_Pruebas/Razonamiento_Matem%C3%A1tico_-_Escritura_y_Prueba_(Sundstrom)';
+const FUENTES={
+ T1:[['at','Cap. 1 Prerrequisitos: números reales']], T2:[['at','Cap. 1 Prerrequisitos: exponentes']], T3:[['at','Cap. 1 Prerrequisitos: radicales']],
+ T4:[['at','Cap. 1 Prerrequisitos: polinomios']], T5:[['at','Cap. 1 Prerrequisitos: factorización']], X1:[['pc',3,'Cap. 3 Funciones polinómicas: división de polinomios']],
+ T7:[['at','Cap. 2 Ecuaciones lineales']], T8:[['at','Cap. 1 Expresiones racionales y Cap. 2 Otras ecuaciones']], T9:[['at','Cap. 2 Ecuaciones cuadráticas']],
+ T10:[['pc',9,'Cap. 9 Sistemas de ecuaciones']], T11:[['at','Cap. 2 Desigualdades lineales y con valor absoluto']], T12:[['pc',2,'Cap. 2 Funciones lineales']],
+ T13:[['pc',1,'Cap. 1 Funciones: dominio y rango'],['pc',3,'Cap. 3 Funciones cuadráticas']], X10:[['pc',1,'Cap. 1 Funciones: a trozos y transformaciones']],
+ T14:[['pc',10,'Cap. 10 Geometría analítica: parábola']], T15:[['pc',9,'Cap. 9 Matrices y operaciones con matrices']], X9:[['pc',9,'Cap. 9 Inversas y regla de Cramer']],
+ T16:[['pc',4,'Cap. 4 Funciones exponenciales y logarítmicas']], T17:[['cv',2,'Cap. 2 Límites']], T18:[['cv',3,'Cap. 3 Derivadas']],
+ X2:[['pc',5,'Cap. 5 Funciones trigonométricas']], X3:[['pc',10,'Cap. 10 Geometría analítica: elipse e hipérbola']], X4:[['pc',8,'Cap. 8 Vectores']],
+ X5:[['log','Cap. 2 Razonamiento lógico y Cap. 5 Conjuntos']], X6:[['pc',1,'Cap. 1 Funciones: composición e inversas']], X7:[['pc',11,'Cap. 11 Sucesiones y series']],
+ X8:[['pc',11,'Cap. 11 Conteo y probabilidad']], X11:[['pc',7,'Cap. 7 Identidades y ecuaciones trigonométricas']]
+};
+function fuentesList(id){ const n=byId()[id]; const out=(FUENTES[id]||[]).map(f=>{ if(f[0]==='at') return ['OpenStax · Álgebra y trigonometría', f[1], SRC_AT]; if(f[0]==='log') return ['Sundstrom · Razonamiento matemático (LibreTexts)', f[1], SRC_LOG]; if(f[0]==='cv') return ['OpenStax · Cálculo volumen 1', f[2], SRC_CV(f[1])]; return ['OpenStax · Precálculo 2ed', f[2], SRC_PC(f[1])]; });
+  if(n){ const q=encodeURIComponent(n.title.replace(/\(.*?\)/g,'').trim()); out.push(['Khan Academy en español','Videos y ejercicios del tema','https://es.khanacademy.org/search?page_search_query='+q]); }
+  return out; }
+
+/* Gráficas paso a paso para los ejemplos de las explicaciones */
+const GEX={
+ T9:{1:{eq:'y = 2x² − 3x − 2',c:['2x^2-3x-2'],st:[
+   {t:'Resolver 2x² − 3x − 2 = 0 es buscar dónde la parábola y = 2x² − 3x − 2 corta al eje x.'},
+   {t:'Vértice: x = −b/(2a) = 3/4 y y = −25/8. Está debajo del eje y la parábola abre hacia arriba (a = 2 > 0): por eso corta dos veces (Δ = 25 > 0).',p:[[0.75,-3.125,'V(3/4, −25/8)',0,1]],vl:0.75},
+   {t:'Dibuja la parábola.',curve:1},
+   {t:'Los cortes con el eje x son las soluciones: x = −1/2 y x = 2.',p:[[-0.5,0,'−1/2'],[2,0,'2']]}]}},
+ T10:{1:{eq:'y = 7 − 2x  y  y = x − 2',c:['7-2x'],c2:['x-2'],st:[
+   {t:'Cada ecuación es una recta. Despeja y: 2x + y = 7 da y = 7 − 2x.',curve:1,p:[[0,7,'(0, 7)']]},
+   {t:'x − y = 2 da y = x − 2 (en rosado).',curve:2,p:[[0,-2,'(0, −2)']]},
+   {t:'La solución del sistema es el punto donde se cortan: (3, 1).',p:[[3,1,'(3, 1)']]}]}},
+ T12:{1:{eq:'y = 3x − 1',c:['3x-1'],st:[
+   {t:'Ubica los dos puntos dados.',p:[[1,2,'(1, 2)'],[3,8,'(3, 8)',0,1]]},
+   {t:'De (1, 2) a (3, 8): avanzas 2 en x y subes 6 en y. Pendiente 6/2 = 3.',vl:1},
+   {t:'Une los puntos: la recta corta al eje y en −1.',curve:1,p:[[0,-1,'(0, −1)']]}]},
+      2:{eq:'y = −2x + 5  y  y = (1/2)x − 1',c:['-2x+5'],c2:['x/2-1'],st:[
+   {t:'La recta original 2x + y = 5 es y = −2x + 5 (pendiente −2).',curve:1},
+   {t:'Marca el punto (4, 1) por donde debe pasar la nueva recta.',p:[[4,1,'(4, 1)']]},
+   {t:'Pendiente perpendicular 1/2: la recta rosada forma un ángulo recto con la original.',curve:2,p:[[0,-1,'(0, −1)']]}]}},
+ T13:{0:{eq:'f(x) = √(x − 3)',c:['√(x-3)'],st:[
+   {t:'La raíz solo existe si x − 3 ≥ 0: la gráfica empieza en x = 3.',vl:3,p:[[3,0,'(3, 0)']]},
+   {t:'Puntos con raíz exacta: x = 4 da 1, x = 7 da 2.',p:[[4,1],[7,2,'(7, 2)']]},
+   {t:'Dibuja: no hay nada a la izquierda de 3. Dominio [3, +∞).',curve:1}]},
+      2:{eq:'f(x) = x² − 4x + 1',c:['x^2-4x+1'],st:[
+   {t:'Vértice en x = −b/(2a) = 2; f(2) = −3.',p:[[2,-3,'V(2, −3)',0,1]],vl:2},
+   {t:'Corte con el eje y: f(0) = 1. Por simetría, f(4) = 1 también.',p:[[0,1,'(0, 1)'],[4,1]]},
+   {t:'a = 1 > 0: abre hacia arriba. Ningún punto queda debajo de y = −3: rango [−3, +∞).',curve:1,hl:-3}]}},
+ X10:{0:{eq:'f(x) = x² si x < 1 ;  3x − 1 si x ≥ 1',c:['x^2+0/√(1-x)','3x-1+0*√(x-1)'],st:[
+   {t:'La frontera es x = 1.',vl:1},
+   {t:'Trozo x² a la izquierda: en x = 1 llega a 1 con punto abierto (no se incluye).',p:[[1,1,'',1],[-2,4,'f(−2) = 4']]},
+   {t:'Trozo 3x − 1 desde x = 1: punto cerrado en (1, 2).',p:[[1,2,'(1, 2)']]},
+   {t:'Dibuja cada trozo solo en su zona.',curve:1}]},
+       1:{eq:'g(x) = (x + 2)² − 3',c:['(x+2)^2-3'],c2:['x^2'],st:[
+   {t:'Parte de y = x² (rosado), con vértice en (0, 0).',curve:2,p:[[0,0,'(0, 0)']]},
+   {t:'x + 2 adentro mueve 2 a la izquierda; −3 afuera baja 3.',p:[[-2,-3,'V(−2, −3)',0,1]]},
+   {t:'Misma forma, nuevo lugar.',curve:1}]},
+       2:{eq:'g(x) = −(x + 3)² + 4',c:['-(x+3)^2+4'],c2:['x^2'],st:[
+   {t:'Parte de y = x² (rosado).',curve:2},
+   {t:'El vértice pasa de (0, 0) a (−3, 4).',p:[[-3,4,'V(−3, 4)']]},
+   {t:'El signo menos la refleja: abre hacia abajo y el vértice es un máximo.',curve:1}]}},
+ T14:{1:{eq:'(x − 3)² + (y + 2)² = 16',c:[{px:'3+4cos(x)',py:'-2+4sen(x)',t:[0,6.2832]}],st:[
+   {t:'Centro (3, −2).',p:[[3,-2,'C(3, −2)']]},
+   {t:'Radio 4: marca 4 unidades en las cuatro direcciones.',p:[[7,-2],[-1,-2],[3,2],[3,-6]]},
+   {t:'Une los puntos con una circunferencia.',curve:1}]},
+      2:{eq:'(y − 2)² = 8(x − 3)',c:[{px:'3+(x-2)^2/8',py:'x',t:[-6,9]}],st:[
+   {t:'Vértice V(3, 2).',p:[[3,2,'V(3, 2)',0,1]]},
+   {t:'4p = 8, así que p = 2. El foco está 2 a la derecha: F(5, 2). La directriz, 2 a la izquierda: x = 1.',p:[[5,2,'F(5, 2)']],vl:1},
+   {t:'Abre hacia la derecha, alrededor del foco.',curve:1}]}},
+ X3:{0:{eq:'x²/16 + y²/9 = 1',c:[{px:'4cos(x)',py:'3sen(x)',t:[0,6.2832]}],st:[
+   {t:'a = 4 en el eje x y b = 3 en el eje y.',p:[[4,0,'4'],[-4,0,'−4'],[0,3,'3'],[0,-3]]},
+   {t:'Focos en (±√7, 0) ≈ (±2,6, 0), dentro de la elipse.',p:[[2.6458,0,'F',0,1],[-2.6458,0,'F',0,1]]},
+   {t:'Dibuja la elipse.',curve:1}]},
+     1:{eq:'x²/16 − y²/9 = 1',c:[{px:'4/cos(x)',py:'3tan(x)',t:[-1.25,1.25]},{px:'-4/cos(x)',py:'3tan(x)',t:[-1.25,1.25]}],st:[
+   {t:'Asíntotas y = ±(3/4)x: guían la forma.',dl:[[0.75,0],[-0.75,0]]},
+   {t:'Vértices (±4, 0) y focos (±5, 0).',p:[[4,0,'V',0,1],[-4,0,'V',0,1],[5,0,'F'],[-5,0,'F']]},
+   {t:'Dibuja las dos ramas, acercándose a las asíntotas.',curve:1}]},
+     2:{eq:'x²/4 + y²/9 = 1',c:[{px:'2cos(x)',py:'3sen(x)',t:[0,6.2832]}],st:[
+   {t:'El 9 está bajo y: elipse vertical con a = 3 y b = 2.',p:[[0,3,'(0, 3)'],[0,-3,'(0, −3)',0,1],[2,0],[-2,0]]},
+   {t:'Focos (0, ±√5) ≈ (0, ±2,2), sobre el eje y.',p:[[0,2.2361,''],[0,-2.2361,'']]},
+   {t:'Dibuja la elipse alargada en vertical.',curve:1}]}},
+ T16:{2:{eq:'y = log₂(x(x − 2))',c:['log(x*(x-2))/log(2)+0*√(x-2)'],st:[
+   {t:'Solo vale x > 2 (los dos logaritmos necesitan argumento positivo).',vlA:2},
+   {t:'Dibuja y = log₂(x) + log₂(x − 2).',curve:1},
+   {t:'Busca la altura 3: la curva la alcanza en x = 4. x = −2 no está en el dominio.',hl:3,p:[[4,3,'(4, 3)']]}]}},
+ T17:{1:{eq:'f(x) = (x² − 9)/(x − 3)',c:['(x^2-9)/(x-3)'],st:[
+   {t:'Fuera de x = 3, la función es igual a x + 3: una recta.',curve:1},
+   {t:'En x = 3 no existe (0/0): hay un hueco.',p:[[3,6,'(3, 6)',1]]},
+   {t:'Al acercarte a 3 por ambos lados, la altura se acerca a 6: ese es el límite.',hl:6}]}},
+ T18:{2:{eq:'f(x) = x² − 3x  y su tangente en x = 2',c:['x^2-3x'],c2:['x-4'],st:[
+   {t:'Dibuja f(x) = x² − 3x.',curve:1},
+   {t:'Punto de tangencia: f(2) = −2.',p:[[2,-2,'(2, −2)',0,1]]},
+   {t:'Pendiente f′(2) = 1: la tangente y = x − 4 toca a la curva solo en ese punto.',curve:2}]}},
+ X6:{1:{eq:'f(x) = 3x − 5  y  f⁻¹(x) = (x + 5)/3',c:['3x-5'],c2:['(x+5)/3'],st:[
+   {t:'Dibuja f(x) = 3x − 5.',curve:1,p:[[0,-5,'(0, −5)']]},
+   {t:'La recta y = x (punteada) es el espejo.',dl:[[1,0]]},
+   {t:'La inversa (rosado) es el reflejo: (0, −5) pasa a (−5, 0).',curve:2,p:[[-5,0,'(−5, 0)',0,1]]}]}}
+};
+function gexSpec(id,k){ const G=GEX[id]; return G&&G[k]?Object.assign({kind:'fx'},G[k]):null; }
+function gCompile(c){ if(typeof c==='string'){ const f=mParse(c); return f?{f}:null; } const fx=mParse(c.px), fy=mParse(c.py); return fx&&fy?{fx,fy,t:c.t}:null; }
+function gPath(cv,X,Y,Z){ let d='', pen=false; const par=!!cv.fx, N=par?480:600;
+  for(let k=0;k<=N;k++){ let x,y; if(par){ const t=cv.t[0]+k*(cv.t[1]-cv.t[0])/N; x=cv.fx(t); y=cv.fy(t); } else { x=-Z+k*(2*Z)/N; y=cv.f(x); }
+    const ok=Number.isFinite(x)&&Number.isFinite(y)&&Math.abs(y)<=Z+1&&Math.abs(x)<=Z+1; if(ok){ d+=(pen?'L':'M')+X(x).toFixed(1)+' '+Y(y).toFixed(1); pen=true; } else pen=false; }
+  return d; }
 
 function practiceTopics(){ return S.nodes.filter(n=>GEN[n.id]); }
 function defaultTopic(){ const w=curWeek(); const n=S.nodes.find(x=>x.week===w&&GEN[x.id]) || practiceTopics().find(x=>!isDom(x.id)) || practiceTopics()[0]; return n?n.id:null; }
@@ -2533,6 +3051,7 @@ function gSpec(kind){
   }
 }
 function gBuild(g){
+  if(g.kind==='fx'){ const cs=[(g.c||[]).map(gCompile).filter(Boolean),(g.c2||[]).map(gCompile).filter(Boolean)]; return {f:()=>NaN, cs, eq:g.eq, st:g.st.map(t=>Object.assign({},t,{p:(t.p||[]).map(a=>({x:a[0],y:a[1],l:a[2]||'',open:!!a[3],below:!!a[4]}))}))}; }
   const P=(x,y,l,o)=>({x,y,l,open:!!o}), ax='Dibuja los ejes x e y con la misma escala.';
   const sh=(h)=>h===0?'x':h>0?`x − ${gnum(h)}`:`x + ${gnum(-h)}`, kk=k=>k===0?'':k>0?` + ${gnum(k)}`:` − ${gnum(-k)}`;
   const co=a=>a===1?'':a===-1?'−':a===0.5?'(1/2)':a===-0.5?'−(1/2)':gnum(a);
@@ -2558,7 +3077,9 @@ function gSVG(b, step){
     if(st.vl!==undefined) s+=`<line class="${fresh}" x1="${X(st.vl)}" x2="${X(st.vl)}" y1="0" y2="${Wv}" stroke="#facc15" stroke-dasharray="4 4" opacity=".7"/>`;
     if(st.vlA!==undefined) s+=`<line class="${fresh}" x1="${X(st.vlA)}" x2="${X(st.vlA)}" y1="0" y2="${Wv}" stroke="#f87171" stroke-dasharray="6 4"/>`;
     if(st.hl!==undefined) s+=`<line class="${fresh}" y1="${Y(st.hl)}" y2="${Y(st.hl)}" x1="0" x2="${Wv}" stroke="#f87171" stroke-dasharray="6 4"/>`;
-    if(st.curve){ let d='', pen=false; for(let k=0;k<=600;k++){ const x=-Z+k*(2*Z)/600, y=b.f(x); const ok=Number.isFinite(y)&&Math.abs(y)<=Z+1 && !(b.brk!==undefined && pen && x>=b.brk && x-(2*Z)/600<b.brk); if(ok){ d+=(pen?'L':'M')+X(x).toFixed(1)+' '+Y(y).toFixed(1); pen=true; } else pen=false; } s+=`<path class="g-curve" d="${d}" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`; }
+    (st.dl||[]).forEach(([m,c])=>{ s+=`<line class="${fresh}" x1="${X(-Z)}" y1="${Y(-m*Z+c)}" x2="${X(Z)}" y2="${Y(m*Z+c)}" stroke="var(--tx3)" stroke-width="1.3" stroke-dasharray="5 4"/>`; });
+    if(st.curve&&b.cs){ (b.cs[st.curve===2?1:0]||[]).forEach(cv=>{ s+=`<path class="g-curve" d="${gPath(cv,X,Y,Z)}" fill="none" stroke="${st.curve===2?'#f472b6':'var(--acc)'}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`; }); }
+    else if(st.curve){ let d='', pen=false; for(let k=0;k<=600;k++){ const x=-Z+k*(2*Z)/600, y=b.f(x); const ok=Number.isFinite(y)&&Math.abs(y)<=Z+1 && !(b.brk!==undefined && pen && x>=b.brk && x-(2*Z)/600<b.brk); if(ok){ d+=(pen?'L':'M')+X(x).toFixed(1)+' '+Y(y).toFixed(1); pen=true; } else pen=false; } s+=`<path class="g-curve" d="${d}" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`; }
     (st.p||[]).forEach(p=>{ if(Math.abs(p.x)>Z||Math.abs(p.y)>Z) return; s+=`<g class="${fresh} g-pt"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4.5" fill="${p.open?'var(--bg2)':'#facc15'}" stroke="#facc15" stroke-width="2"/>${p.l?`<text x="${X(p.x)+(p.x>Z-3?-7:7)}" y="${Y(p.y)+(p.below?18:-8)}" font-size="10.5" font-weight="700" text-anchor="${p.x>Z-3?'end':'start'}" fill="var(--tx)" paint-order="stroke" stroke="var(--bg2)" stroke-width="3">${esc(p.l)}</text>`:''}</g>`; });
   });
   return `<svg viewBox="0 0 ${Wv} ${Wv}" class="gsvg" role="img" aria-label="Gráfica paso a paso">${s}</svg>`;
@@ -2575,7 +3096,7 @@ function graphCard(){ return `<div class="card" id="graphCard"><h2>📐 Gráfica
   <div class="row"><select id="gKind">${GKINDS.map(([k,l])=>`<option value="${k}" ${GW.kind===k?'selected':''}>${l}</option>`).join('')}</select><button class="btn" id="gNew" style="flex:0 0 auto">🎲 Otra</button></div>
   <div id="gHost" style="margin-top:10px">${graphWidget(GW.g, GW.s, 'main')}</div></div>`; }
 function bindGraphs(w){
-  const host=k=>k==='main'?GW:practice.items[+k];
+  const host=k=>k==='main'?GW:(k[0]==='E'&&XP&&XP.gs)?XP.gs[k]:practice.items[+k];
   const rer=k=>{ const o=host(k); const el=w.querySelector(`[data-gw="${k}"]`); if(el){ el.outerHTML=graphWidget(o.g,o.s||0,k); bindGraphs(w); } };
   w.querySelectorAll('[data-gnext]').forEach(b=>b.onclick=()=>{ const k=b.dataset.gnext, o=host(k), n=gBuild(o.g).st.length; o.s=((o.s||0)+1>=n)?0:(o.s||0)+1; rer(k); });
   w.querySelectorAll('[data-gprev]').forEach(b=>b.onclick=()=>{ const k=b.dataset.gprev, o=host(k); o.s=Math.max(0,(o.s||0)-1); rer(k); });
@@ -3488,7 +4009,7 @@ const DEEPL = {
   T18:['La derivada de una suma es la suma de las derivadas.','El exponente baja multiplicando y se le resta 1: (xⁿ)′ = n·x^(n−1).','La constante −5 se queda multiplicando.','x tiene derivada 1; una constante no cambia, su derivada es 0.','Se juntan las derivadas de cada término.'],
   X2:['En un triángulo rectángulo, la hipotenusa² es la suma de los catetos².','El seno compara el lado opuesto al ángulo con la hipotenusa.','Coseno usa el adyacente y tangente compara opuesto con adyacente.']
 };
-let DEEPON=false; try{ DEEPON=localStorage.getItem('arbolAli.deep')==='1'; }catch(e){}
+let DEEPON=true; try{ DEEPON=localStorage.getItem('arbolAli.deep')!=='0'; }catch(e){}
 function explainWhy(id,k){ const D=DEEP[id]; if(!DEEPON||!D||!D.w) return null; const E=EXPLAIN[id], L=LESSONS[id]; const map=L&&E.ex.length===2?[0,null,1]:[0,1,2]; const j=map[k]; return j===null?(DEEPL[id]||null):(D.w[j]||null); }
 function whyWrap(h,w){ return w? h.replace(/<\/div><\/li>$/, `<div class="ls-why">💭 <b>¿Por qué?</b> ${mth(w)}</div></div></li>`) : h; }
 function lsStep(s,i,fresh){ const w=DEEPON&&LS&&DEEPL[LS.id]?DEEPL[LS.id][i]:null; return whyWrap(lessonStep(s,i,fresh),w); }
@@ -3500,24 +4021,29 @@ function explainNext(id){ const B=byId(), ids=Object.keys(EXPLAIN).filter(k=>B[k
 function xpExample(e,k){ const shown=XP.st[k]||0, ns=e.s.length;
   return `<div class="xp-ex" style="--i:${k}"><div class="xp-ext"><span class="lvt l${k+1}">${XLV[k]}</span><span class="muted" style="font-size:12px">Ejemplo ${k+1} de 3</span></div><div class="ls-q">${mth(e.q)}</div>
     <ol class="ls-steps" id="xpS${k}">${e.s.slice(0,shown).map((s,i)=>xpStep(s,i,false,k)).join('')}</ol>
-    ${shown<ns?`<div class="xp-btns"><button class="btn pri sm" data-xstep="${k}">${shown?'Siguiente paso ›':'Resolver paso a paso ›'}</button><button class="btn sm" data-xall="${k}">Ver todo</button></div>`:`<div class="ls-res">✅ Resultado: <b>${mth(e.r)}</b></div>`}</div>`; }
+    ${xpGraphBtn(k)}${shown<ns?`<div class="xp-btns"><button class="btn pri sm" data-xstep="${k}">${shown?'Siguiente paso ›':'Resolver paso a paso ›'}</button><button class="btn sm" data-xall="${k}">Ver todo</button></div>`:`<div class="ls-res">✅ Resultado: <b>${mth(e.r)}</b></div>`}</div>`; }
+function xpG(id,k){ const s=gexSpec(id,k); if(s) return s; const L=LESSONS[id], E=EXPLAIN[id]; return L&&L.g&&E&&E.ex.length===2&&k===1?L.g:null; }
+function xpGraphBtn(k){ if(!XP||!xpG(XP.id,k)) return ''; const o=XP.gs['E'+k]; return `<button class="btn sm xg-btn" data-xg="${k}">${o?'Ocultar gráfica':'📈 Verlo en la gráfica, paso a paso'}</button><div id="xg${k}">${o?graphWidget(o.g,o.s||0,'E'+k):''}</div>`; }
+function cqHTML(c,key,done){ return `<div class="cq-q">🤔 ${mth(c.q)}</div><div class="cq-o">${c.o.map((t,j)=>`<button data-${key}="${j}" ${done!==undefined?'disabled':''} class="${done!==undefined?(j===c.c?'ok':j===done?'no':''):''}">${mth(t)}</button>`).join('')}</div>${done!==undefined?`<div class="cq-e">${done===c.c?'✅ ¡Bien!':'💡 No exactamente.'} ${mth(c.e)}</div>`:''}`; }
 function openExplain(id){
-  const E=EXPLAIN[id], n=byId()[id]; if(!E||!n) return; LS=null; const keep=XP&&XP.id===id&&XP.keep; XP={id, st:keep?XP.st:[0,0,0]}; const D=DEEPON?DEEP[id]:null;
+  const E=EXPLAIN[id], n=byId()[id]; if(!E||!n) return; LS=null; const keep=XP&&XP.id===id&&XP.keep; XP=keep?{id, st:XP.st, qa:XP.qa||{}, gs:XP.gs||{}, wq:XP.wq}:{id, st:[0,0,0], qa:{}, gs:{}}; const D=DEEPON?DEEP[id]:null;
   const box=lessonBox(), c=col(n), sm=SUMMARY[id], L=LESSONS[id], B=byId();
   const reqs=(n.reqs||[]).filter(r=>B[r]), kids=S.nodes.filter(m=>(m.reqs||[]).includes(id));
   const chip=m=>`<button class="nchip xp-chip" ${EXPLAIN[m.id]?`data-exp="${esc(m.id)}"`:''} style="--c:${col(m)}"><b>${esc(m.id)}</b> ${esc(m.title)}</button>`;
   const errs=E.err.concat(L&&L.err?[L.err]:[]), nx=explainNext(id), exs=explainExamples(id);
   box.innerHTML=`<div class="ls-wrap" style="--c:${c}"><div class="ls-top"><span class="p-id" style="background:${c};margin-top:0">${esc(n.id)}</span><div class="ls-tt"><div class="ls-k">Explicación${n.week?' · semana '+n.week:''}</div><h2>${esc(n.title)}</h2></div><button class="xbtn" id="xpX" aria-label="Cerrar" style="margin-top:0">✕</button></div>
     <button class="deep-tg ${DEEPON?'on':''}" id="xpDeep"><span><b>🔬 Modo profundo</b><small>${DEEPON?'Activado: el porqué de cada fórmula y de cada paso':'Actívalo para ver el porqué de cada fórmula y de cada paso'}</small></span><i></i></button>
-    <div class="xp-nav">${[['xs1','🌱 Desde cero'],['xs2','🔑 Conceptos']].concat(D?[['xs7','🧠 El porqué']]:[],[['xs3','📐 Fórmulas'],['xs4','✏️ Ejemplos']],D?[['xs8','🧭 Receta']]:[],[['xs5','⚠️ Errores'],['xs6','🔗 Conexiones']]).map(([a,t])=>`<button class="nchip" data-xgo="${a}">${t}</button>`).join('')}</div>
+    <div class="xp-nav">${[['xs1','🌱 Desde cero'],['xs2','🔑 Conceptos']].concat(D?[['xs7','🧠 El porqué']]:[],[['xs3','📐 Fórmulas'],['xs4','✏️ Ejemplos']],D?[['xs8','🧭 Receta']]:[],(CHECKQ[id]?[['xs9','🤔 ¿Y si…?']]:[]),[['xs5','⚠️ Errores'],['xs6','🔗 Conexiones'],['xs10','📚 Fuentes']]).map(([a,t])=>`<button class="nchip" data-xgo="${a}">${t}</button>`).join('')}</div>
     <section class="ls-sec" id="xs1"><h3>🌱 Desde cero</h3>${E.intro.map(p=>`<p class="xp-p">${mth(p)}</p>`).join('')}</section>
     <section class="ls-sec" id="xs2"><h3>🔑 Conceptos clave</h3><div class="xp-conc">${E.conc.map(([t,d],i)=>`<div class="xp-cc" style="--i:${i}"><b>${esc(t)}</b><span>${mth(d)}</span></div>`).join('')}</div></section>
     ${D?`<section class="ls-sec deep-sec" id="xs7"><h3>🧠 El porqué de cada cosa</h3>${D.pq.map(([q,a],i)=>`<details class="dq" ${i===0?'open':''} style="--i:${i}"><summary>${mth(q)}</summary><p>${mth(a)}</p></details>`).join('')}</section>`:''}
     ${sm?`<section class="ls-sec" id="xs3"><h3>📐 Fórmulas explicadas</h3>${sm.f.map(([f,e],i)=>`<div class="sm-f" style="--i:${i}"><div class="sm-fx">${mth(f)}</div><div class="sm-ex">${mth(e)}</div></div>`).join('')}</section>`:''}
     <section class="ls-sec" id="xs4"><h3>✏️ Ejemplos resueltos, de menos a más</h3>${exs.map((e,k)=>xpExample(e,k)).join('')}</section>
     ${D?`<section class="ls-sec deep-sec" id="xs8"><h3>🧭 Receta: cómo atacar cualquier ejercicio del tema</h3><ol class="rec">${D.rec.map(r=>`<li>${mth(r)}</li>`).join('')}</ol></section>`:''}
+    ${CHECKQ[id]&&CHECKQ[id][1]?`<section class="ls-sec" id="xs9"><h3>🤔 ¿Qué pasaría si…?</h3><div class="cq" id="xpWq">${cqHTML(CHECKQ[id][1],'wqo',XP.wq)}</div></section>`:''}
     <section class="ls-sec warn-sec" id="xs5"><h3>⚠️ Errores comunes</h3><ul class="xp-err">${errs.map(e=>`<li>${mth(e)}</li>`).join('')}</ul></section>
     <section class="ls-sec" id="xs6"><h3>🔗 Conexiones</h3>${reqs.length?`<div class="xp-k">Necesitas antes</div><div class="chips">${reqs.map(r=>chip(B[r])).join('')}</div>`:''}${kids.length?`<div class="xp-k">Este tema te abre</div><div class="chips">${kids.map(chip).join('')}</div>`:''}${sm&&sm.uso?`<div class="sm-uso">🎯 <b>Para qué sirve:</b> ${esc(sm.uso)}</div>`:''}</section>
+    <section class="ls-sec" id="xs10"><h3>📚 Fuentes</h3><p class="xp-p" style="margin-top:0">Las definiciones y fórmulas de este tema coinciden con estos libros abiertos y gratuitos. Úsalos para leer más o practicar.</p><ul class="src">${fuentesList(id).map(([a,b,u])=>`<li><a href="${esc(u)}" target="_blank" rel="noopener"><b>${esc(a)}</b><span>${esc(b)}</span></a></li>`).join('')}</ul></section>
     <div class="ls-act">${GEN[id]?`<button class="btn" id="xpPrac">🧮 Practicar</button>`:''}${L?`<button class="btn" data-lesson="${esc(id)}">📖 Lección</button>`:''}${THEORY[id]?`<button class="btn" id="xpTheo">🧠 Teoría</button>`:''}${nx?`<button class="btn pri" data-exp="${esc(nx)}">Siguiente tema: ${esc(nx)} ›</button>`:''}</div></div>`;
   box.scrollTop=0; box.classList.add('show'); buzz(8); bindExplain();
 }
@@ -3527,10 +4053,13 @@ function bindExplain(){
   $('#xpDeep').onclick=()=>{ DEEPON=!DEEPON; try{ localStorage.setItem('arbolAli.deep',DEEPON?'1':'0'); }catch(e){} buzz(8); const y=box.scrollTop; XP.keep=true; openExplain(id); box.scrollTop=y; toast(DEEPON?'🔬 Modo profundo activado':'Modo profundo desactivado'); };
   if($('#xpPrac')) $('#xpPrac').onclick=()=>{ box.classList.remove('show'); XP=null; goPractice(id); };
   if($('#xpTheo')) $('#xpTheo').onclick=()=>{ box.classList.remove('show'); XP=null; goTheory(id); };
+  bindGraphs(box);
   box.querySelectorAll('[data-xgo]').forEach(b=>b.onclick=()=>{ const t=box.querySelector('#'+b.dataset.xgo); if(t) box.scrollTo({top:t.offsetTop-62, behavior:RM()?'auto':'smooth'}); });
 }
 function xpReveal(k, all){
   if(!XP) return; const e=explainExamples(XP.id)[k]; if(!e) return; const box=lessonBox(), ol=box.querySelector('#xpS'+k); const from=XP.st[k];
+  const cq=(CHECKQ[XP.id]||[])[0]; if(!all && cq && cq.k===k && from===cq.at && !XP.qa[k]){ const card=ol.parentNode, tail=card.querySelector('.xp-btns'); if(tail) tail.outerHTML=`<div class="cq" id="xpCq${k}">${cqHTML(cq,'cqo')}<div class="xp-btns" style="margin-top:8px"><button class="btn sm" data-cqskip="${k}">Saltar pregunta</button></div></div>`; buzz(6); setTimeout(()=>{ const q=box.querySelector('#xpCq'+k); if(q) q.scrollIntoView({behavior:RM()?'auto':'smooth', block:'nearest'}); },30); return; }
+  if(all) XP.qa[k]=true; const oq=box.querySelector('#xpCq'+k); if(oq) oq.remove();
   XP.st[k]= all ? e.s.length : Math.min(e.s.length, from+1); buzz(6);
   ol.insertAdjacentHTML('beforeend', e.s.slice(from, XP.st[k]).map((s,i)=>xpStep(s,from+i,true,k)).join(''));
   const card=ol.parentNode, tail=card.querySelector('.xp-btns'); if(tail) tail.remove();
@@ -3545,7 +4074,11 @@ function explainCard(){
 document.addEventListener('click', e=>{
   const x=e.target.closest('[data-exp]'); if(x){ openExplain(x.dataset.exp); return; }
   const s=e.target.closest('[data-xstep]'); if(s){ xpReveal(+s.dataset.xstep,false); return; }
-  const a=e.target.closest('[data-xall]'); if(a){ xpReveal(+a.dataset.xall,true); }
+  const a=e.target.closest('[data-xall]'); if(a){ xpReveal(+a.dataset.xall,true); return; }
+  const o=e.target.closest('[data-cqo]'); if(o&&XP){ const w=o.closest('.cq'), k=+w.id.replace('xpCq',''), c=CHECKQ[XP.id][0], j=+o.dataset.cqo; XP.qa[k]=true; buzz(j===c.c?14:[30,40,30]); w.innerHTML=cqHTML(c,'cqo',j)+`<div class="xp-btns" style="margin-top:8px"><button class="btn pri sm" data-xstep="${k}">Continuar ›</button></div>`; return; }
+  const sk=e.target.closest('[data-cqskip]'); if(sk&&XP){ const k=+sk.dataset.cqskip; XP.qa[k]=true; xpReveal(k,false); return; }
+  const wq=e.target.closest('[data-wqo]'); if(wq&&XP){ const c=CHECKQ[XP.id][1]; XP.wq=+wq.dataset.wqo; buzz(XP.wq===c.c?14:[30,40,30]); wq.closest('.cq').innerHTML=cqHTML(c,'wqo',XP.wq); return; }
+  const g=e.target.closest('[data-xg]'); if(g&&XP){ const k=+g.dataset.xg, key='E'+k; XP.gs[key]=XP.gs[key]?null:{g:xpG(XP.id,k),s:0}; const box=lessonBox(); g.outerHTML=''; const host=box.querySelector('#xg'+k); host.insertAdjacentHTML('beforebegin',''); host.outerHTML=xpGraphBtn(k); bindGraphs(box); return; }
 });
 
 /* ---------- Inicio ---------- */
